@@ -1,4 +1,4 @@
-package com.example.campus_nexus_backend;
+package com.campusnexus.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
