@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, Check, X, ChevronLeft, Calendar, Clock, Users, Info, ShieldCheck } from 'lucide-react';
-import { getBookingReviewDetails, approveBooking, rejectBooking } from '../services/api';
+import { getBookingReviewDetails, approveBooking, rejectBooking } from '../../../services/api/bookingApi';
 import { AvailabilityTimeline } from '../components/AvailabilityTimeline';
 
 export function BookingConflictReview() {

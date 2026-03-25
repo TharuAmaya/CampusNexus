@@ -1,7 +1,7 @@
 import { Filter, Search, LayoutDashboard, Database, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { BookingCard } from '../components/BookingCard';
-import { getAllBookings } from '../services/api';
+import { getAllBookings } from '../../../services/api/bookingApi';
 
 export function AdminBookingsDashboard() {
   const { data: bookings, isLoading, isError } = useQuery({

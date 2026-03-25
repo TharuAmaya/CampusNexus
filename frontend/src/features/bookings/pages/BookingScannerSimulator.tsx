@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { CheckCircle2, XCircle, Camera, ShieldCheck, Zap } from 'lucide-react';
-import { verifyQrToken } from '../services/api';
+import { verifyQrToken } from '../../../services/api/bookingApi';
 
 export function BookingScannerSimulator() {
   const [scanResult, setScanResult] = useState<string | null>(null);
