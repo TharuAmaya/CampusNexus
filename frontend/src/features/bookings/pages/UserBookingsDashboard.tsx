@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, LayoutDashboard, Database, Clock } from 'lucide-react';
 import { BookingCard } from '../components/BookingCard';
-import { getMyBookings } from '../services/api';
+import { getMyBookings } from '../../../services/api/bookingApi';
 
 const TEMP_USER_ID = "USER_001"; // Placeholder for Auth
 

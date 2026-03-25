@@ -2,7 +2,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, Calendar, Clock, Hash, ShieldCheck, Info } from 'lucide-react';
-import { getBooking } from '../services/api';
+import { getBooking } from '../../../services/api/bookingApi';
 
 export function BookingDetails() {
   const { id } = useParams<{ id: string }>();

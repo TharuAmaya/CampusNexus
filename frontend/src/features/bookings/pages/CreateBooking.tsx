@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, Users, FileText, CheckCircle2, AlertCircle, Info, Database } from 'lucide-react';
-import { createBooking, getAllBookings } from '../services/api';
+import { createBooking, getAllBookings } from '../../../services/api/bookingApi';
 import { AvailabilityTimeline } from '../components/AvailabilityTimeline';
 import type { CreateBookingRequest } from '../types';
 
