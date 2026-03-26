@@ -1,4 +1,4 @@
-package com.example.campus_nexus_backend.maintenance.model.entity;
+package com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity;
 
 import com.example.campus_nexus_backend.auth.User;
 import jakarta.persistence.Column;
