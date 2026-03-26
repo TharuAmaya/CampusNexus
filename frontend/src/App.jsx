@@ -26,6 +26,9 @@ import Profile from './pages/Profile.jsx';
 import ManageUsers from './pages/admin/ManageUsers';
 
 import Tickets from './pages/student/Tickets.jsx';
+import MyBookings from './pages/student/booking/MyBookings.jsx';
+import CreateBooking from './pages/student/booking/CreateBooking.jsx';
+import BookingDetails from './pages/student/booking/BookingDetails.jsx';
 
 function App() {
   return (
@@ -76,6 +79,30 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
                   <Tickets />
+                </ProtectedRoute>}
+            />
+
+            <Route
+              path="/student/booking"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <MyBookings />
+                </ProtectedRoute>}
+            />
+
+            <Route
+              path="/student/booking/new"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <CreateBooking />
+                </ProtectedRoute>}
+            />
+
+            <Route
+              path="/student/booking/:id"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <BookingDetails />
                 </ProtectedRoute>}
             />
 
