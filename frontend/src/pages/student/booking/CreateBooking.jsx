@@ -1,0 +1,345 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import DashboardLayout from '../../../components/DashboardLayout';
+import { 
+    FaCalendarCheck, FaClock, FaUsers, 
+    FaInfoCircle, FaMapMarkerAlt, FaCheckCircle, 
+    FaArrowRight, FaCalendarAlt, FaShieldAlt
+} from 'react-icons/fa';
+
+const CreateBooking = () => {
+    const navigate = useNavigate();
+    
+    // Form States
+    const [formData, setFormData] = useState({
+        resourceId: '',
+        bookingDate: '',
+        startTime: '',
+        endTime: '',
+        purpose: '',
+        expectedAttendees: 1
+    });
+
+    const [resources, setResources] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
+
+    useEffect(() => {
+        // Fetch Available Resources
+        const fetchResources = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('http://localhost:8081/api/resources/available', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setResources(data);
+                }
+            } catch (err) {
+                console.error("Failed to load resources");
+            }
+        };
+        fetchResources();
+    }, []);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!termsAccepted) {
+            alert('You must adhere to the facility regulations and liability terms to proceed.');
+            return;
+        }
+
+        if (formData.startTime >= formData.endTime) {
+            alert('End time must be after start time.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const token = localStorage.getItem('token');
+            
+            // Get User Profile first to find current user ID
+            const profileRes = await fetch('http://localhost:8081/api/user/profile', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (!profileRes.ok) throw new Error('Auth failure');
+            const user = await profileRes.json();
+
+            const res = await fetch('http://localhost:8081/api/bookings', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    ...formData,
+                    userId: user.id
+                })
+            });
+
+            if (res.ok) {
+                navigate('/student/booking');
+            } else {
+                const errData = await res.json();
+                alert(errData.message || 'Booking submission failed. Please check availability. Ensure you are booking within 8:00 and 20:00.');
+            }
+        } catch (err) {
+            alert('A network error occurred. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
+            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-32 pb-20">
+                
+                {/* Immersive Background Image (library02.png) */}
+                <div 
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-[1px] z-0 scale-105 fixed"
+                    style={{ backgroundImage: "url('/library02.png')" }}
+                ></div>
+
+                {/* Dark color overlay */}
+                <div className="absolute inset-0 bg-[#0a1e35]/80 z-10 fixed"></div>
+
+                {/* Top Navigation Bar Positioning (Absolute) */}
+                <div className="absolute top-0 left-0 z-30 w-full px-8 py-6 bg-black/10 backdrop-blur-md border-b border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link
+                            to="/student/booking"
+                            className="bg-white/10 hover:bg-white/20 text-white px-5 py-2 rounded-lg transition-all flex items-center gap-2 border border-white/10 group shadow-lg"
+                        >
+                            <span className="text-xl group-hover:-translate-x-1 transition-transform">←</span>
+                            <span className="font-bold tracking-widest text-xs uppercase">BACK</span>
+                        </Link>
+                        
+                        <div className="h-6 w-[1px] bg-white/20 ml-2"></div>
+                        
+                        <nav className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                            <span className="text-white/40 cursor-pointer hover:text-white transition-colors" onClick={() => navigate('/student-dashboard')}>DASHBOARD</span>
+                            <span className="text-white/20">/</span>
+                            <span className="text-blue-400">New Reservation</span>
+                        </nav>
+                    </div>
+                </div>
+
+                {/* Main Content Area */}
+                <div className="relative z-20 w-full flex flex-col px-8 mx-auto max-w-5xl">
+                    <div className="bg-white/95 backdrop-blur-2xl shadow-[0_45px_100px_rgba(0,0,0,0.6)] border border-white/50 relative overflow-hidden flex flex-col md:flex-row">
+                        
+                        {/* Glass Luster Accent */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100/20 rounded-bl-full filter blur-3xl pointer-events-none opacity-50 z-0"></div>
+
+                        {/* Left: Decorative Info Panel (using dark theme to match BookingDetails sidebar) */}
+                        <div className="md:w-1/3 bg-[#111e2f]/90 p-10 text-white flex flex-col justify-between relative overflow-hidden border-r border-white/10 z-10">
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl -mt-24 -mr-24 opacity-30"></div>
+                            
+                            <div className="z-10 relative">
+                                <FaShieldAlt className="text-4xl text-blue-400 mb-6 opacity-90" />
+                                <h2 className="text-white text-4xl lg:text-5xl font-black tracking-tighter uppercase mb-6 leading-tight">Secure Your Campus Space</h2>
+                                <p className="text-white/50 text-[11px] uppercase tracking-widest mb-12 leading-relaxed font-light">
+                                    Systematic conflict detection for all facility requests. Process entails mandatory administrative validation.
+                                </p>
+                                
+                                <div className="space-y-6 pt-8 border-t border-white/10">
+                                    <div className="flex gap-4">
+                                        <FaCheckCircle className="text-emerald-400 mt-1 shrink-0" />
+                                        <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Real-Time Allocation Check</p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <FaCheckCircle className="text-emerald-400 mt-1 shrink-0" />
+                                        <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Encrypted Access Generation</p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <FaCheckCircle className="text-amber-500 mt-1 shrink-0" />
+                                        <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Mandatory Rule Adherence</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="z-10 mt-12 pt-8 border-t border-white/10">
+                                <p className="text-[10px] font-bold text-white/30 tracking-widest uppercase mb-4">Support Reference</p>
+                                <p className="text-[11px] font-mono text-blue-400 bg-black/40 py-2 px-4 tracking-widest border border-white/5 shadow-inner">
+                                    ext. 4455 // IT TEAM
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Right: Booking Form */}
+                        <div className="md:w-2/3 p-10 z-10 relative">
+                            <div className="flex flex-col mb-10 pb-8 border-b border-gray-100">
+                                <h3 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tighter uppercase leading-tight">
+                                    Resource Requisition
+                                </h3>
+                            </div>
+                            
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Resource Selection */}
+                                    <div className="md:col-span-2 bg-gray-50/80 p-6 border border-gray-100 shadow-sm group hover:bg-white transition-all duration-300">
+                                        <label className="block text-[10px] font-bold text-[#f4511e] uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+                                            <FaMapMarkerAlt /> Select Campus Resource
+                                        </label>
+                                        <select 
+                                            name="resourceId" 
+                                            value={formData.resourceId} 
+                                            onChange={handleChange} 
+                                            required 
+                                            className="w-full bg-white text-gray-900 text-lg px-4 py-3 border border-gray-100 outline-none focus:border-[#f4511e]/30 transition-all font-semibold tracking-tight shadow-inner rounded-none cursor-pointer"
+                                        >
+                                            <option value="">— Choose a facility —</option>
+                                            {resources.map(res => (
+                                                <option key={res.resourceId} value={res.resourceId}>
+                                                    {res.name} (Code: {res.resourceId})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Date Field */}
+                                    <div className="bg-gray-50/80 p-6 border border-gray-100 shadow-sm group hover:bg-white transition-all duration-300">
+                                        <label className="block text-[10px] font-bold text-[#f4511e] uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+                                            <FaCalendarAlt /> Booking Date
+                                        </label>
+                                        <input 
+                                            type="date" 
+                                            name="bookingDate" 
+                                            value={formData.bookingDate} 
+                                            onChange={handleChange} 
+                                            required 
+                                            min={new Date().toISOString().split('T')[0]} 
+                                            className="w-full bg-white text-gray-900 text-lg px-4 py-3 border border-gray-100 outline-none transition-all font-bold tracking-tight shadow-inner rounded-none" 
+                                        />
+                                    </div>
+
+                                    {/* Attendees Field */}
+                                    <div className="bg-gray-50/80 p-6 border border-gray-100 shadow-sm group hover:bg-white transition-all duration-300">
+                                        <label className="block text-[10px] font-bold text-[#f4511e] uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+                                            <FaUsers /> Capacity Required
+                                        </label>
+                                        <input 
+                                            type="number" 
+                                            name="expectedAttendees" 
+                                            value={formData.expectedAttendees} 
+                                            onChange={handleChange} 
+                                            required 
+                                            min="1" 
+                                            className="w-full bg-white text-gray-900 text-lg px-4 py-3 border border-gray-100 outline-none transition-all font-bold tracking-tight shadow-inner rounded-none" 
+                                        />
+                                    </div>
+
+                                    {/* Start Time */}
+                                    <div className="bg-gray-50/80 p-6 border border-gray-100 shadow-sm group hover:bg-white transition-all duration-300">
+                                        <label className="block text-[10px] font-bold text-[#f4511e] uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+                                            <FaClock /> Check-In Time
+                                        </label>
+                                        <input 
+                                            type="time" 
+                                            name="startTime" 
+                                            value={formData.startTime} 
+                                            onChange={handleChange} 
+                                            required 
+                                            className="w-full bg-white text-gray-900 text-lg px-4 py-3 border border-gray-100 outline-none transition-all font-bold tracking-tight shadow-inner rounded-none uppercase" 
+                                        />
+                                    </div>
+
+                                    {/* End Time */}
+                                    <div className="bg-gray-50/80 p-6 border border-gray-100 shadow-sm group hover:bg-white transition-all duration-300">
+                                        <label className="block text-[10px] font-bold text-[#f4511e] uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+                                            <FaClock /> Check-Out Time
+                                        </label>
+                                        <input 
+                                            type="time" 
+                                            name="endTime" 
+                                            value={formData.endTime} 
+                                            onChange={handleChange} 
+                                            required 
+                                            className="w-full bg-white text-gray-900 text-lg px-4 py-3 border border-gray-100 outline-none transition-all font-bold tracking-tight shadow-inner rounded-none uppercase" 
+                                        />
+                                    </div>
+
+                                    {/* Purpose Field */}
+                                    <div className="md:col-span-2 bg-gray-50/80 p-6 border border-gray-100 shadow-sm group hover:bg-white transition-all duration-300">
+                                        <label className="block text-[10px] font-bold text-[#f4511e] uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+                                            <FaInfoCircle /> Statement of Purpose
+                                        </label>
+                                        <textarea 
+                                            name="purpose" 
+                                            value={formData.purpose} 
+                                            onChange={handleChange} 
+                                            required 
+                                            rows="2" 
+                                            placeholder="Briefly state the intended use..."
+                                            className="w-full bg-white text-gray-900 text-lg px-6 py-4 border border-gray-100 outline-none font-semibold tracking-tight resize-none shadow-inner rounded-none"
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                {/* Terms and Conditions Box */}
+                                <div className="mt-8 bg-blue-50/50 p-6 border border-blue-500/20 shadow-sm">
+                                    <h4 className="text-[11px] font-bold text-blue-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <FaShieldAlt className="text-blue-500" /> Behavioral & Facility Terms
+                                    </h4>
+                                    <div className="text-[11px] text-gray-700 leading-relaxed font-semibold mb-6 space-y-3 tracking-wide">
+                                        <p><strong className="text-gray-900 underline underline-offset-2">Behavior Expectations:</strong> Maintain respectful, quiet, and considerate behavior while inside the room and strictly use the space for study purposes only.</p>
+                                        <p><strong className="text-gray-900 underline underline-offset-2">Access Control:</strong> Do not allow other students to enter the room you have reserved.</p>
+                                        <p><strong className="text-gray-900 underline underline-offset-2">Food & Beverage:</strong> Food & beverage items are not allowed within the room except water.</p>
+                                        <p><strong className="text-gray-900 underline underline-offset-2">Responsibility and Damages:</strong> You are accountable for the room during your booking period. Any damage to the property will result in a penalty. The penalty will be the value of the damaged item plus an additional 50% of the total value, following a formal inquiry.</p>
+                                    </div>
+                                    
+                                    <label className="flex items-start gap-4 cursor-pointer group mt-4 pt-4 border-t border-blue-500/10">
+                                        <div className="relative pt-0.5">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={termsAccepted}
+                                                onChange={(e) => setTermsAccepted(e.target.checked)}
+                                                required
+                                                className="peer sr-only"
+                                            />
+                                            <div className="w-6 h-6 border-2 border-gray-300 bg-white peer-checked:bg-[#f4511e] peer-checked:border-[#f4511e] flex items-center justify-center transition-all">
+                                                <FaCheckCircle className={`text-white text-sm transition-transform duration-200 ${termsAccepted ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`} />
+                                            </div>
+                                        </div>
+                                        <span className={`text-sm tracking-tight font-bold select-none transition-colors duration-200 pt-0.5 ${termsAccepted ? 'text-[#f4511e]' : 'text-gray-600 group-hover:text-gray-900'}`}>
+                                            I agree to the Terms & Conditions and accept responsibility for the facility.
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div className="pt-2">
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSubmitting || !termsAccepted}
+                                        className={`w-full py-5 px-8 font-bold uppercase tracking-[0.2em] text-[11px] shadow-sm transition-all flex items-center justify-center gap-3 ${termsAccepted ? 'bg-emerald-600 hover:bg-emerald-700 text-white transform hover:-translate-y-1 active:scale-95' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                                    >
+                                        {isSubmitting ? 'Processing Validation...' : <><FaCalendarCheck /> Confirm Reservation Request</>}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer pinned absolutely at the bottom */}
+                <div className="absolute bottom-8 left-0 w-full z-20 text-center px-4">
+                    <p className="text-white/40 text-[10px] tracking-widest font-bold uppercase opacity-50">
+                        © 2026 CampusNexus Hub. All Rights Reserved
+                    </p>
+                </div>
+            </div>
+        </DashboardLayout>
+    );
+};
+
+export default CreateBooking;
