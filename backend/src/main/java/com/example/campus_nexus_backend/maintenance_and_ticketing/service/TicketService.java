@@ -126,10 +126,17 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        // 1. Check if the user owns the ticket
         if (!ticket.getCreatedBy().getEmail().equals(userEmail)) {
             throw new RuntimeException("Unauthorized: You can only delete your own tickets");
         }
 
+        // 2. NEW RULE: Check if the status is OPEN
+        if (!"OPEN".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: You can only delete tickets that are currently OPEN.");
+        }
+
+        // If both checks pass, delete it
         ticketRepository.delete(ticket);
     }
 
