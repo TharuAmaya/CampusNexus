@@ -111,6 +111,10 @@ public class TicketService {
             throw new RuntimeException("Unauthorized: You can only edit your own tickets");
         }
 
+        if (!"OPEN".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: You can only edit tickets that are currently OPEN.");
+        }
+
         ticket.setResourceId(dto.getResourceId());
         ticket.setLocationText(dto.getLocationText());
         ticket.setCategory(dto.getCategory());
