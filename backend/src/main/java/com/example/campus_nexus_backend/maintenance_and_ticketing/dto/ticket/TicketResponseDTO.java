@@ -3,6 +3,7 @@ package com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.attachment.AttachmentDTO;
 
 @Data
 public class TicketResponseDTO {
