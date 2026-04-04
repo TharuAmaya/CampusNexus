@@ -26,10 +26,10 @@ public class TicketCommentService {
     @Autowired
     private UserRepository userRepository;
 
-    // Helper: Enforces that ONLY involved Students/Technicians can access the comments
+    // Helper: Enforces that ONLY involved Students/Technicians can ADD comments
     private void validateUserAccessToTicket(Ticket ticket, User user) {
         if ("ROLE_ADMIN".equals(user.getRole())) {
-            throw new RuntimeException("Admins are not allowed to participate in ticket comments.");
+            throw new RuntimeException("Action denied: Admins are not allowed to add comments.");
         }
         
         if ("ROLE_STUDENT".equals(user.getRole()) && !ticket.getCreatedBy().getEmail().equals(user.getEmail())) {
@@ -62,8 +62,10 @@ public class TicketCommentService {
         Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));
         User user = userRepository.findByEmail(userEmail).orElseThrow();
 
-        // Must be participant to view comments
-        validateUserAccessToTicket(ticket, user);
+        // ONLY validate access if the user is NOT an admin. Admins can see all comments.
+        if (!"ROLE_ADMIN".equals(user.getRole())) {
+            validateUserAccessToTicket(ticket, user);
+        }
 
         List<TicketComment> comments = commentRepository.findByTicket_TicketIdOrderByCreatedAtAsc(ticketId);
         
