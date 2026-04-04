@@ -8,6 +8,10 @@ import java.util.List;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
+    
     // Fetches all tickets created by a specific student using their email
     List<Ticket> findByCreatedBy_EmailOrderByCreatedAtDesc(String email);
+
+    // Fetches all tickets assigned to a specific technician with a specific status
+    List<Ticket> findByAssignedTo_EmailAndStatus(String email, String status);
 }
