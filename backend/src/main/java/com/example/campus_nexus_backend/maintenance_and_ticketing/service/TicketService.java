@@ -90,12 +90,17 @@ public class TicketService {
         return tickets.stream().map(this::mapToResponseDTO).collect(Collectors.toList());
     }
 
-    // 3. Get Specific Ticket Details (With ownership check)
+    // 3. Get Specific Ticket Details (With role-based ownership check)
     public TicketResponseDTO getTicketDetails(Long ticketId, String userEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        if (!ticket.getCreatedBy().getEmail().equals(userEmail)) {
+        User requestingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Allow if the user is the creator OR if the user is an ADMIN/TECHNICIAN
+        if (!ticket.getCreatedBy().getEmail().equals(userEmail) && 
+            "ROLE_STUDENT".equals(requestingUser.getRole())) {
             throw new RuntimeException("Unauthorized: You can only view your own tickets");
         }
 
