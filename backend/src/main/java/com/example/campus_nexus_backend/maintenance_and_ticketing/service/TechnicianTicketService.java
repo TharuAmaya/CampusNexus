@@ -1,8 +1,12 @@
 package com.example.campus_nexus_backend.maintenance_and_ticketing.service;
 
+import com.example.campus_nexus_backend.auth.User;
+import com.example.campus_nexus_backend.auth.UserRepository;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketSummaryDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.Ticket;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.TicketStatusHistory;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketRepository;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketStatusHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +18,12 @@ public class TechnicianTicketService {
 
     @Autowired
     private TicketRepository ticketRepository;
+
+    @Autowired
+    private TicketStatusHistoryRepository statusHistoryRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // 1. Get ONLY assigned IN_PROGRESS tickets for this technician
     public List<TicketSummaryDTO> getMyAssignedTickets(String technicianEmail) {
@@ -37,6 +47,9 @@ public class TechnicianTicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        User technician = userRepository.findByEmail(technicianEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
         if (resolutionNotes == null || resolutionNotes.trim().isEmpty()) {
             throw new RuntimeException("Resolution note is required to mark ticket as RESOLVED.");
         }
@@ -51,8 +64,16 @@ public class TechnicianTicketService {
             throw new RuntimeException("Action denied: Ticket must be IN_PROGRESS to resolve.");
         }
 
+        String oldStatus = ticket.getStatus();
         ticket.setResolutionNotes(resolutionNotes.trim());
         ticket.setStatus("RESOLVED");
         ticketRepository.save(ticket);
+
+        TicketStatusHistory history = new TicketStatusHistory();
+        history.setTicket(ticket);
+        history.setOldStatus(oldStatus);
+        history.setNewStatus("RESOLVED");
+        history.setChangedBy(technician);
+        statusHistoryRepository.save(history);
     }
 }
