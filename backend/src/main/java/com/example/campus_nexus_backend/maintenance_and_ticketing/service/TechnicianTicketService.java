@@ -37,6 +37,10 @@ public class TechnicianTicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        if (resolutionNotes == null || resolutionNotes.trim().isEmpty()) {
+            throw new RuntimeException("Resolution note is required to mark ticket as RESOLVED.");
+        }
+
         // Verify this technician is assigned to this ticket
         if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(technicianEmail)) {
             throw new RuntimeException("Unauthorized: You can only resolve tickets assigned to you.");
@@ -47,7 +51,7 @@ public class TechnicianTicketService {
             throw new RuntimeException("Action denied: Ticket must be IN_PROGRESS to resolve.");
         }
 
-        ticket.setResolutionNotes(resolutionNotes);
+        ticket.setResolutionNotes(resolutionNotes.trim());
         ticket.setStatus("RESOLVED");
         ticketRepository.save(ticket);
     }

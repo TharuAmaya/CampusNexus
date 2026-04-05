@@ -36,6 +36,7 @@ public class SecurityConfig {
 
                         // මෙන්න අලුත් පේළිය: Admin ගේ API වලට යන්න පුළුවන් ROLE_ADMIN අයට විතරයි!
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers("/api/technician/**").hasAuthority("ROLE_TECHNICIAN")
 
                         .requestMatchers("/api/user/**").authenticated()
                         .anyRequest().authenticated())
