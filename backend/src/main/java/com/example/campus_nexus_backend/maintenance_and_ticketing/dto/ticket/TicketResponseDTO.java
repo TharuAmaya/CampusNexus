@@ -20,4 +20,7 @@ public class TicketResponseDTO {
     
     // To send attachment details back to the frontend
     private List<AttachmentDTO> attachments;
+
+    // Read-only timeline of all status transitions for this ticket
+    private List<TicketStatusHistoryDTO> statusHistory;
 }
