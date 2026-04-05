@@ -63,9 +63,10 @@ public class AdminTicketController {
     @PatchMapping("/{id}/reject")
     public ResponseEntity<?> rejectTicket(
             @PathVariable Long id, 
-            @RequestBody RejectTicketDTO dto) {
+            @RequestBody RejectTicketDTO dto,
+            Authentication authentication) {
         try {
-            adminTicketService.rejectTicket(id, dto.getRejectionReason());
+            adminTicketService.rejectTicket(id, dto.getRejectionReason(), authentication.getName());
             return ResponseEntity.ok("Ticket has been rejected.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -76,9 +77,10 @@ public class AdminTicketController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateTicketStatus(
             @PathVariable Long id,
-            @RequestBody UpdateTicketStatusDTO dto) {
+            @RequestBody UpdateTicketStatusDTO dto,
+            Authentication authentication) {
         try {
-            adminTicketService.updateTicketStatus(id, dto.getNewStatus());
+            adminTicketService.updateTicketStatus(id, dto.getNewStatus(), authentication.getName());
             return ResponseEntity.ok("Ticket status manually updated to " + dto.getNewStatus());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
