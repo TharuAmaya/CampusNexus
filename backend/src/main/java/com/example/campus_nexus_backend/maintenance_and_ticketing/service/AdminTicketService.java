@@ -5,7 +5,9 @@ import com.example.campus_nexus_backend.auth.UserRepository;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TechnicianListItemDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketSummaryDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.Ticket;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.TicketStatusHistory;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketRepository;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketStatusHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,9 @@ public class AdminTicketService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TicketStatusHistoryRepository statusHistoryRepository;
 
     // 1. Get All Tickets (Summary format for the table)
     public List<TicketSummaryDTO> getAllTicketsSummary() {
@@ -70,23 +75,35 @@ public class AdminTicketService {
     }
 
     // 4. Reject Ticket
-    public void rejectTicket(Long ticketId, String reason) {
+    public void rejectTicket(Long ticketId, String reason, String changedByEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        User changedBy = userRepository.findByEmail(changedByEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         if ("CLOSED".equals(ticket.getStatus())) {
             throw new RuntimeException("Cannot reject a CLOSED ticket.");
         }
 
+        String oldStatus = ticket.getStatus();
+        if ("REJECTED".equals(oldStatus)) {
+            return;
+        }
+
         ticket.setStatus("REJECTED");
         ticket.setRejectionReason(reason);
         ticketRepository.save(ticket);
+        saveStatusHistory(ticket, oldStatus, "REJECTED", changedBy);
     }
 
     // 5. Manually Update Status
-    public void updateTicketStatus(Long ticketId, String newStatus) {
+    public void updateTicketStatus(Long ticketId, String newStatus, String changedByEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        User changedBy = userRepository.findByEmail(changedByEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         String normalizedStatus = newStatus.toUpperCase();
 
@@ -100,8 +117,14 @@ public class AdminTicketService {
             throw new RuntimeException("Assign a technician before setting status to IN_PROGRESS.");
         }
 
+        String oldStatus = ticket.getStatus();
+        if (normalizedStatus.equals(oldStatus)) {
+            return;
+        }
+
         ticket.setStatus(normalizedStatus);
         ticketRepository.save(ticket);
+        saveStatusHistory(ticket, oldStatus, normalizedStatus, changedBy);
     }
 
     // 6. Delete CLOSED Ticket ONLY
@@ -114,5 +137,14 @@ public class AdminTicketService {
         }
 
         ticketRepository.delete(ticket);
+    }
+
+    private void saveStatusHistory(Ticket ticket, String oldStatus, String newStatus, User changedBy) {
+        TicketStatusHistory history = new TicketStatusHistory();
+        history.setTicket(ticket);
+        history.setOldStatus(oldStatus);
+        history.setNewStatus(newStatus);
+        history.setChangedBy(changedBy);
+        statusHistoryRepository.save(history);
     }
 }
