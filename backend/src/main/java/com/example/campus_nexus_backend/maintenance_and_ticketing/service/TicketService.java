@@ -5,10 +5,13 @@ import com.example.campus_nexus_backend.auth.UserRepository;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.attachment.AttachmentDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketRequestDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketResponseDTO;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketStatusHistoryDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.Ticket;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.TicketAttachment;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.TicketStatusHistory;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketAttachmentRepository;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketRepository;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketStatusHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +37,9 @@ public class TicketService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TicketStatusHistoryRepository statusHistoryRepository;
 
     private final String UPLOAD_DIR = "uploads/tickets/";
 
@@ -183,6 +189,22 @@ public class TicketService {
             attachmentDTOs.add(attDto);
         }
         dto.setAttachments(attachmentDTOs);
+
+        List<TicketStatusHistory> statusHistoryRows = statusHistoryRepository
+                .findByTicket_TicketIdOrderByChangedAtAsc(ticket.getTicketId());
+        List<TicketStatusHistoryDTO> statusHistory = new ArrayList<>();
+
+        for (TicketStatusHistory row : statusHistoryRows) {
+            TicketStatusHistoryDTO historyDTO = new TicketStatusHistoryDTO();
+            historyDTO.setOldStatus(row.getOldStatus());
+            historyDTO.setNewStatus(row.getNewStatus());
+            historyDTO.setChangedByName(row.getChangedBy().getFullName());
+            historyDTO.setChangedByRole(row.getChangedBy().getRole());
+            historyDTO.setChangedByEmail(row.getChangedBy().getEmail());
+            historyDTO.setChangedAt(row.getChangedAt());
+            statusHistory.add(historyDTO);
+        }
+        dto.setStatusHistory(statusHistory);
 
         return dto;
     }
