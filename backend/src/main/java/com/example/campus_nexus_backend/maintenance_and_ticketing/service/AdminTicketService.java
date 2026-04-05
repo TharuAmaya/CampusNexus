@@ -2,6 +2,7 @@ package com.example.campus_nexus_backend.maintenance_and_ticketing.service;
 
 import com.example.campus_nexus_backend.auth.User;
 import com.example.campus_nexus_backend.auth.UserRepository;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TechnicianListItemDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketSummaryDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.Ticket;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketRepository;
@@ -35,10 +36,27 @@ public class AdminTicketService {
         }).collect(Collectors.toList());
     }
 
-    // 2. Assign Technician & Automatically Set to IN_PROGRESS
+    // 2. Get all technicians for assignment dropdown/list
+    public List<TechnicianListItemDTO> getAllTechnicians() {
+        return userRepository.findByRole("ROLE_TECHNICIAN").stream().map(user -> {
+            TechnicianListItemDTO dto = new TechnicianListItemDTO();
+            dto.setId(user.getId());
+            dto.setFullName(user.getFullName());
+            dto.setEmail(user.getEmail());
+            dto.setDepartment(user.getDepartment());
+            dto.setRole(user.getRole());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    // 3. Assign technician to ticket (status is updated manually through status endpoint)
     public void assignTechnician(Long ticketId, Long technicianId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        if ("CLOSED".equals(ticket.getStatus()) || "REJECTED".equals(ticket.getStatus())) {
+            throw new RuntimeException("Cannot assign technicians to CLOSED or REJECTED tickets.");
+        }
         
         User technician = userRepository.findById(technicianId)
                 .orElseThrow(() -> new RuntimeException("Technician not found"));
@@ -48,36 +66,45 @@ public class AdminTicketService {
         }
 
         ticket.setAssignedTo(technician);
-        ticket.setStatus("IN_PROGRESS");
         ticketRepository.save(ticket);
     }
 
-    // 3. Reject Ticket
+    // 4. Reject Ticket
     public void rejectTicket(Long ticketId, String reason) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        if ("CLOSED".equals(ticket.getStatus())) {
+            throw new RuntimeException("Cannot reject a CLOSED ticket.");
+        }
 
         ticket.setStatus("REJECTED");
         ticket.setRejectionReason(reason);
         ticketRepository.save(ticket);
     }
 
-    // 4. Manually Update Status (NEW)
+    // 5. Manually Update Status
     public void updateTicketStatus(Long ticketId, String newStatus) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        String normalizedStatus = newStatus.toUpperCase();
+
         // Validate that the status is one of the allowed values
         List<String> allowedStatuses = List.of("OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED");
-        if (!allowedStatuses.contains(newStatus.toUpperCase())) {
+        if (!allowedStatuses.contains(normalizedStatus)) {
             throw new RuntimeException("Invalid status value. Allowed: OPEN, IN_PROGRESS, RESOLVED, CLOSED, REJECTED");
         }
 
-        ticket.setStatus(newStatus.toUpperCase());
+        if ("IN_PROGRESS".equals(normalizedStatus) && ticket.getAssignedTo() == null) {
+            throw new RuntimeException("Assign a technician before setting status to IN_PROGRESS.");
+        }
+
+        ticket.setStatus(normalizedStatus);
         ticketRepository.save(ticket);
     }
 
-    // 5. Delete CLOSED Ticket ONLY
+    // 6. Delete CLOSED Ticket ONLY
     public void deleteClosedTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
