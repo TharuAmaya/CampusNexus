@@ -77,4 +77,15 @@ public class ResourceController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/api/resources/{id}")
+    public ResponseEntity<ResourceDropdownDTO> getResourceById(@PathVariable Long id) {
+        return resourceRepository.findById(id)
+                .map(resource -> ResponseEntity.ok(new ResourceDropdownDTO(
+                        resource.getResourceId(),
+                        resource.getName(),
+                        resource.getType() != null ? resource.getType().name() : null
+                )))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }
