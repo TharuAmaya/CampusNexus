@@ -26,6 +26,7 @@ import Profile from './pages/Profile.jsx';
 import ManageUsers from './pages/admin/ManageUsers';
 
 import Tickets from './pages/student/Tickets.jsx';
+import AllTickets from './pages/student/AllTickets.jsx';
 import MyBookings from './pages/student/booking/MyBookings.jsx';
 import CreateBooking from './pages/student/booking/CreateBooking.jsx';
 import BookingDetails from './pages/student/booking/BookingDetails.jsx';
@@ -79,6 +80,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
                   <Tickets />
+                </ProtectedRoute>}
+            />
+
+            <Route
+              path="/student/all-tickets"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <AllTickets />
                 </ProtectedRoute>}
             />
 
