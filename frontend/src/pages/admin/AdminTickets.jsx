@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FaExclamationCircle, FaSpinner, FaTicketAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaExclamationCircle, FaEye, FaSpinner, FaTicketAlt } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout.jsx';
 
 const API_BASE_URL = 'http://localhost:8081';
@@ -125,6 +126,7 @@ const AdminTickets = () => {
                                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Submitted By</th>
                                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Assigned To</th>
                                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Created At</th>
+                                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
@@ -141,6 +143,14 @@ const AdminTickets = () => {
                                         <td className="px-4 py-3 text-sm text-slate-700">{ticket.createdByEmail || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-slate-700">{ticket.assignedToEmail || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-slate-600">{formatDateTime(ticket.createdAt)}</td>
+                                        <td className="px-4 py-3 text-sm">
+                                            <Link
+                                                to={`/admin/tickets/${ticket.ticketId}`}
+                                                className="inline-flex items-center gap-2 rounded-lg bg-[#f4511e] px-3 py-2 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-[#d84315]"
+                                            >
+                                                <FaEye /> View More
+                                            </Link>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
