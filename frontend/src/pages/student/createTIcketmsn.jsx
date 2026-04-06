@@ -8,8 +8,6 @@ import {
     FaExclamationCircle,
     FaInfoCircle,
     FaCheckCircle,
-    FaEdit,
-    FaTrash,
     FaLifeRing
 } from 'react-icons/fa';
 
@@ -423,22 +421,16 @@ const CreateTicketmsn = () => {
                                     <FaInfoCircle className="mt-0.5 shrink-0 text-blue-500" />
                                     <div className="space-y-1 text-sm text-slate-700">
                                         <p className="font-semibold text-slate-900">Before submitting</p>
-                                        <p>Make sure the chosen resource type and resource name match the issue location. Update and Delete actions are reserved for a later workflow and are not active on this screen yet.</p>
+                                        <p>Make sure the chosen resource type and resource name match the issue location before submitting the ticket.</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="grid gap-3 md:grid-cols-3">
-                                <button type="button" disabled className="rounded-lg border border-gray-200 bg-gray-100 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                                    <FaEdit className="inline-block align-middle" /> Update
-                                </button>
-                                <button type="button" disabled className="rounded-lg border border-gray-200 bg-gray-100 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                                    <FaTrash className="inline-block align-middle" /> Delete
-                                </button>
+                            <div>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="rounded-lg bg-[#f4511e] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-lg transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    className="w-full rounded-lg bg-[#f4511e] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-lg transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     {isSubmitting ? 'Submitting...' : <><FaPaperPlane className="inline-block align-middle" /> Submit Ticket</>}
                                 </button>
