@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaEdit, FaExclamationCircle, FaInfoCircle, FaPaperclip, FaSpinner, FaTrash } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout.jsx';
 
@@ -9,6 +9,7 @@ const priorityOptions = ['Low', 'Medium', 'High', 'Urgent'];
 
 const StudentTicketDetails = () => {
     const { ticketId } = useParams();
+    const navigate = useNavigate();
     const [ticket, setTicket] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
@@ -18,6 +19,9 @@ const StudentTicketDetails = () => {
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateError, setUpdateError] = useState('');
+    const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
     const [resourceTypes, setResourceTypes] = useState([]);
     const [resourceOptions, setResourceOptions] = useState([]);
     const [updateFiles, setUpdateFiles] = useState([]);
@@ -282,6 +286,45 @@ const StudentTicketDetails = () => {
         return date.toLocaleString();
     };
 
+    const openDeleteConfirmation = () => {
+        setDeleteError('');
+        setIsDeleteConfirmationOpen(true);
+    };
+
+    const closeDeleteConfirmation = () => {
+        setIsDeleteConfirmationOpen(false);
+        setDeleteError('');
+    };
+
+    const handleDelete = async () => {
+        try {
+            setIsDeleting(true);
+            setDeleteError('');
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const message = await response.text();
+                throw new Error(message || 'Failed to delete ticket.');
+            }
+
+            closeDeleteConfirmation();
+            setTimeout(() => {
+                navigate('/student/all-tickets', { replace: true });
+            }, 500);
+        } catch (error) {
+            setDeleteError(error.message || 'Unable to delete ticket.');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
         <DashboardLayout title="Ticket Details">
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
@@ -384,14 +427,16 @@ const StudentTicketDetails = () => {
                             <button
                                 type="button"
                                 onClick={openUpdateModal}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-amber-700 transition hover:bg-amber-100"
+                                disabled={ticket.status !== 'OPEN'}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400"
                             >
                                 <FaEdit /> Update
                             </button>
                             <button
                                 type="button"
-                                disabled
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-rose-500"
+                                onClick={openDeleteConfirmation}
+                                disabled={ticket.status !== 'OPEN'}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400"
                             >
                                 <FaTrash /> Delete
                             </button>
@@ -585,6 +630,52 @@ const StudentTicketDetails = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {isDeleteConfirmationOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+                    <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
+                        <div className="mb-4 flex items-center gap-3">
+                            <div className="rounded-lg bg-rose-50 p-3">
+                                <FaExclamationCircle className="text-rose-600" size={20} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Delete Ticket?</h3>
+                                <p className="text-sm text-slate-500">This action cannot be undone.</p>
+                            </div>
+                        </div>
+
+                        {deleteError && (
+                            <div className="mb-4 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                <FaExclamationCircle className="mt-0.5 shrink-0" />
+                                <span>{deleteError}</span>
+                            </div>
+                        )}
+
+                        <p className="mb-6 text-sm text-slate-600">
+                            Ticket <span className="font-semibold text-slate-900">#{ticketId}</span> will be permanently deleted.
+                        </p>
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={closeDeleteConfirmation}
+                                disabled={isDeleting}
+                                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                            >
+                                {isDeleting ? 'Deleting...' : 'Delete Ticket'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
