@@ -9,7 +9,6 @@ import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.attachment
 public class TicketResponseDTO {
     private Long ticketId;
     private Long resourceId;
-    private String locationText;
     private String category;
     private String description;
     private String priority;

@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class TicketRequestDTO {
     private Long resourceId;
-    private String locationText;
     private String category;
     private String description;
     private String priority;
