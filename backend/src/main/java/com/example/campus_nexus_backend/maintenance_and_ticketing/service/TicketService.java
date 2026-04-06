@@ -60,7 +60,6 @@ public class TicketService {
         Ticket ticket = new Ticket();
         ticket.setCreatedBy(student);
         ticket.setResourceId(dto.getResourceId());
-        ticket.setLocationText(dto.getLocationText());
         ticket.setCategory(dto.getCategory());
         ticket.setDescription(dto.getDescription());
         ticket.setPriority(dto.getPriority());
@@ -136,7 +135,6 @@ public class TicketService {
         }
 
         ticket.setResourceId(dto.getResourceId());
-        ticket.setLocationText(dto.getLocationText());
         ticket.setCategory(dto.getCategory());
         ticket.setDescription(dto.getDescription());
         ticket.setPriority(dto.getPriority());
@@ -169,7 +167,6 @@ public class TicketService {
         TicketResponseDTO dto = new TicketResponseDTO();
         dto.setTicketId(ticket.getTicketId());
         dto.setResourceId(ticket.getResourceId());
-        dto.setLocationText(ticket.getLocationText());
         dto.setCategory(ticket.getCategory());
         dto.setDescription(ticket.getDescription());
         dto.setPriority(ticket.getPriority());
