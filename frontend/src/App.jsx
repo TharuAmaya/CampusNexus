@@ -14,6 +14,7 @@ import Footer from './components/Footer.jsx';
 // --- අලුත් IMPORTS ---
 import AdminHome from './pages/admin/AdminHome.jsx'; // Folder structure එක බලන්න
 import AdminTickets from './pages/admin/AdminTickets.jsx';
+import AdminTicketDetails from './pages/admin/AdminTicketDetails.jsx';
 import StudentHome from './pages/student/StudentHome.jsx';
 import TechnicianHome from './pages/technician/TechnicianHome.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // ආරක්‍ෂක component එක
@@ -157,6 +158,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <AdminTickets />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/tickets/:ticketId"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminTicketDetails />
                 </ProtectedRoute>
               }
             />
