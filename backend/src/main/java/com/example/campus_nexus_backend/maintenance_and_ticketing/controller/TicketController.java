@@ -50,13 +50,14 @@ public class TicketController {
     }
 
     // 4. Update an existing ticket
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<?> updateTicket(
-            @PathVariable Long id, 
-            @RequestBody TicketRequestDTO ticketDTO, 
+            @PathVariable Long id,
+            @RequestPart("ticketDetails") TicketRequestDTO ticketDTO,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
             Authentication authentication) {
         try {
-            ticketService.updateTicket(id, ticketDTO, authentication.getName());
+            ticketService.updateTicket(id, ticketDTO, images, authentication.getName());
             return ResponseEntity.ok("Ticket updated successfully!");
         } catch (Exception e) {
             return mapExceptionToResponse(e);
