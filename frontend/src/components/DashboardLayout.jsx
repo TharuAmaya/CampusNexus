@@ -36,6 +36,7 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
         } else if (userRole === 'ROLE_STUDENT') {
             return [...commonLinks,
             { name: 'Publish Ticket', path: '/student/publish-ticket', icon: <FaTicketAlt /> },
+            { name: 'All Tickets', path: '/student/all-tickets', icon: <FaTicketAlt /> },
             { name: 'Resources', path: '/student/resources', icon: <FaBook /> },
             // මෙන්න අලුතින් දාපු එක:
             { name: 'View Grades', path: '/student/grades', icon: <FaGraduationCap /> },
