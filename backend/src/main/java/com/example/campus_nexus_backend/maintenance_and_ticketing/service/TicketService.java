@@ -14,6 +14,7 @@ import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.Tic
 import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketStatusHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -121,8 +123,9 @@ public class TicketService {
         return mapToResponseDTO(ticket);
     }
 
-    // 4. Update Ticket
-    public void updateTicket(Long ticketId, TicketRequestDTO dto, String userEmail) {
+    // 4. Update Ticket (including attachment replacement)
+    @Transactional(rollbackFor = Exception.class)
+    public void updateTicket(Long ticketId, TicketRequestDTO dto, List<MultipartFile> files, String userEmail) throws IOException {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
@@ -134,13 +137,54 @@ public class TicketService {
             throw new RuntimeException("Action denied: You can only edit tickets that are currently OPEN.");
         }
 
+        if (files != null && files.size() > 3) {
+            throw new RuntimeException("Maximum of 3 image attachments allowed.");
+        }
+
         ticket.setResourceId(dto.getResourceId());
         ticket.setCategory(dto.getCategory());
         ticket.setDescription(dto.getDescription());
         ticket.setPriority(dto.getPriority());
         ticket.setPreferredContact(dto.getPreferredContact());
-        
+
         ticketRepository.save(ticket);
+
+        // Requirement: replace attachments during update
+        List<TicketAttachment> existingAttachments = attachmentRepository.findByTicket_TicketId(ticketId);
+        for (TicketAttachment attachment : existingAttachments) {
+            if (attachment.getFilePath() != null && !attachment.getFilePath().isBlank()) {
+                try {
+                    Files.deleteIfExists(Paths.get(attachment.getFilePath()));
+                } catch (IOException ignored) {
+                    // Keep update robust even if one old file is already missing on disk.
+                }
+            }
+        }
+        attachmentRepository.deleteByTicket_TicketId(ticketId);
+
+        if (files != null && !files.isEmpty()) {
+            File uploadDir = new File(UPLOAD_DIR);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            for (MultipartFile file : files) {
+                if (file == null || file.isEmpty()) {
+                    continue;
+                }
+
+                String safeOriginalName = file.getOriginalFilename() == null ? "attachment" : file.getOriginalFilename();
+                String fileName = UUID.randomUUID() + "_" + safeOriginalName;
+                Path filePath = Paths.get(UPLOAD_DIR, fileName);
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                TicketAttachment attachment = new TicketAttachment();
+                attachment.setTicket(ticket);
+                attachment.setFileName(safeOriginalName);
+                attachment.setFilePath(filePath.toString());
+                attachmentRepository.save(attachment);
+            }
+        }
     }
 
     // 5. Delete Ticket
