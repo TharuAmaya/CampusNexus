@@ -1,14 +1,18 @@
 package com.example.campus_nexus_backend.facilities.controller;
 
 import com.example.campus_nexus_backend.facilities.model.ResourcesModel;
+import com.example.campus_nexus_backend.facilities.model.enums.ResourceType;
 import com.example.campus_nexus_backend.facilities.repository.ResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -20,6 +24,7 @@ public class ResourceController {
     public ResourcesModel newResourceModel(@RequestBody ResourcesModel newResourceModel) {
         return resourceRepository.save(newResourceModel);
     }
+
     @PostMapping("/resources/resourceImg")
     public String resourceImg(@RequestParam("file") MultipartFile file) {
         String folder = "src/main/uploads/";
@@ -36,5 +41,25 @@ public class ResourceController {
             return "Error uploading file; " + resourceImg;
         }
         return resourceImg;
+    }
+
+    @GetMapping("/api/resources/types")
+    public ResponseEntity<List<String>> getResourceTypes() {
+        List<ResourceType> types = resourceRepository.findDistinctTypes();
+        List<String> typeStrings = types.stream()
+                .map(ResourceType::toString)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(typeStrings);
+    }
+
+    @GetMapping("/api/resources/names")
+    public ResponseEntity<List<String>> getResourceNamesByType(@RequestParam String type) {
+        try {
+            ResourceType resourceType = ResourceType.valueOf(type.toUpperCase());
+            List<String> names = resourceRepository.findNamesByType(resourceType);
+            return ResponseEntity.ok(names);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
