@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { FaArrowLeft, FaEdit, FaExclamationCircle, FaInfoCircle, FaSpinner, FaTrash } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaExclamationCircle, FaInfoCircle, FaPaperclip, FaSpinner, FaTrash } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout.jsx';
 
 const API_BASE_URL = 'http://localhost:8081';
@@ -20,6 +20,7 @@ const StudentTicketDetails = () => {
     const [updateError, setUpdateError] = useState('');
     const [resourceTypes, setResourceTypes] = useState([]);
     const [resourceOptions, setResourceOptions] = useState([]);
+    const [updateFiles, setUpdateFiles] = useState([]);
     const [isLoadingTypes, setIsLoadingTypes] = useState(false);
     const [isLoadingResources, setIsLoadingResources] = useState(false);
     const [updateForm, setUpdateForm] = useState({
@@ -166,6 +167,7 @@ const StudentTicketDetails = () => {
     const openUpdateModal = () => {
         setUpdateError('');
         setIsUpdateModalOpen(true);
+        setUpdateFiles([]);
         setUpdateForm({
             resourceType: resourceDetails?.type || '',
             resourceId: ticket?.resourceId ? String(ticket.resourceId) : '',
@@ -180,6 +182,7 @@ const StudentTicketDetails = () => {
         setIsUpdateModalOpen(false);
         setUpdateError('');
         setResourceOptions([]);
+        setUpdateFiles([]);
     };
 
     const handleUpdateChange = (event) => {
@@ -191,6 +194,26 @@ const StudentTicketDetails = () => {
         }));
     };
 
+    const handleUpdateAttachmentChange = (event) => {
+        const newFiles = Array.from(event.target.files || []);
+        const allFiles = [...updateFiles, ...newFiles];
+
+        if (allFiles.length > 3) {
+            setUpdateError('You can attach a maximum of 3 files.');
+            event.target.value = '';
+            return;
+        }
+
+        setUpdateFiles(allFiles);
+        setUpdateError('');
+        event.target.value = '';
+    };
+
+    const removeUpdateFile = (indexToRemove) => {
+        const updated = updateFiles.filter((_, index) => index !== indexToRemove);
+        setUpdateFiles(updated);
+    };
+
     const handleUpdateSubmit = async (event) => {
         event.preventDefault();
 
@@ -199,24 +222,41 @@ const StudentTicketDetails = () => {
             return;
         }
 
+        if (updateFiles.length > 3) {
+            setUpdateError('You can attach a maximum of 3 files.');
+            return;
+        }
+
         try {
             setIsUpdating(true);
             setUpdateError('');
 
             const token = localStorage.getItem('token');
+            const payload = new FormData();
+
+            payload.append(
+                'ticketDetails',
+                new Blob([
+                    JSON.stringify({
+                        resourceId: Number(updateForm.resourceId),
+                        category: updateForm.category,
+                        description: updateForm.description,
+                        priority: updateForm.priority,
+                        preferredContact: updateForm.preferredContact
+                    })
+                ], { type: 'application/json' })
+            );
+
+            updateFiles.forEach((file) => {
+                payload.append('images', file);
+            });
+
             const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
                 method: 'PUT',
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    resourceId: Number(updateForm.resourceId),
-                    category: updateForm.category,
-                    description: updateForm.description,
-                    priority: updateForm.priority,
-                    preferredContact: updateForm.preferredContact
-                })
+                body: payload
             });
 
             if (!response.ok) {
@@ -479,6 +519,52 @@ const StudentTicketDetails = () => {
                                         rows="6"
                                         className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium leading-7 text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
                                     />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">
+                                        <FaPaperclip /> Attachment Selection
+                                    </label>
+                                    <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-5">
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*,.pdf,.png,.jpg,.jpeg"
+                                            onChange={handleUpdateAttachmentChange}
+                                            className="block w-full text-sm text-slate-600 file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#f4511e] file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-[#d84315]"
+                                        />
+                                        <p className="mt-3 text-xs leading-6 text-slate-500">
+                                            Select up to 3 files. Saving this form replaces previous attachments with the newly selected files.
+                                        </p>
+
+                                        {Array.isArray(ticket?.attachments) && ticket.attachments.length > 0 && (
+                                            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                                                Current attachments: {ticket.attachments.length}. They will be replaced when you save.
+                                            </div>
+                                        )}
+
+                                        <div className="mt-4 space-y-2">
+                                            {updateFiles.length > 0 ? updateFiles.map((file, index) => (
+                                                <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between gap-2 text-sm text-slate-700">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                                        <span className="font-medium">{file.name}</span>
+                                                        <span className="text-slate-400">({Math.ceil(file.size / 1024)} KB)</span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeUpdateFile(index)}
+                                                        className="text-slate-500 transition-colors hover:text-red-500"
+                                                        title="Remove file"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            )) : (
+                                                <p className="text-sm text-slate-400">No new attachments selected.</p>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
