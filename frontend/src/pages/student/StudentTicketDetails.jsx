@@ -4,12 +4,32 @@ import { FaArrowLeft, FaEdit, FaExclamationCircle, FaInfoCircle, FaSpinner, FaTr
 import DashboardLayout from '../../components/DashboardLayout.jsx';
 
 const API_BASE_URL = 'http://localhost:8081';
+const categoryOptions = ['Maintenance', 'Electrical', 'Plumbing', 'Furniture', 'Cleanliness', 'Security', 'IT Support', 'Other'];
+const priorityOptions = ['Low', 'Medium', 'High', 'Urgent'];
 
 const StudentTicketDetails = () => {
     const { ticketId } = useParams();
     const [ticket, setTicket] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
+    const [resourceDetails, setResourceDetails] = useState(null);
+    const [isResourceLoading, setIsResourceLoading] = useState(false);
+
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [updateError, setUpdateError] = useState('');
+    const [resourceTypes, setResourceTypes] = useState([]);
+    const [resourceOptions, setResourceOptions] = useState([]);
+    const [isLoadingTypes, setIsLoadingTypes] = useState(false);
+    const [isLoadingResources, setIsLoadingResources] = useState(false);
+    const [updateForm, setUpdateForm] = useState({
+        resourceType: '',
+        resourceId: '',
+        category: '',
+        description: '',
+        priority: 'Medium',
+        preferredContact: ''
+    });
 
     useEffect(() => {
         const fetchTicketDetails = async () => {
@@ -40,6 +60,178 @@ const StudentTicketDetails = () => {
             fetchTicketDetails();
         }
     }, [ticketId]);
+
+    useEffect(() => {
+        const fetchResourceDetails = async () => {
+            if (!ticket?.resourceId) {
+                setResourceDetails(null);
+                return;
+            }
+
+            try {
+                setIsResourceLoading(true);
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/resources/${ticket.resourceId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    setResourceDetails(null);
+                    return;
+                }
+
+                const data = await response.json();
+                setResourceDetails(data);
+            } finally {
+                setIsResourceLoading(false);
+            }
+        };
+
+        fetchResourceDetails();
+    }, [ticket]);
+
+    useEffect(() => {
+        const fetchResourceTypes = async () => {
+            if (!isUpdateModalOpen) return;
+
+            try {
+                setIsLoadingTypes(true);
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/resources/types`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load resource types.');
+                }
+
+                const data = await response.json();
+                setResourceTypes(data || []);
+            } catch (error) {
+                setUpdateError(error.message || 'Unable to load resource types.');
+            } finally {
+                setIsLoadingTypes(false);
+            }
+        };
+
+        fetchResourceTypes();
+    }, [isUpdateModalOpen]);
+
+    useEffect(() => {
+        const fetchResourceNames = async () => {
+            if (!isUpdateModalOpen || !updateForm.resourceType) {
+                setResourceOptions([]);
+                return;
+            }
+
+            try {
+                setIsLoadingResources(true);
+                const token = localStorage.getItem('token');
+                const response = await fetch(
+                    `${API_BASE_URL}/api/resources/names?type=${encodeURIComponent(updateForm.resourceType)}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to load resources for the selected type.');
+                }
+
+                const data = await response.json();
+                setResourceOptions(data || []);
+            } catch (error) {
+                setUpdateError(error.message || 'Unable to load resources.');
+            } finally {
+                setIsLoadingResources(false);
+            }
+        };
+
+        fetchResourceNames();
+    }, [isUpdateModalOpen, updateForm.resourceType]);
+
+    const refreshTicketDetails = async () => {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            const message = await response.text();
+            throw new Error(message || 'Failed to refresh ticket details.');
+        }
+
+        const data = await response.json();
+        setTicket(data);
+    };
+
+    const openUpdateModal = () => {
+        setUpdateError('');
+        setIsUpdateModalOpen(true);
+        setUpdateForm({
+            resourceType: resourceDetails?.type || '',
+            resourceId: ticket?.resourceId ? String(ticket.resourceId) : '',
+            category: ticket?.category || '',
+            description: ticket?.description || '',
+            priority: ticket?.priority || 'Medium',
+            preferredContact: ticket?.preferredContact || ''
+        });
+    };
+
+    const closeUpdateModal = () => {
+        setIsUpdateModalOpen(false);
+        setUpdateError('');
+        setResourceOptions([]);
+    };
+
+    const handleUpdateChange = (event) => {
+        const { name, value } = event.target;
+        setUpdateForm((previous) => ({
+            ...previous,
+            [name]: value,
+            ...(name === 'resourceType' ? { resourceId: '' } : {})
+        }));
+    };
+
+    const handleUpdateSubmit = async (event) => {
+        event.preventDefault();
+
+        if (!updateForm.resourceType || !updateForm.resourceId || !updateForm.category || !updateForm.description || !updateForm.priority || !updateForm.preferredContact) {
+            setUpdateError('Please complete all required fields.');
+            return;
+        }
+
+        try {
+            setIsUpdating(true);
+            setUpdateError('');
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    resourceId: Number(updateForm.resourceId),
+                    category: updateForm.category,
+                    description: updateForm.description,
+                    priority: updateForm.priority,
+                    preferredContact: updateForm.preferredContact
+                })
+            });
+
+            if (!response.ok) {
+                const message = await response.text();
+                throw new Error(message || 'Ticket update failed.');
+            }
+
+            await refreshTicketDetails();
+            closeUpdateModal();
+        } catch (error) {
+            setUpdateError(error.message || 'Unable to update ticket.');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
 
     const formatDateTime = (value) => {
         if (!value) return '-';
@@ -104,8 +296,17 @@ const StudentTicketDetails = () => {
                         </div>
 
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Resource ID</p>
-                            <p className="mt-1 font-semibold text-slate-900">{ticket.resourceId || '-'}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Resource Name</p>
+                            <p className="mt-1 font-semibold text-slate-900">
+                                {isResourceLoading ? 'Loading...' : (resourceDetails?.name || '-')}
+                            </p>
+                        </div>
+
+                        <div className="rounded-xl border border-gray-200 bg-white p-4">
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Resource Type</p>
+                            <p className="mt-1 font-semibold text-slate-900">
+                                {isResourceLoading ? 'Loading...' : (resourceDetails?.type ? resourceDetails.type.replace(/_/g, ' ') : '-')}
+                            </p>
                         </div>
 
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
@@ -142,8 +343,8 @@ const StudentTicketDetails = () => {
                         <div className="grid gap-3 md:grid-cols-2">
                             <button
                                 type="button"
-                                disabled
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-amber-500"
+                                onClick={openUpdateModal}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-amber-700 transition hover:bg-amber-100"
                             >
                                 <FaEdit /> Update
                             </button>
@@ -158,6 +359,149 @@ const StudentTicketDetails = () => {
                     </div>
                 )}
             </section>
+
+            {isUpdateModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+                    <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
+                        <div className="mb-6 flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
+                            <div>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#f4511e]">Update Ticket</p>
+                                <h3 className="mt-1 text-2xl font-black tracking-tight text-slate-900">Edit ticket details</h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeUpdateModal}
+                                className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-gray-50 hover:text-slate-700"
+                            >
+                                Close
+                            </button>
+                        </div>
+
+                        {updateError && (
+                            <div className="mb-5 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                <FaExclamationCircle className="mt-0.5 shrink-0" />
+                                <span>{updateError}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleUpdateSubmit} className="space-y-5">
+                            <div className="grid gap-5 md:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Resource Type</label>
+                                    <select
+                                        name="resourceType"
+                                        value={updateForm.resourceType}
+                                        onChange={handleUpdateChange}
+                                        required
+                                        disabled={isLoadingTypes}
+                                        className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
+                                    >
+                                        <option value="">{isLoadingTypes ? 'Loading resource types...' : 'Choose a resource type'}</option>
+                                        {resourceTypes.map((type) => (
+                                            <option key={type} value={type}>{type.replace(/_/g, ' ')}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Resource Name</label>
+                                    <select
+                                        name="resourceId"
+                                        value={updateForm.resourceId}
+                                        onChange={handleUpdateChange}
+                                        required
+                                        disabled={!updateForm.resourceType || isLoadingResources}
+                                        className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white disabled:cursor-not-allowed disabled:bg-gray-100"
+                                    >
+                                        <option value="">
+                                            {!updateForm.resourceType
+                                                ? 'Select a resource type first'
+                                                : (isLoadingResources ? 'Loading resources...' : 'Choose a resource name')}
+                                        </option>
+                                        {resourceOptions.map((resource) => (
+                                            <option key={resource.resourceId} value={resource.resourceId}>
+                                                {resource.name} (ID: {resource.resourceId})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Category</label>
+                                    <select
+                                        name="category"
+                                        value={updateForm.category}
+                                        onChange={handleUpdateChange}
+                                        required
+                                        className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
+                                    >
+                                        <option value="">Choose a category</option>
+                                        {categoryOptions.map((category) => (
+                                            <option key={category} value={category}>{category}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Priority</label>
+                                    <select
+                                        name="priority"
+                                        value={updateForm.priority}
+                                        onChange={handleUpdateChange}
+                                        required
+                                        className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
+                                    >
+                                        {priorityOptions.map((priority) => (
+                                            <option key={priority} value={priority}>{priority}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Contact Details</label>
+                                    <input
+                                        type="text"
+                                        name="preferredContact"
+                                        value={updateForm.preferredContact}
+                                        onChange={handleUpdateChange}
+                                        required
+                                        className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
+                                    />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Description</label>
+                                    <textarea
+                                        name="description"
+                                        value={updateForm.description}
+                                        onChange={handleUpdateChange}
+                                        required
+                                        rows="6"
+                                        className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium leading-7 text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={closeUpdateModal}
+                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-500 transition hover:bg-gray-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isUpdating}
+                                    className="rounded-lg bg-[#f4511e] px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
+                                >
+                                    {isUpdating ? 'Updating...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 };
