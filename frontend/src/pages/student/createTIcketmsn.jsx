@@ -74,7 +74,7 @@ const CreateTicketmsn = () => {
                 setIsLoadingResources(true);
                 const token = localStorage.getItem('token');
                 const response = await fetch(
-                    `${API_BASE_URL}/api/resources/dropdown?type=${encodeURIComponent(formData.resourceType)}`,
+                    `${API_BASE_URL}/api/resources/names?type=${encodeURIComponent(formData.resourceType)}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
 
@@ -107,18 +107,28 @@ const CreateTicketmsn = () => {
     };
 
     const handleAttachmentChange = (event) => {
-        const files = Array.from(event.target.files || []);
+        const newFiles = Array.from(event.target.files || []);
+        
+        // Combine already selected files with newly selected files
+        const allFiles = [...selectedFiles, ...newFiles];
 
-        if (files.length > 3) {
-            setErrorMessage('You can attach a maximum of 3 files.');
+        if (allFiles.length > 3) {
+            setErrorMessage('You can attach a maximum of 3 files. Please select fewer files.');
             event.target.value = '';
-            setSelectedFiles([]);
             return;
         }
 
-        setSelectedFiles(files);
+        setSelectedFiles(allFiles);
         setErrorMessage('');
         setSuccessMessage('');
+    };
+
+    const removeFile = (fileName) => {
+        const updatedFiles = selectedFiles.filter(file => file.name !== fileName);
+        setSelectedFiles(updatedFiles);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     const resetForm = () => {
@@ -138,6 +148,11 @@ const CreateTicketmsn = () => {
 
         if (!formData.resourceType || !formData.resourceId || !formData.category || !formData.description || !formData.priority || !formData.preferredContact) {
             setErrorMessage('Please complete all required fields before submitting.');
+            return;
+        }
+
+        if (selectedFiles.length > 3) {
+            setErrorMessage('You can attach a maximum of 3 files.');
             return;
         }
 
@@ -354,10 +369,20 @@ const CreateTicketmsn = () => {
 
                                         <div className="mt-4 space-y-2">
                                             {selectedFiles.length > 0 ? selectedFiles.map((file) => (
-                                                <div key={file.name} className="flex items-center gap-2 text-sm text-slate-700">
-                                                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                                                    <span className="font-medium">{file.name}</span>
-                                                    <span className="text-slate-400">({Math.ceil(file.size / 1024)} KB)</span>
+                                                <div key={file.name} className="flex items-center justify-between gap-2 text-sm text-slate-700">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                                        <span className="font-medium">{file.name}</span>
+                                                        <span className="text-slate-400">({Math.ceil(file.size / 1024)} KB)</span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeFile(file.name)}
+                                                        className="text-slate-500 hover:text-red-500 transition-colors"
+                                                        title="Remove file"
+                                                    >
+                                                        ✕
+                                                    </button>
                                                 </div>
                                             )) : (
                                                 <p className="text-sm text-slate-400">No attachments selected.</p>
