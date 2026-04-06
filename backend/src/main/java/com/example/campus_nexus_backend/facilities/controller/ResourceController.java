@@ -55,27 +55,13 @@ public class ResourceController {
     }
 
     @GetMapping("/api/resources/names")
-    public ResponseEntity<List<String>> getResourceNamesByType(@RequestParam String type) {
-        try {
-            ResourceType resourceType = ResourceType.valueOf(type.toUpperCase());
-            List<String> names = resourceRepository.findNamesByType(resourceType);
-            return ResponseEntity.ok(names);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @GetMapping("/api/resources/dropdown")
-    public ResponseEntity<List<ResourceDropdownDTO>> getResourceDropdown(@RequestParam(required = false) String type) {
+    public ResponseEntity<List<ResourceDropdownDTO>> getResourceNamesByType(@RequestParam String type) {
         try {
             List<ResourcesModel> resources = resourceRepository.findAll();
-
-            if (type != null && !type.isBlank()) {
-                ResourceType resourceType = ResourceType.valueOf(type.toUpperCase());
-                resources = resources.stream()
-                        .filter(resource -> resource.getType() == resourceType)
-                        .toList();
-            }
+            ResourceType resourceType = ResourceType.valueOf(type.toUpperCase());
+            resources = resources.stream()
+                    .filter(resource -> resource.getType() == resourceType)
+                    .toList();
 
             List<ResourceDropdownDTO> dropdownItems = resources.stream()
                     .sorted(Comparator.comparing(ResourcesModel::getName, String.CASE_INSENSITIVE_ORDER))
