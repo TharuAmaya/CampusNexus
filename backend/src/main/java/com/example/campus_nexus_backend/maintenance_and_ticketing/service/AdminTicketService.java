@@ -144,13 +144,13 @@ public class AdminTicketService {
         return cleanedStatus;
     }
 
-    // 6. Delete CLOSED Ticket ONLY
+    // 6. Delete CLOSED or REJECTED Ticket ONLY
     public void deleteClosedTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        if (!"CLOSED".equals(ticket.getStatus())) {
-            throw new RuntimeException("Action denied: Admins can only delete tickets with a 'CLOSED' status.");
+        if (!"CLOSED".equals(ticket.getStatus()) && !"REJECTED".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: Admins can only delete tickets with a 'CLOSED' or 'REJECTED' status.");
         }
 
         ticketRepository.delete(ticket);
