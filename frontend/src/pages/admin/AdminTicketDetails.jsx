@@ -213,6 +213,11 @@ const AdminTicketDetails = () => {
             return;
         }
 
+        if (selectedStatus === 'CLOSED' && ticket?.status !== 'RESOLVED') {
+            setStatusError('Ticket must be RESOLVED before setting status to CLOSED.');
+            return;
+        }
+
         try {
             setIsUpdatingStatus(true);
             setStatusError('');
@@ -591,7 +596,7 @@ const AdminTicketDetails = () => {
                                         >
                                             INPROGRESS
                                         </option>
-                                        <option value="CLOSED">CLOSED</option>
+                                        <option value="CLOSED" disabled={ticket?.status !== 'RESOLVED'}>CLOSED</option>
                                     </select>
                                     <button
                                         type="button"
