@@ -27,7 +27,10 @@ const AllTickets = () => {
                 }
 
                 const data = await response.json();
-                setTickets(Array.isArray(data) ? data : []);
+                const sortedTickets = Array.isArray(data)
+                    ? [...data].sort((left, right) => Number(left.ticketId) - Number(right.ticketId))
+                    : [];
+                setTickets(sortedTickets);
             } catch (error) {
                 setErrorMessage(error.message || 'Unable to fetch tickets.');
             } finally {
