@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaExclamationCircle, FaInfoCircle, FaPaperclip, FaSpinner, FaTrash, FaUserCog, FaTasks, FaBan, FaTrashAlt } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout.jsx';
 
@@ -7,6 +7,7 @@ const API_BASE_URL = 'http://localhost:8081';
 
 const AdminTicketDetails = () => {
     const { ticketId } = useParams();
+    const navigate = useNavigate();
     const [ticket, setTicket] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
@@ -27,6 +28,9 @@ const AdminTicketDetails = () => {
     const [isRejecting, setIsRejecting] = useState(false);
     const [rejectError, setRejectError] = useState('');
     const [rejectSuccess, setRejectSuccess] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
 
     useEffect(() => {
         const fetchTicketDetails = async () => {
@@ -229,6 +233,17 @@ const AdminTicketDetails = () => {
         setRejectError('');
     };
 
+    const openDeleteModal = () => {
+        setDeleteError('');
+        setIsDeleteModalOpen(true);
+    };
+
+    const closeDeleteModal = () => {
+        if (isDeleting) return;
+        setDeleteError('');
+        setIsDeleteModalOpen(false);
+    };
+
     const handleRejectTicket = async (event) => {
         event.preventDefault();
 
@@ -275,6 +290,33 @@ const AdminTicketDetails = () => {
             setRejectError(error.message || 'Unable to reject ticket.');
         } finally {
             setIsRejecting(false);
+        }
+    };
+
+    const handleDeleteTicket = async () => {
+        try {
+            setIsDeleting(true);
+            setDeleteError('');
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const responseText = await response.text();
+            if (!response.ok) {
+                throw new Error(responseText || `HTTP ${response.status}: Failed to delete ticket.`);
+            }
+
+            setIsDeleteModalOpen(false);
+            navigate('/admin/tickets', { replace: true });
+        } catch (error) {
+            setDeleteError(error.message || 'Unable to delete ticket.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -493,8 +535,9 @@ const AdminTicketDetails = () => {
                             </button>
                             <button
                                 type="button"
-                                disabled
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-rose-700 opacity-80"
+                                onClick={openDeleteModal}
+                                disabled={ticket.status !== 'CLOSED' || isDeleting}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <FaTrashAlt /> Delete
                             </button>
@@ -548,6 +591,47 @@ const AdminTicketDetails = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+                    <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
+                        <div className="mb-4 border-b border-gray-100 pb-3">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#f4511e]">Delete Ticket</p>
+                            <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900">Confirm Deletion</h3>
+                        </div>
+
+                        {deleteError && (
+                            <div className="mb-4 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                <FaExclamationCircle className="mt-0.5 shrink-0" />
+                                <span>{deleteError}</span>
+                            </div>
+                        )}
+
+                        <p className="mb-6 text-sm text-slate-600">
+                            This will permanently delete ticket #{ticketId}. Admin can delete only CLOSED tickets.
+                        </p>
+
+                        <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+                            <button
+                                type="button"
+                                onClick={closeDeleteModal}
+                                disabled={isDeleting}
+                                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDeleteTicket}
+                                disabled={isDeleting}
+                                className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                            >
+                                {isDeleting ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
