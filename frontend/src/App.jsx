@@ -17,6 +17,8 @@ import AdminTickets from './pages/admin/AdminTickets.jsx';
 import AdminTicketDetails from './pages/admin/AdminTicketDetails.jsx';
 import StudentHome from './pages/student/StudentHome.jsx';
 import TechnicianHome from './pages/technician/TechnicianHome.jsx';
+import AssignedTickets from './pages/technician/AssignedTickets.jsx';
+import TechnicianTicketDetails from './pages/technician/TechnicianTicketDetails.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // ආරක්‍ෂක component එක
 
 ///View grades page එක
@@ -179,6 +181,24 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
                   <TechnicianHome />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/technician/tickets"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
+                  <AssignedTickets />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/technician/tickets/:ticketId"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
+                  <TechnicianTicketDetails />
                 </ProtectedRoute>
               }
             />
