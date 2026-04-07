@@ -79,7 +79,6 @@ const AdminTickets = () => {
                         <div>
                             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#f4511e]">Admin Dashboard</p>
                             <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-900">All Submitted Tickets</h2>
-                            <p className="mt-2 text-sm text-slate-500">View tickets submitted by all students and filter them by category.</p>
                         </div>
                     </div>
 
