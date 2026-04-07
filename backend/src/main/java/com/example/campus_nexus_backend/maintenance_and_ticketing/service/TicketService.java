@@ -219,6 +219,7 @@ public class TicketService {
         dto.setResolutionNotes(ticket.getResolutionNotes());
         dto.setCreatedAt(ticket.getCreatedAt());
         dto.setAssignedToEmail(ticket.getAssignedTo() != null ? ticket.getAssignedTo().getEmail() : null);
+        dto.setCreatedByEmail(ticket.getCreatedBy() != null ? ticket.getCreatedBy().getEmail() : null);
 
         List<TicketAttachment> attachments = attachmentRepository.findByTicket_TicketId(ticket.getTicketId());
         List<AttachmentDTO> attachmentDTOs = new ArrayList<>();
