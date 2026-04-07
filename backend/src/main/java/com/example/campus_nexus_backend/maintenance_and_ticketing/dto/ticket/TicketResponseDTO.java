@@ -17,6 +17,7 @@ public class TicketResponseDTO {
     private String resolutionNotes;
     private LocalDateTime createdAt;
     private String assignedToEmail;
+    private String createdByEmail;
     
     // To send attachment details back to the frontend
     private List<AttachmentDTO> attachments;
