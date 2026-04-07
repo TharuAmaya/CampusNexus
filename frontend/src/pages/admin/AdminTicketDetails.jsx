@@ -17,6 +17,7 @@ const AdminTicketDetails = () => {
     const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
     const [isAssigning, setIsAssigning] = useState(false);
     const [assignError, setAssignError] = useState('');
+    const [assignSuccess, setAssignSuccess] = useState(false);
 
     useEffect(() => {
         const fetchTicketDetails = async () => {
@@ -112,6 +113,7 @@ const AdminTicketDetails = () => {
         try {
             setIsAssigning(true);
             setAssignError('');
+            setAssignSuccess(false);
 
             const token = localStorage.getItem('token');
             const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/assign`, {
@@ -131,6 +133,7 @@ const AdminTicketDetails = () => {
                 throw new Error(responseText || `HTTP ${response.status}: Failed to assign technician.`);
             }
 
+            // Refresh ticket details to show updated assignedToEmail
             const ticketResponse = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -138,10 +141,15 @@ const AdminTicketDetails = () => {
             if (ticketResponse.ok) {
                 const updatedTicket = await ticketResponse.json();
                 setTicket(updatedTicket);
+                setAssignSuccess(true);
+                setSelectedTechnicianId('');
+                // Hide success message after 3 seconds
+                setTimeout(() => setAssignSuccess(false), 3000);
+            } else {
+                throw new Error('Failed to refresh ticket details.');
             }
-
-            setSelectedTechnicianId('');
         } catch (error) {
+            console.error('Assignment error:', error);
             setAssignError(error.message || 'Unable to assign technician.');
         } finally {
             setIsAssigning(false);
@@ -264,6 +272,13 @@ const AdminTicketDetails = () => {
                             <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                                 <FaExclamationCircle className="mt-0.5 shrink-0" />
                                 <span>{assignError}</span>
+                            </div>
+                        )}
+
+                        {assignSuccess && (
+                            <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                                <FaInfoCircle className="mt-0.5 shrink-0" />
+                                <span>Technician assigned successfully! Check the "Assigned To" field above.</span>
                             </div>
                         )}
 
