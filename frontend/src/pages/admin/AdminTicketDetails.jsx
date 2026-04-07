@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { FaArrowLeft, FaExclamationCircle, FaInfoCircle, FaPaperclip, FaSpinner, FaTrash, FaUserCog, FaTasks, FaBan, FaTrashAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaComments, FaExclamationCircle, FaInfoCircle, FaPaperclip, FaSpinner, FaTrash, FaUserCog, FaTasks, FaBan, FaTrashAlt } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout.jsx';
 
 const API_BASE_URL = 'http://localhost:8081';
@@ -31,6 +31,9 @@ const AdminTicketDetails = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState('');
+    const [comments, setComments] = useState([]);
+    const [isCommentsLoading, setIsCommentsLoading] = useState(false);
+    const [commentsError, setCommentsError] = useState('');
 
     useEffect(() => {
         const fetchTicketDetails = async () => {
@@ -116,6 +119,36 @@ const AdminTicketDetails = () => {
 
         fetchTechnicians();
     }, []);
+
+    useEffect(() => {
+        const fetchComments = async () => {
+            try {
+                setIsCommentsLoading(true);
+                setCommentsError('');
+
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}/comments`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    const message = await response.text();
+                    throw new Error(message || 'Failed to load comments.');
+                }
+
+                const data = await response.json();
+                setComments(Array.isArray(data) ? data : []);
+            } catch (error) {
+                setCommentsError(error.message || 'Unable to load comments.');
+            } finally {
+                setIsCommentsLoading(false);
+            }
+        };
+
+        if (ticketId) {
+            fetchComments();
+        }
+    }, [ticketId]);
 
     const handleAssignTechnician = async () => {
         if (!selectedTechnicianId) {
@@ -437,6 +470,44 @@ const AdminTicketDetails = () => {
                                 <p className="mt-1 leading-7 text-amber-900">{ticket.resolutionNotes}</p>
                             </div>
                         )}
+
+                        <div className="rounded-xl border border-gray-200 bg-white p-4">
+                            <div className="flex items-center gap-2">
+                                <FaComments className="text-blue-600" />
+                                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Comments</p>
+                            </div>
+
+                            {commentsError && (
+                                <div className="mt-3 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                    <FaExclamationCircle className="mt-0.5 shrink-0" />
+                                    <span>{commentsError}</span>
+                                </div>
+                            )}
+
+                            {isCommentsLoading ? (
+                                <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                                    <FaSpinner className="animate-spin" />
+                                    <span>Loading comments...</span>
+                                </div>
+                            ) : comments.length === 0 ? (
+                                <p className="mt-3 text-sm text-slate-500">No comments yet.</p>
+                            ) : (
+                                <div className="mt-3 space-y-3">
+                                    {comments.map((comment) => (
+                                        <div key={comment.commentId} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                            <div>
+                                                <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                                                    {comment.authorRole === 'ROLE_TECHNICIAN' ? 'Technician' : 'Student'}
+                                                </p>
+                                                <p className="mt-0.5 text-sm font-semibold text-slate-900">{comment.authorName || comment.authorEmail}</p>
+                                                <p className="text-xs text-slate-500">{formatDateTime(comment.updatedAt || comment.createdAt)}</p>
+                                            </div>
+                                            <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-800">{comment.commentText}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         {assignError && (
                             <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
