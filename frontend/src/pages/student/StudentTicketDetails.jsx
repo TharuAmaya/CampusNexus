@@ -649,7 +649,7 @@ const StudentTicketDetails = () => {
                                 type="button"
                                 onClick={openUpdateModal}
                                 disabled={ticket.status !== 'OPEN'}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-100"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-300 disabled:text-gray-100"
                             >
                                 <FaEdit /> Update
                             </button>
@@ -657,7 +657,7 @@ const StudentTicketDetails = () => {
                                 type="button"
                                 onClick={openDeleteConfirmation}
                                 disabled={ticket.status !== 'OPEN'}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-100"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-400 bg-rose-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-300 disabled:text-gray-100"
                             >
                                 <FaTrash /> Delete
                             </button>
