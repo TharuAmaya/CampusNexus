@@ -25,9 +25,9 @@ public class TechnicianTicketService {
     @Autowired
     private UserRepository userRepository;
 
-    // 1. Get ONLY assigned IN_PROGRESS tickets for this technician
+    // 1. Get all assigned tickets for this technician (including RESOLVED)
     public List<TicketSummaryDTO> getMyAssignedTickets(String technicianEmail) {
-        List<Ticket> tickets = ticketRepository.findByAssignedTo_EmailAndStatus(technicianEmail, "IN_PROGRESS");
+        List<Ticket> tickets = ticketRepository.findByAssignedTo_EmailOrderByCreatedAtDesc(technicianEmail);
         
         return tickets.stream().map(ticket -> {
             TicketSummaryDTO dto = new TicketSummaryDTO();
@@ -73,6 +73,56 @@ public class TechnicianTicketService {
         history.setTicket(ticket);
         history.setOldStatus(oldStatus);
         history.setNewStatus("RESOLVED");
+        history.setChangedBy(technician);
+        statusHistoryRepository.save(history);
+    }
+
+    // 3. Edit existing resolution note
+    public void updateResolutionNote(Long ticketId, String resolutionNotes, String technicianEmail) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        if (resolutionNotes == null || resolutionNotes.trim().isEmpty()) {
+            throw new RuntimeException("Resolution note cannot be empty.");
+        }
+
+        if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(technicianEmail)) {
+            throw new RuntimeException("Unauthorized: You can only edit resolution notes of tickets assigned to you.");
+        }
+
+        if (!"RESOLVED".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: Resolution notes can only be edited for RESOLVED tickets.");
+        }
+
+        ticket.setResolutionNotes(resolutionNotes.trim());
+        ticketRepository.save(ticket);
+    }
+
+    // 4. Delete existing resolution note
+    public void deleteResolutionNote(Long ticketId, String technicianEmail) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        User technician = userRepository.findByEmail(technicianEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(technicianEmail)) {
+            throw new RuntimeException("Unauthorized: You can only delete resolution notes of tickets assigned to you.");
+        }
+
+        if (!"RESOLVED".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: Resolution notes can only be deleted for RESOLVED tickets.");
+        }
+
+        String oldStatus = ticket.getStatus();
+        ticket.setResolutionNotes(null);
+        ticket.setStatus("IN_PROGRESS");
+        ticketRepository.save(ticket);
+
+        TicketStatusHistory history = new TicketStatusHistory();
+        history.setTicket(ticket);
+        history.setOldStatus(oldStatus);
+        history.setNewStatus("IN_PROGRESS");
         history.setChangedBy(technician);
         statusHistoryRepository.save(history);
     }
