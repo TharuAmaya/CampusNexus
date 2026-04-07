@@ -22,6 +22,11 @@ const AdminTicketDetails = () => {
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [statusError, setStatusError] = useState('');
     const [statusSuccess, setStatusSuccess] = useState(false);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
+    const [isRejecting, setIsRejecting] = useState(false);
+    const [rejectError, setRejectError] = useState('');
+    const [rejectSuccess, setRejectSuccess] = useState(false);
 
     useEffect(() => {
         const fetchTicketDetails = async () => {
@@ -212,6 +217,67 @@ const AdminTicketDetails = () => {
         }
     };
 
+    const openRejectModal = () => {
+        setRejectReason('');
+        setRejectError('');
+        setIsRejectModalOpen(true);
+    };
+
+    const closeRejectModal = () => {
+        if (isRejecting) return;
+        setIsRejectModalOpen(false);
+        setRejectError('');
+    };
+
+    const handleRejectTicket = async (event) => {
+        event.preventDefault();
+
+        if (!rejectReason.trim()) {
+            setRejectError('Please enter a reject reason.');
+            return;
+        }
+
+        try {
+            setIsRejecting(true);
+            setRejectError('');
+            setRejectSuccess(false);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/reject`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ rejectionReason: rejectReason.trim() })
+            });
+
+            const responseText = await response.text();
+            if (!response.ok) {
+                throw new Error(responseText || `HTTP ${response.status}: Failed to reject ticket.`);
+            }
+
+            const ticketResponse = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (ticketResponse.ok) {
+                const updatedTicket = await ticketResponse.json();
+                setTicket(updatedTicket);
+                setRejectSuccess(true);
+                setSelectedStatus('');
+                setIsRejectModalOpen(false);
+                setTimeout(() => setRejectSuccess(false), 3000);
+            } else {
+                throw new Error('Failed to refresh ticket details after rejection.');
+            }
+        } catch (error) {
+            setRejectError(error.message || 'Unable to reject ticket.');
+        } finally {
+            setIsRejecting(false);
+        }
+    };
+
     const displayStatus = (value) => {
         if (!value) return '-';
         if (value === 'IN_PROGRESS') return 'INPROGRESS';
@@ -358,6 +424,13 @@ const AdminTicketDetails = () => {
                             </div>
                         )}
 
+                        {rejectSuccess && (
+                            <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                                <FaInfoCircle className="mt-0.5 shrink-0" />
+                                <span>Ticket rejected successfully! Status is now REJECTED.</span>
+                            </div>
+                        )}
+
                         <div className="grid gap-3 md:grid-cols-4">
                             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
                                 <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.15em] text-blue-700">Assign Technician</label>
@@ -412,8 +485,9 @@ const AdminTicketDetails = () => {
                             </div>
                             <button
                                 type="button"
-                                disabled
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-amber-700 opacity-80"
+                                onClick={openRejectModal}
+                                disabled={isRejecting}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <FaBan /> Reject Ticket
                             </button>
@@ -428,6 +502,55 @@ const AdminTicketDetails = () => {
                     </div>
                 )}
             </section>
+
+            {isRejectModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+                    <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
+                        <div className="mb-4 border-b border-gray-100 pb-3">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#f4511e]">Reject Ticket</p>
+                            <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900">Provide Reject Reason</h3>
+                        </div>
+
+                        {rejectError && (
+                            <div className="mb-4 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                <FaExclamationCircle className="mt-0.5 shrink-0" />
+                                <span>{rejectError}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleRejectTicket} className="space-y-4">
+                            <div>
+                                <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Reject Reason</label>
+                                <textarea
+                                    value={rejectReason}
+                                    onChange={(e) => setRejectReason(e.target.value)}
+                                    rows="4"
+                                    placeholder="Enter reason for rejecting this ticket"
+                                    className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium leading-7 text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={closeRejectModal}
+                                    disabled={isRejecting}
+                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isRejecting}
+                                    className="rounded-lg bg-amber-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                >
+                                    {isRejecting ? 'Submitting...' : 'Submit Rejection'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 };
