@@ -584,6 +584,7 @@ const AdminTicketDetails = () => {
                                         className="w-full rounded-lg border border-emerald-300 bg-white px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white"
                                     >
                                         <option value="">Choose a status</option>
+                                        <option value="OPEN">OPEN</option>
                                         <option
                                             value="INPROGRESS"
                                             disabled={!ticket?.assignedToEmail}
