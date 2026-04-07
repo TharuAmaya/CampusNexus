@@ -105,7 +105,7 @@ public class AdminTicketService {
         User changedBy = userRepository.findByEmail(changedByEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String normalizedStatus = newStatus.toUpperCase();
+        String normalizedStatus = normalizeStatus(newStatus);
 
         // Validate that the status is one of the allowed values
         List<String> allowedStatuses = List.of("OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED");
@@ -125,6 +125,19 @@ public class AdminTicketService {
         ticket.setStatus(normalizedStatus);
         ticketRepository.save(ticket);
         saveStatusHistory(ticket, oldStatus, normalizedStatus, changedBy);
+    }
+
+    private String normalizeStatus(String status) {
+        if (status == null) {
+            throw new RuntimeException("Status is required.");
+        }
+
+        String cleanedStatus = status.trim().toUpperCase().replace("-", "_");
+        if ("INPROGRESS".equals(cleanedStatus)) {
+            return "IN_PROGRESS";
+        }
+
+        return cleanedStatus;
     }
 
     // 6. Delete CLOSED Ticket ONLY
