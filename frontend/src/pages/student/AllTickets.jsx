@@ -57,7 +57,7 @@ const AllTickets = () => {
                     <div>
                         <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#f4511e]">Student Dashboard</p>
                         <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-900">All Submitted Tickets</h2>
-                        <p className="mt-2 text-sm text-slate-500">Click View to open a separate details page for each ticket.</p>
+                        <p className="mt-2 text-sm text-slate-500">Click View More to see more details of each ticket</p>
                     </div>
                 </div>
 
@@ -107,7 +107,7 @@ const AllTickets = () => {
                                                 to={`/student/all-tickets/${ticket.ticketId}`}
                                                 className="inline-flex items-center gap-2 rounded-lg bg-[#f4511e] px-3 py-2 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-[#d84315]"
                                             >
-                                                <FaEye /> View
+                                                <FaEye /> View More
                                             </Link>
                                         </td>
                                     </tr>
