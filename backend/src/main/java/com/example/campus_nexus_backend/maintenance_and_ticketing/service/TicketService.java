@@ -117,6 +117,10 @@ public class TicketService {
             if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(userEmail)) {
                 throw new RuntimeException("Unauthorized: You can only view tickets assigned to you.");
             }
+
+            if ("OPEN".equals(ticket.getStatus()) || "REJECTED".equals(ticket.getStatus())) {
+                throw new RuntimeException("Unauthorized: You can only view tickets assigned to you.");
+            }
         }
 
         // Admins automatically bypass the above checks and reach this return statement
