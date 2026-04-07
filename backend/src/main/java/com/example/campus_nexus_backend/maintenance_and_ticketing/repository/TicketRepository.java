@@ -14,4 +14,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     // Fetches all tickets assigned to a specific technician with a specific status
     List<Ticket> findByAssignedTo_EmailAndStatus(String email, String status);
+
+    // Fetches all tickets assigned to a specific technician regardless of status
+    List<Ticket> findByAssignedTo_EmailOrderByCreatedAtDesc(String email);
 }
