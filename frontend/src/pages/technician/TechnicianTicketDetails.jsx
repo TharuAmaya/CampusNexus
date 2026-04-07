@@ -298,7 +298,7 @@ const TechnicianTicketDetails = () => {
 
     const startResolutionEdit = () => {
         setResolveError('');
-        setEditedResolutionNotes(ticket?.resolutionNotes || '');
+        setEditedResolutionNotes(resolutionNoteValue);
         setIsEditingResolution(true);
     };
 
@@ -382,6 +382,9 @@ const TechnicianTicketDetails = () => {
         if (Number.isNaN(date.getTime())) return value;
         return date.toLocaleString();
     };
+
+    const resolutionNoteValue = (ticket?.resolutionNotes ?? ticket?.resolutionNote ?? '').trim();
+    const hasResolutionNote = resolutionNoteValue.length > 0;
 
     return (
         <DashboardLayout title="Ticket Details">
@@ -499,7 +502,7 @@ const TechnicianTicketDetails = () => {
                             </div>
                         )}
 
-                        {ticket.resolutionNotes && (
+                        {hasResolutionNote && (
                             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
                                 <div className="flex items-center justify-between gap-3">
                                     <p className="text-[11px] font-bold uppercase tracking-wide text-amber-700">Resolution Notes</p>
@@ -553,7 +556,7 @@ const TechnicianTicketDetails = () => {
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="mt-1 leading-7 text-amber-900">{ticket.resolutionNotes}</p>
+                                    <p className="mt-1 leading-7 text-amber-900">{resolutionNoteValue}</p>
                                 )}
                             </div>
                         )}
@@ -634,7 +637,7 @@ const TechnicianTicketDetails = () => {
                             <button
                                 type="button"
                                 onClick={openResolveModal}
-                                disabled={ticket.status !== 'IN_PROGRESS'}
+                                disabled={hasResolutionNote}
                                 className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <FaEdit /> Add Resolution Notes
