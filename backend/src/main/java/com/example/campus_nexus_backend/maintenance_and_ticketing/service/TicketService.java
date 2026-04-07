@@ -94,7 +94,10 @@ public class TicketService {
     // 2. Get All Tickets for Logged In Student (Basic details for the list)
     public List<TicketResponseDTO> getMyTickets(String userEmail) {
         List<Ticket> tickets = ticketRepository.findByCreatedBy_EmailOrderByCreatedAtDesc(userEmail);
-        return tickets.stream().map(this::mapToResponseDTO).collect(Collectors.toList());
+        return tickets.stream()
+                .filter(ticket -> !"CLOSED".equals(ticket.getStatus()))
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
     }
 
     // 3. Get Specific Ticket Details (With strict role-based ownership check)
@@ -109,6 +112,10 @@ public class TicketService {
         if ("ROLE_STUDENT".equals(requestingUser.getRole())) {
             if (!ticket.getCreatedBy().getEmail().equals(userEmail)) {
                 throw new RuntimeException("Unauthorized: You can only view your own tickets.");
+            }
+
+            if ("CLOSED".equals(ticket.getStatus())) {
+                throw new RuntimeException("Unauthorized: CLOSED tickets are not available to students.");
             }
         }
 
