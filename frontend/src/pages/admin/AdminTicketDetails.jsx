@@ -555,7 +555,7 @@ const AdminTicketDetails = () => {
                             </div>
                         )}
 
-                        <div className="grid gap-3 md:grid-cols-4">
+                        <div className="grid gap-3 md:grid-cols-[1fr_1fr_420px]">
                             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
                                 <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.15em] text-blue-700">Assign Technician</label>
                                 <div className="space-y-2">
@@ -563,7 +563,7 @@ const AdminTicketDetails = () => {
                                         value={selectedTechnicianId}
                                         onChange={(e) => setSelectedTechnicianId(e.target.value)}
                                         disabled={isTechniciansLoading || isAssigning}
-                                        className="w-full rounded-lg border border-blue-300 bg-white px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white disabled:cursor-not-allowed disabled:bg-gray-100"
+                                        className="w-full rounded-lg border border-blue-400 bg-blue-100/60 px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:bg-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100"
                                     >
                                         <option value="">{isTechniciansLoading ? 'Loading...' : 'Choose a technician'}</option>
                                         {technicians.map((tech) => (
@@ -574,7 +574,7 @@ const AdminTicketDetails = () => {
                                         type="button"
                                         onClick={handleAssignTechnician}
                                         disabled={!selectedTechnicianId || isAssigning}
-                                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-blue-400 bg-blue-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-blue-800 transition hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <FaUserCog /> {isAssigning ? 'Assigning...' : 'Assign'}
                                     </button>
@@ -586,7 +586,7 @@ const AdminTicketDetails = () => {
                                     <select
                                         value={selectedStatus}
                                         onChange={(e) => setSelectedStatus(e.target.value)}
-                                        className="w-full rounded-lg border border-emerald-300 bg-white px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white"
+                                        className="w-full rounded-lg border border-emerald-400 bg-emerald-100/60 px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-emerald-100"
                                     >
                                         <option value="">Choose a status</option>
                                         <option value="OPEN">OPEN</option>
@@ -602,28 +602,30 @@ const AdminTicketDetails = () => {
                                         type="button"
                                         onClick={handleStatusUpdate}
                                         disabled={!selectedStatus || isUpdatingStatus}
-                                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-400 bg-emerald-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-emerald-800 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <FaTasks /> {isUpdatingStatus ? 'Updating...' : 'Update'}
                                     </button>
                                 </div>
                             </div>
-                            <button
-                                type="button"
-                                onClick={openRejectModal}
-                                disabled={isRejecting}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <FaBan /> Reject Ticket
-                            </button>
-                            <button
-                                type="button"
-                                onClick={openDeleteModal}
-                                disabled={(!['CLOSED', 'REJECTED'].includes(ticket.status)) || isDeleting}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <FaTrashAlt /> Delete
-                            </button>
+                            <div className="flex flex-col gap-2 md:self-start">
+                                <button
+                                    type="button"
+                                    onClick={openRejectModal}
+                                    disabled={isRejecting}
+                                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <FaBan /> Reject Ticket
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={openDeleteModal}
+                                    disabled={(!['CLOSED', 'REJECTED'].includes(ticket.status)) || isDeleting}
+                                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-rose-400 bg-rose-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <FaTrashAlt /> Delete
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
