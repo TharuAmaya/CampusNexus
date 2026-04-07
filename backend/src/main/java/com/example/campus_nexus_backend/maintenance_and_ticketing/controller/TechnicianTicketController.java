@@ -18,7 +18,7 @@ public class TechnicianTicketController {
     @Autowired
     private TechnicianTicketService technicianTicketService;
 
-    // 1. View assigned IN_PROGRESS tickets
+    // 1. View assigned tickets (including RESOLVED)
     @GetMapping
     public ResponseEntity<List<TicketSummaryDTO>> getAssignedTickets(Authentication authentication) {
         return ResponseEntity.ok(technicianTicketService.getMyAssignedTickets(authentication.getName()));
@@ -33,6 +33,31 @@ public class TechnicianTicketController {
         try {
             technicianTicketService.resolveTicket(id, dto.getResolutionNotes(), authentication.getName());
             return ResponseEntity.ok("Ticket successfully resolved.");
+        } catch (Exception e) {
+            return mapExceptionToResponse(e);
+        }
+    }
+
+    // 3. Edit resolution note for a resolved ticket
+    @PatchMapping("/{id}/resolution-note")
+    public ResponseEntity<?> updateResolutionNote(
+            @PathVariable Long id,
+            @RequestBody TechnicianResolutionDTO dto,
+            Authentication authentication) {
+        try {
+            technicianTicketService.updateResolutionNote(id, dto.getResolutionNotes(), authentication.getName());
+            return ResponseEntity.ok("Resolution note updated successfully.");
+        } catch (Exception e) {
+            return mapExceptionToResponse(e);
+        }
+    }
+
+    // 4. Delete resolution note for a resolved ticket
+    @DeleteMapping("/{id}/resolution-note")
+    public ResponseEntity<?> deleteResolutionNote(@PathVariable Long id, Authentication authentication) {
+        try {
+            technicianTicketService.deleteResolutionNote(id, authentication.getName());
+            return ResponseEntity.ok("Resolution note deleted successfully.");
         } catch (Exception e) {
             return mapExceptionToResponse(e);
         }
