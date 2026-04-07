@@ -25,11 +25,13 @@ public class TechnicianTicketService {
     @Autowired
     private UserRepository userRepository;
 
-    // 1. Get all assigned tickets for this technician (including RESOLVED)
+    // 1. Get assigned tickets for this technician, excluding OPEN and REJECTED tickets
     public List<TicketSummaryDTO> getMyAssignedTickets(String technicianEmail) {
         List<Ticket> tickets = ticketRepository.findByAssignedTo_EmailOrderByCreatedAtDesc(technicianEmail);
         
-        return tickets.stream().map(ticket -> {
+        return tickets.stream()
+                .filter(ticket -> !"OPEN".equals(ticket.getStatus()) && !"REJECTED".equals(ticket.getStatus()))
+                .map(ticket -> {
             TicketSummaryDTO dto = new TicketSummaryDTO();
             dto.setTicketId(ticket.getTicketId());
             dto.setCategory(ticket.getCategory());
