@@ -18,6 +18,10 @@ const AdminTicketDetails = () => {
     const [isAssigning, setIsAssigning] = useState(false);
     const [assignError, setAssignError] = useState('');
     const [assignSuccess, setAssignSuccess] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState('');
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+    const [statusError, setStatusError] = useState('');
+    const [statusSuccess, setStatusSuccess] = useState(false);
 
     useEffect(() => {
         const fetchTicketDetails = async () => {
@@ -156,6 +160,64 @@ const AdminTicketDetails = () => {
         }
     };
 
+    const handleStatusUpdate = async () => {
+        if (!selectedStatus) {
+            setStatusError('Please select a status.');
+            return;
+        }
+
+        if (selectedStatus === 'INPROGRESS' && !ticket?.assignedToEmail) {
+            setStatusError('Assign a technician before setting status to INPROGRESS.');
+            return;
+        }
+
+        try {
+            setIsUpdatingStatus(true);
+            setStatusError('');
+            setStatusSuccess(false);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ newStatus: selectedStatus })
+            });
+
+            const responseText = await response.text();
+
+            if (!response.ok) {
+                throw new Error(responseText || `HTTP ${response.status}: Failed to update status.`);
+            }
+
+            const ticketResponse = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (ticketResponse.ok) {
+                const updatedTicket = await ticketResponse.json();
+                setTicket(updatedTicket);
+                setStatusSuccess(true);
+                setSelectedStatus('');
+                setTimeout(() => setStatusSuccess(false), 3000);
+            } else {
+                throw new Error('Failed to refresh ticket details after status update.');
+            }
+        } catch (error) {
+            setStatusError(error.message || 'Unable to update status.');
+        } finally {
+            setIsUpdatingStatus(false);
+        }
+    };
+
+    const displayStatus = (value) => {
+        if (!value) return '-';
+        if (value === 'IN_PROGRESS') return 'INPROGRESS';
+        return value;
+    };
+
     const formatDateTime = (value) => {
         if (!value) return '-';
 
@@ -200,7 +262,7 @@ const AdminTicketDetails = () => {
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                                 <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status</p>
-                                <p className="mt-1 font-semibold text-slate-900">{ticket.status || '-'}</p>
+                                <p className="mt-1 font-semibold text-slate-900">{displayStatus(ticket.status)}</p>
                             </div>
                             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                                 <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Created At</p>
@@ -282,6 +344,20 @@ const AdminTicketDetails = () => {
                             </div>
                         )}
 
+                        {statusError && (
+                            <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                <FaExclamationCircle className="mt-0.5 shrink-0" />
+                                <span>{statusError}</span>
+                            </div>
+                        )}
+
+                        {statusSuccess && (
+                            <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                                <FaInfoCircle className="mt-0.5 shrink-0" />
+                                <span>Status updated successfully! Check the "Status" field above.</span>
+                            </div>
+                        )}
+
                         <div className="grid gap-3 md:grid-cols-4">
                             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
                                 <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.15em] text-blue-700">Assign Technician</label>
@@ -307,13 +383,33 @@ const AdminTicketDetails = () => {
                                     </button>
                                 </div>
                             </div>
-                            <button
-                                type="button"
-                                disabled
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-emerald-700 opacity-80"
-                            >
-                                <FaTasks /> Update Status
-                            </button>
+                            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                                <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-700">Update Status</label>
+                                <div className="space-y-2">
+                                    <select
+                                        value={selectedStatus}
+                                        onChange={(e) => setSelectedStatus(e.target.value)}
+                                        className="w-full rounded-lg border border-emerald-300 bg-white px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white"
+                                    >
+                                        <option value="">Choose a status</option>
+                                        <option
+                                            value="INPROGRESS"
+                                            disabled={!ticket?.assignedToEmail}
+                                        >
+                                            INPROGRESS
+                                        </option>
+                                        <option value="CLOSED">CLOSED</option>
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={handleStatusUpdate}
+                                        disabled={!selectedStatus || isUpdatingStatus}
+                                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <FaTasks /> {isUpdatingStatus ? 'Updating...' : 'Update'}
+                                    </button>
+                                </div>
+                            </div>
                             <button
                                 type="button"
                                 disabled
