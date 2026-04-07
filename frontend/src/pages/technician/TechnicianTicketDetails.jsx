@@ -450,9 +450,15 @@ const TechnicianTicketDetails = () => {
                             </p>
                         </div>
 
-                        <div className="rounded-xl border border-gray-200 bg-white p-4">
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Assigned To</p>
-                            <p className="mt-1 font-semibold text-slate-900">{ticket.assignedToEmail || 'Unassigned'}</p>
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="rounded-xl border border-gray-200 bg-white p-4">
+                                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Assigned To</p>
+                                <p className="mt-1 font-semibold text-slate-900">{ticket.assignedToEmail || 'Unassigned'}</p>
+                            </div>
+                            <div className="rounded-xl border border-gray-200 bg-white p-4">
+                                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Submitted By</p>
+                                <p className="mt-1 font-semibold text-slate-900">{ticket.createdByEmail || '-'}</p>
+                            </div>
                         </div>
 
                         {resolveSuccess && (
