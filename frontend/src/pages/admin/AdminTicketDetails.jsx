@@ -12,6 +12,11 @@ const AdminTicketDetails = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [resourceDetails, setResourceDetails] = useState(null);
     const [isResourceLoading, setIsResourceLoading] = useState(false);
+    const [technicians, setTechnicians] = useState([]);
+    const [isTechniciansLoading, setIsTechniciansLoading] = useState(false);
+    const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
+    const [isAssigning, setIsAssigning] = useState(false);
+    const [assignError, setAssignError] = useState('');
 
     useEffect(() => {
         const fetchTicketDetails = async () => {
@@ -71,6 +76,77 @@ const AdminTicketDetails = () => {
 
         fetchResourceDetails();
     }, [ticket]);
+
+    useEffect(() => {
+        const fetchTechnicians = async () => {
+            try {
+                setIsTechniciansLoading(true);
+                setAssignError('');
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/admin/tickets/technicians`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load technicians.');
+                }
+
+                const data = await response.json();
+                setTechnicians(Array.isArray(data) ? data : []);
+            } catch (error) {
+                setAssignError(error.message || 'Unable to load technicians.');
+            } finally {
+                setIsTechniciansLoading(false);
+            }
+        };
+
+        fetchTechnicians();
+    }, []);
+
+    const handleAssignTechnician = async () => {
+        if (!selectedTechnicianId) {
+            setAssignError('Please select a technician.');
+            return;
+        }
+
+        try {
+            setIsAssigning(true);
+            setAssignError('');
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/assign`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ technicianId: Number(selectedTechnicianId) })
+            });
+
+            console.log('Response status:', response.status);
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+
+            if (!response.ok) {
+                throw new Error(responseText || `HTTP ${response.status}: Failed to assign technician.`);
+            }
+
+            const ticketResponse = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (ticketResponse.ok) {
+                const updatedTicket = await ticketResponse.json();
+                setTicket(updatedTicket);
+            }
+
+            setSelectedTechnicianId('');
+        } catch (error) {
+            setAssignError(error.message || 'Unable to assign technician.');
+        } finally {
+            setIsAssigning(false);
+        }
+    };
 
     const formatDateTime = (value) => {
         if (!value) return '-';
@@ -184,14 +260,38 @@ const AdminTicketDetails = () => {
                             </div>
                         )}
 
+                        {assignError && (
+                            <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                <FaExclamationCircle className="mt-0.5 shrink-0" />
+                                <span>{assignError}</span>
+                            </div>
+                        )}
+
                         <div className="grid gap-3 md:grid-cols-4">
-                            <button
-                                type="button"
-                                disabled
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-blue-700 opacity-80"
-                            >
-                                <FaUserCog /> Assign Technician
-                            </button>
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                                <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.15em] text-blue-700">Assign Technician</label>
+                                <div className="space-y-2">
+                                    <select
+                                        value={selectedTechnicianId}
+                                        onChange={(e) => setSelectedTechnicianId(e.target.value)}
+                                        disabled={isTechniciansLoading || isAssigning}
+                                        className="w-full rounded-lg border border-blue-300 bg-white px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white disabled:cursor-not-allowed disabled:bg-gray-100"
+                                    >
+                                        <option value="">{isTechniciansLoading ? 'Loading...' : 'Choose a technician'}</option>
+                                        {technicians.map((tech) => (
+                                            <option key={tech.id} value={tech.id}>{tech.fullName}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={handleAssignTechnician}
+                                        disabled={!selectedTechnicianId || isAssigning}
+                                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <FaUserCog /> {isAssigning ? 'Assigning...' : 'Assign'}
+                                    </button>
+                                </div>
+                            </div>
                             <button
                                 type="button"
                                 disabled
