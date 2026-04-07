@@ -201,55 +201,44 @@ const CreateTicketmsn = () => {
 
     return (
         <DashboardLayout title="Publish Ticket">
-            <div className="space-y-6">
-                <div className="grid gap-6 xl:grid-cols-[0.92fr_1.45fr]">
-                    <aside className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#111e2f] p-8 text-white shadow-[0_40px_100px_rgba(15,23,42,0.35)]">
-                        <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
-                        <div className="absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-[#f4511e]/10 blur-3xl" />
+            <div className="mx-auto w-full max-w-5xl space-y-6">
+                <aside className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#111e2f] p-5 md:p-6 text-white shadow-[0_40px_100px_rgba(15,23,42,0.35)]">
+                    <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
+                    <div className="absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-[#f4511e]/10 blur-3xl" />
 
-                        <div className="relative z-10">
-                            <div className="mb-8 flex items-center gap-3">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#f4511e]">
-                                    <FaLifeRing className="text-xl" />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/40">Student Support</p>
-                                    <h2 className="text-2xl font-black uppercase tracking-tight text-white">Ticket Submission</h2>
-                                </div>
+                    <div className="relative z-10">
+                        <div className="mb-5 flex items-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#f4511e]">
+                                <FaLifeRing className="text-xl" />
                             </div>
-
-                            <p className="text-sm leading-7 text-white/70">
-                                Use this form to report a facility or service issue. Select the resource type first, then choose the exact resource name so the ticket is linked to the right campus asset.
-                            </p>
-
-                            <div className="mt-8 space-y-4 border-t border-white/10 pt-8">
-                                <div className="flex gap-3">
-                                    <FaCheckCircle className="mt-1 shrink-0 text-emerald-400" />
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-white/75">Backend accepts up to 3 attachments per ticket.</p>
-                                </div>
-                                <div className="flex gap-3">
-                                    <FaCheckCircle className="mt-1 shrink-0 text-emerald-400" />
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-white/75">Category, description, priority, and contact details are required.</p>
-                                </div>
-                                <div className="flex gap-3">
-                                    <FaCheckCircle className="mt-1 shrink-0 text-emerald-400" />
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-white/75">Submitted tickets are created with OPEN status on the backend.</p>
-                                </div>
-                            </div>
-
-                            <div className="mt-8 rounded-xl border border-white/10 bg-black/20 p-4">
-                                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/35">Support Note</p>
-                                <p className="mt-2 text-sm font-medium text-blue-300">Keep the description short, factual, and specific. Attach one or two images only when needed.</p>
+                            <div>
+                                <h2 className="text-2xl font-black uppercase tracking-tight text-white">Ticket Submission</h2>
                             </div>
                         </div>
-                    </aside>
 
-                    <section className="rounded-2xl border border-gray-200 bg-white p-8 shadow-[0_32px_80px_rgba(15,23,42,0.08)]">
+                        <p className="text-sm leading-7 text-white/70">
+                            Use this form to report a facility or service issue. Select the resource type first, then choose the exact resource name so the ticket is linked to the right campus asset.
+                        </p>
+
+                        <div className="mt-5 space-y-3 border-t border-white/10 pt-5">
+                            <div className="flex gap-3">
+                                <FaCheckCircle className="mt-1 shrink-0 text-emerald-400" />
+                                <p className="text-xs font-semibold uppercase tracking-wide text-white/75">Category, description, priority, and contact details are required.</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <FaCheckCircle className="mt-1 shrink-0 text-emerald-400" />
+                                <p className="text-xs font-semibold uppercase tracking-wide text-white/75">Attach images only when needed. You can add upto 3 images.</p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <section className="rounded-2xl border border-gray-200 bg-white p-8 shadow-[0_32px_80px_rgba(15,23,42,0.08)]">
                         <div className="mb-8 border-b border-gray-100 pb-6">
                             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#f4511e]">Publish Ticket</p>
-                            <h3 className="mt-2 text-3xl font-black tracking-tight text-slate-900">Create a new support request</h3>
+                            <h3 className="mt-2 text-3xl font-black tracking-tight text-slate-900">Report a Maintenance or Facility Issue</h3>
                             <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">
-                                Fill in the issue details below. The ticket will be linked to the selected resource and routed to the support queue after submission.
+                                Fill in the issue details below.
                             </p>
                         </div>
 
@@ -436,8 +425,7 @@ const CreateTicketmsn = () => {
                                 </button>
                             </div>
                         </form>
-                    </section>
-                </div>
+                </section>
             </div>
         </DashboardLayout>
     );
