@@ -88,7 +88,6 @@ const AssignedTickets = () => {
                                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Priority</th>
                                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Status</th>
                                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Created By</th>
-                                    <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Assigned To</th>
                                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Created At</th>
                                     <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Action</th>
                                 </tr>
@@ -105,7 +104,6 @@ const AssignedTickets = () => {
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-slate-700">{ticket.createdByEmail || '-'}</td>
-                                        <td className="px-4 py-3 text-sm text-slate-700">{ticket.assignedToEmail || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-slate-600">{formatDateTime(ticket.createdAt)}</td>
                                         <td className="px-4 py-3 text-sm">
                                             <Link
