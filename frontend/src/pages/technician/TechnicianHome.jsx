@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 const API_BASE_URL = 'http://localhost:8081';
 
 const TechnicianHome = () => {
+    const [technicianName, setTechnicianName] = useState('TECHNICIAN');
     const [stats, setStats] = useState({
         totalAssigned: 0,
         inProgress: 0,
@@ -65,11 +66,41 @@ const TechnicianHome = () => {
         fetchTechnicianStats();
     }, []);
 
+    useEffect(() => {
+        const fetchTechnicianProfile = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const profile = await response.json();
+                const fullName = String(profile?.fullName || '').trim();
+                if (fullName) {
+                    const normalizedName = fullName
+                        .replace(/\s+/g, ' ')
+                        .toLowerCase()
+                        .split(' ')
+                        .map((part) => part ? part.charAt(0).toUpperCase() + part.slice(1) : part)
+                        .join(' ');
+                    setTechnicianName(normalizedName);
+                }
+            } catch {
+                // Keep default fallback name when profile fetch fails.
+            }
+        };
+
+        fetchTechnicianProfile();
+    }, []);
+
     return (
-        <DashboardLayout title="Welcome to Technician Dashboard">
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back, Technician! 🔧</h1>
-                <p className="text-gray-600">Here is your assigned ticket summary.</p>
+        <DashboardLayout title="Technician Dashboard">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Welcome {technicianName}!!</h1>
             </div>
 
             {isLoading ? (
