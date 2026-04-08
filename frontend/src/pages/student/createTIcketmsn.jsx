@@ -190,8 +190,8 @@ const CreateTicketmsn = () => {
                 throw new Error(message || 'Ticket submission failed.');
             }
 
-            setSuccessMessage('Ticket submitted successfully. The support team will review it shortly.');
             resetForm();
+            setSuccessMessage('Ticket submitted successfully. The support team will review it shortly.');
         } catch (error) {
             setErrorMessage(error.message || 'A network error occurred while submitting the ticket.');
         } finally {
