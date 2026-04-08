@@ -50,6 +50,24 @@ const AllTickets = () => {
         return date.toLocaleString();
     };
 
+    const getStatusBadgeClass = (status) => {
+        switch (status) {
+        case 'OPEN':
+            return 'bg-blue-50 text-blue-700';
+        case 'IN_PROGRESS':
+        case 'INPROGRESS':
+            return 'bg-amber-50 text-amber-700';
+        case 'RESOLVED':
+            return 'bg-emerald-50 text-emerald-700';
+        case 'CLOSED':
+            return 'bg-slate-100 text-slate-700';
+        case 'REJECTED':
+            return 'bg-rose-50 text-rose-700';
+        default:
+            return 'bg-gray-100 text-gray-700';
+        }
+    };
+
     return (
         <DashboardLayout title="All Tickets">
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
@@ -100,7 +118,7 @@ const AllTickets = () => {
                                         <td className="px-4 py-3 text-sm text-slate-700">{ticket.category || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-slate-700">{ticket.priority || '-'}</td>
                                         <td className="px-4 py-3 text-sm">
-                                            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-blue-700">
+                                            <span className={`rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${getStatusBadgeClass(ticket.status)}`}>
                                                 {ticket.status || '-'}
                                             </span>
                                         </td>
