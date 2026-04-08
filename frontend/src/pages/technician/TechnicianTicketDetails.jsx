@@ -383,6 +383,19 @@ const TechnicianTicketDetails = () => {
         return date.toLocaleString();
     };
 
+    const displayStatusText = (value) => {
+        if (!value) return '-';
+        return value.replace(/_/g, ' ');
+    };
+
+    const displayRoleText = (value) => {
+        if (!value) return 'User';
+        if (value === 'ROLE_ADMIN') return 'Admin';
+        if (value === 'ROLE_TECHNICIAN') return 'Technician';
+        if (value === 'ROLE_STUDENT') return 'Student';
+        return value.replace(/^ROLE_/, '').replace(/_/g, ' ');
+    };
+
     const resolutionNoteValue = (ticket?.resolutionNotes ?? ticket?.resolutionNote ?? '').trim();
     const hasResolutionNote = resolutionNoteValue.length > 0;
 
@@ -642,6 +655,21 @@ const TechnicianTicketDetails = () => {
                             >
                                 <FaEdit /> Add Resolution Notes
                             </button>
+                        </div>
+
+                        <div className="rounded-xl border border-gray-200 bg-white p-4">
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status History</p>
+                            {Array.isArray(ticket.statusHistory) && ticket.statusHistory.length > 0 ? (
+                                <div className="mt-3 space-y-2">
+                                    {ticket.statusHistory.map((historyItem, index) => (
+                                        <div key={`${historyItem.changedAt || 'status'}-${index}`} className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-slate-700">
+                                            {displayStatusText(historyItem.oldStatus)} {' -> '} {displayStatusText(historyItem.newStatus)} ({displayRoleText(historyItem.changedByRole)}, {formatDateTime(historyItem.changedAt)})
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="mt-2 text-sm text-slate-500">No status history available.</p>
+                            )}
                         </div>
                     </div>
                 )}
