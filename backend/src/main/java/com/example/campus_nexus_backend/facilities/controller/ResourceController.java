@@ -1,17 +1,22 @@
 package com.example.campus_nexus_backend.facilities.controller;
 
+import com.example.campus_nexus_backend.facilities.exception.ResourceNotFoundException;
 import com.example.campus_nexus_backend.facilities.model.ResourcesModel;
 import com.example.campus_nexus_backend.facilities.repository.ResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -51,5 +56,41 @@ public class ResourceController {
         }
 
         return Paths.get("src", "main", "uploads");
+    }
+
+    @GetMapping("/resources")
+    public List<ResourcesModel> getAllResources() {
+    return resourceRepository.findAll();
+    }
+
+    @GetMapping("/resources/{id}")
+    public ResourcesModel getResourceById(@PathVariable Long id) {
+        return resourceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id));
+    }
+
+    @GetMapping("/uploads/{filename}")
+    public ResponseEntity<FileSystemResource> getImage(@PathVariable String filename) {
+
+        Path uploadDirPath = resolveUploadDirectory();
+        Path filePath = uploadDirPath.resolve(filename);
+        File file = filePath.toFile();
+
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        try {
+            String probeType = Files.probeContentType(filePath);
+            if (probeType != null) {
+                mediaType = MediaType.parseMediaType(probeType);
+            }
+        } catch (IOException ignored) {
+        }
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .body(new FileSystemResource(file));
     }
 }

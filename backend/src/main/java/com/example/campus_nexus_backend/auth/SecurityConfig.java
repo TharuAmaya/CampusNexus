@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/**", "/login/**", "/oauth2/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/uploads/**", "/resources", "/resources/*").permitAll()
 
                         // මෙන්න අලුත් පේළිය: Admin ගේ API වලට යන්න පුළුවන් ROLE_ADMIN අයට විතරයි!
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")

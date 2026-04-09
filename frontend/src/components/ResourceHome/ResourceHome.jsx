@@ -20,6 +20,12 @@ function ResourceHome() {
             Add New Resource
           </Link>
           <Link
+            to="/displayresource"
+            className="rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center text-base font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            View All Resources
+          </Link>
+          <Link
             to="/"
             className="rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center text-base font-semibold text-slate-700 transition hover:bg-slate-100"
           >

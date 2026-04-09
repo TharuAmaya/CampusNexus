@@ -33,6 +33,7 @@ import BookingDetails from './pages/student/booking/BookingDetails.jsx';
 //Resource management pages
 import ResourceHome from './components/ResourceHome/ResourceHome.jsx';
 import AddResource from './components/AddResource/AddResource.jsx';
+import DisplayResource from './components/DisplayResource/DisplayResource.jsx';
 
 function App() {
   return (
@@ -175,6 +176,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <AddResource />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/displayresource"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <DisplayResource />
                 </ProtectedRoute>
               }
             />
