@@ -16,7 +16,7 @@ public class TicketCommentController {
     private TicketCommentService commentService;
 
     // 1. Get all comments for a specific ticket
-    @GetMapping("/tickets/{ticketId}/comments")
+    @GetMapping
     public ResponseEntity<?> getComments(@PathVariable Long ticketId, Authentication authentication) {
         try {
             return ResponseEntity.ok(commentService.getComments(ticketId, authentication.getName()));
