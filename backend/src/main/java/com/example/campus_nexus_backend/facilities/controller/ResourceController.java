@@ -36,13 +36,13 @@ public class ResourceController {
         String folder = uploadDirPath.toString() + File.separator;
         String resourceImg = file.getOriginalFilename();
 
-        try{
+        try {
             File uploadDir = new File(folder);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
-            file.transferTo(Paths.get(folder+resourceImg));
-            }catch (IOException e) {
+            file.transferTo(Paths.get(folder + resourceImg));
+        } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error uploading file; " + resourceImg);

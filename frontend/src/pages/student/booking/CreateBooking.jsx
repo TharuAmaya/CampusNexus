@@ -100,17 +100,17 @@ const CreateBooking = () => {
     };
 
     return (
-        <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
-            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-32 pb-20">
+        <DashboardLayout title="Create Reservation" noPadding={true}>
+            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-32">
                 
                 {/* Immersive Background Image (library02.png) */}
                 <div 
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-[1px] z-0 scale-105 fixed"
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-[1px] z-0 scale-105"
                     style={{ backgroundImage: "url('/library02.png')" }}
                 ></div>
 
                 {/* Dark color overlay */}
-                <div className="absolute inset-0 bg-[#0a1e35]/80 z-10 fixed"></div>
+                <div className="absolute inset-0 bg-[#0a1e35]/80 z-10"></div>
 
                 {/* Top Navigation Bar Positioning (Absolute) */}
                 <div className="absolute top-0 left-0 z-30 w-full px-8 py-6 bg-black/10 backdrop-blur-md border-b border-white/10 flex items-center justify-between">

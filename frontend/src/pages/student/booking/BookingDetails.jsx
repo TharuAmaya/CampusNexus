@@ -155,7 +155,7 @@ const BookingDetails = () => {
 
     if (isLoading) {
         return (
-            <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
+            <DashboardLayout title="Booking Details" noPadding={true}>
                 <div className="relative min-h-screen bg-gray-950 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#f4511e]"></div>
                 </div>
@@ -165,7 +165,7 @@ const BookingDetails = () => {
 
     if (error || !booking) {
         return (
-            <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
+            <DashboardLayout title="Booking Details" noPadding={true}>
                 <div className="relative min-h-screen bg-gray-950 flex items-center justify-center p-8">
                     <div className="bg-white/95 backdrop-blur-xl p-12 text-center shadow-2xl border border-white/20 max-w-lg w-full">
                         <FaInfoCircle className="text-5xl text-rose-500 mx-auto mb-6" />
@@ -183,8 +183,8 @@ const BookingDetails = () => {
     const { status, bookingCode, resourceId, resourceName, purpose, expectedAttendees, bookingDate, startTime, endTime, adminDecisionReason } = booking;
 
     return (
-        <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
-            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-32 pb-20">
+        <DashboardLayout title="Booking Details" noPadding={true}>
+            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-32">
                 
                 {/* Immersive Background Image (library02.png) */}
                 <div
