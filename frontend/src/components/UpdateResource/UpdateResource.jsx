@@ -94,7 +94,7 @@ function UpdateResource() {
         resourceId: formData.resourceId,
         name: formData.name,
         type: formData.type,
-        capacity: formData.capacity,
+        capacity: Number(formData.capacity),
         location: formData.location,
         status: formData.status,
       })
@@ -105,6 +105,10 @@ function UpdateResource() {
     }
 
     try {
+      if (!localStorage.getItem("token")) {
+        throw new Error("You are not logged in. Please log in and try again.");
+      }
+
       await axios.put(`${API_BASE_URL}/resources/${id}`, data, {
         headers: {
           ...getAuthHeaders(),
@@ -115,7 +119,17 @@ function UpdateResource() {
       navigate("/displayresource");
 
     } catch (err) {
-      setError("Error updating resource");
+      const serverMessage =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        (typeof err?.response?.data === "string" ? err.response.data : "");
+      const status = err?.response?.status;
+      setError(
+        serverMessage ||
+          (status
+            ? `Update failed (HTTP ${status}). Please check your session and input values.`
+            : err.message || "Error updating resource"),
+      );
     } finally {
       setSaving(false);
     }
