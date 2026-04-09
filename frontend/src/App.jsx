@@ -30,6 +30,10 @@ import MyBookings from './pages/student/booking/MyBookings.jsx';
 import CreateBooking from './pages/student/booking/CreateBooking.jsx';
 import BookingDetails from './pages/student/booking/BookingDetails.jsx';
 
+//Resource management pages
+import ResourceHome from './components/ResourceHome/ResourceHome.jsx';
+import AddResource from './components/AddResource/AddResource.jsx';
+
 function App() {
   return (
     <Router>
@@ -153,6 +157,24 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_STUDENT', 'ROLE_TECHNICIAN']}>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+
+{/*/* Resource management routes (Admin only) */}
+            <Route
+              path="/resourcehome"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <ResourceHome />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/addresource"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AddResource />
                 </ProtectedRoute>
               }
             />

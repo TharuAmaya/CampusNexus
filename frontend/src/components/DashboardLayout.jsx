@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 // අලුතින් Hamburger සහ Close icons ගමු
-import { FaUser, FaTicketAlt, FaUsers, FaUserPlus, FaBook, FaBell, FaTools, FaHome, FaBars, FaTimes, FaGraduationCap, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaTicketAlt, FaUsers, FaUserPlus, FaBoxes, FaBook, FaBell, FaTools, FaHome, FaBars, FaTimes, FaGraduationCap, FaCalendarAlt } from 'react-icons/fa';
 
 const DashboardLayout = ({ children, title, noPadding = false, hideBranding = false, hideHeader = false, hideSidebar = false, hideTitle = false }) => {
     const location = useLocation();
@@ -31,12 +31,15 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
         if (userRole === 'ROLE_ADMIN') {
             return [...commonLinks,
             { name: 'Ticket Management', path: '/admin/tickets', icon: <FaTicketAlt /> },
-            { name: 'User List', path: '/admin/users', icon: <FaUsers /> }];
+            { name: 'User List', path: '/admin/users', icon: <FaUsers /> },
+            /**newly added */
+            { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> }];
+
 
         } else if (userRole === 'ROLE_STUDENT') {
             return [...commonLinks,
             { name: 'Publish Ticket', path: '/student/publish-ticket', icon: <FaTicketAlt /> },
-            { name: 'Resources', path: '/student/resources', icon: <FaBook /> },
+            { name: 'Resources', path: '/student/resources', icon: <FaBoxes /> },
             // මෙන්න අලුතින් දාපු එක:
             { name: 'View Grades', path: '/student/grades', icon: <FaGraduationCap /> },
             { name: 'Resource Booking', path: '/student/booking', icon: <FaCalendarAlt /> }];
