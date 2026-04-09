@@ -54,7 +54,7 @@ public class TicketCommentController {
     }
 
     // 4. Delete an existing comment
-    @DeleteMapping("/comments/{commentId}")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId, Authentication authentication) {
         try {
             commentService.deleteComment(commentId, authentication.getName());

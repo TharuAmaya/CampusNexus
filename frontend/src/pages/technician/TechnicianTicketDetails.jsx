@@ -237,7 +237,7 @@ const TechnicianTicketDetails = () => {
             setCommentSuccess('');
 
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/comments/${commentId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`
