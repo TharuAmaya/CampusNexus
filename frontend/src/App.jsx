@@ -35,6 +35,12 @@ import MyBookings from './pages/student/booking/MyBookings.jsx';
 import CreateBooking from './pages/student/booking/CreateBooking.jsx';
 import BookingDetails from './pages/student/booking/BookingDetails.jsx';
 
+//Resource management pages
+import ResourceHome from './components/ResourceHome/ResourceHome.jsx';
+import AddResource from './components/AddResource/AddResource.jsx';
+import DisplayResource from './components/DisplayResource/DisplayResource.jsx';
+import UpdateResource from './components/UpdateResource/UpdateResource.jsx';
+
 function App() {
   return (
     <Router>
@@ -189,6 +195,39 @@ function App() {
               }
             />
 
+{/*/* Resource management routes (Admin only) */}
+            <Route
+              path="/resourcehome"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <ResourceHome />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/addresource"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AddResource />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/displayresource"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <DisplayResource />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/updateresource/:id"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <UpdateResource />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Catch-all route (Page Not Found) */}
             <Route path="*" element={<div className="container mx-auto mt-40 text-center"><h1 className="text-4xl">404 - Page Not Found 🧐</h1></div>} />
