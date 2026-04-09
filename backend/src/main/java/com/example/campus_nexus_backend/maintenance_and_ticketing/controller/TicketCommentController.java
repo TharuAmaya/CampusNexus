@@ -26,7 +26,7 @@ public class TicketCommentController {
     }
 
     // 2. Add a new comment to a ticket
-    @PostMapping("/tickets/{ticketId}/comments")
+    @PostMapping
     public ResponseEntity<?> addComment(
             @PathVariable Long ticketId, 
             @RequestBody TicketCommentRequestDTO dto, 
