@@ -25,6 +25,11 @@ import Profile from './pages/Profile.jsx';
 //admin user management page
 import ManageUsers from './pages/admin/ManageUsers';
 
+//admin booking management pages
+import AdminBookingDashboard from './pages/admin/booking/AdminBookingDashboard.jsx';
+import AdminBookingReview from './pages/admin/booking/AdminBookingReview.jsx';
+import AdminBookingScanner from './pages/admin/booking/AdminBookingScanner.jsx';
+
 import Tickets from './pages/student/Tickets.jsx';
 import MyBookings from './pages/student/booking/MyBookings.jsx';
 import CreateBooking from './pages/student/booking/CreateBooking.jsx';
@@ -129,6 +134,33 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <ManageUsers />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/booking"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminBookingDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/booking/review/:id"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminBookingReview />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/booking/scanner"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminBookingScanner />
                 </ProtectedRoute>
               }
             />
