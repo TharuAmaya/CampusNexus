@@ -40,12 +40,12 @@ public class AdminTicketController {
     }
 
     // 3. Assign a technician to a ticket
-    @PatchMapping("/{id}/assign")
+    @PatchMapping("/{id}")
     public ResponseEntity<?> assignTechnician(
             @PathVariable Long id, 
             @RequestBody AssignTechnicianDTO dto) {
         try {
-            adminTicketService.assignTechnician(id, dto.getTechnicianId());
+            adminTicketService.assignTechnician(id, dto.getAssignedTechnicianId());
             return ResponseEntity.ok("Technician assigned successfully.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

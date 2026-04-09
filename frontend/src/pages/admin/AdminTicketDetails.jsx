@@ -162,13 +162,13 @@ const AdminTicketDetails = () => {
             setAssignSuccess(false);
 
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/assign`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ technicianId: Number(selectedTechnicianId) })
+                body: JSON.stringify({ assignedTechnicianId: Number(selectedTechnicianId) })
             });
 
             console.log('Response status:', response.status);
