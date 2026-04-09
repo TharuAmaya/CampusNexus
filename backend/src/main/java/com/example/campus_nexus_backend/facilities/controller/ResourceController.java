@@ -3,6 +3,7 @@ package com.example.campus_nexus_backend.facilities.controller;
 import com.example.campus_nexus_backend.facilities.exception.ResourceNotFoundException;
 import com.example.campus_nexus_backend.facilities.model.ResourcesModel;
 import com.example.campus_nexus_backend.facilities.repository.ResourceRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
@@ -92,5 +93,50 @@ public class ResourceController {
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(new FileSystemResource(file));
+    }
+
+    @PutMapping("/resources/{id}")
+    public ResourcesModel updateResource(
+            @RequestPart("resourceDetails") String resourceDetails,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @PathVariable Long id) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ResourcesModel newResource;
+
+        try {
+            newResource = mapper.readValue(resourceDetails, ResourcesModel.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing resourceDetails", e);
+        }
+
+        return resourceRepository.findById(id).map(existingResource -> {
+
+            existingResource.setName(newResource.getName());
+            existingResource.setType(newResource.getType());
+            existingResource.setCapacity(newResource.getCapacity());
+            existingResource.setLocation(newResource.getLocation());
+            existingResource.setStatus(newResource.getStatus());
+
+            if (file != null && !file.isEmpty()) {
+                Path uploadDirPath = resolveUploadDirectory();
+                String fileName = file.getOriginalFilename();
+
+                try {
+                    File uploadDir = uploadDirPath.toFile();
+                    if (!uploadDir.exists()) {
+                        uploadDir.mkdirs();
+                    }
+
+                    file.transferTo(uploadDirPath.resolve(fileName));
+                    existingResource.setImageName(fileName);
+                } catch (IOException e) {
+                    throw new RuntimeException("Error saving uploaded file", e);
+                }
+            }
+
+            return resourceRepository.save(existingResource);
+
+        }).orElseThrow(() -> new ResourceNotFoundException(id));
     }
 }

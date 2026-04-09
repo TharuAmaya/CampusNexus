@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = "http://localhost:8081";
 
@@ -8,9 +9,14 @@ const getAuthHeaders = () => {
 };
 
 function DisplayResource() {
+  const navigate = useNavigate();
   const [resource, setResource] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const updateNavigate = (id) => {
+    navigate(`/updateresource/${id}`);
+  };
 
   useEffect(() => {
     loadResources();
@@ -92,6 +98,11 @@ function DisplayResource() {
         <td>{resource.capacity}</td>
         <td>{resource.location}</td>
         <td>{resource.status}</td>
+        <td>
+          <button onClick={() => updateNavigate(resource.resourceId)}>
+            Update
+          </button>
+        </td>
         </tr>
     ))}
         </tbody>

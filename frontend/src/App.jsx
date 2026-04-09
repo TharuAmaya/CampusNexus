@@ -34,6 +34,7 @@ import BookingDetails from './pages/student/booking/BookingDetails.jsx';
 import ResourceHome from './components/ResourceHome/ResourceHome.jsx';
 import AddResource from './components/AddResource/AddResource.jsx';
 import DisplayResource from './components/DisplayResource/DisplayResource.jsx';
+import UpdateResource from './components/UpdateResource/UpdateResource.jsx';
 
 function App() {
   return (
@@ -187,7 +188,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/updateresource/:id"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <UpdateResource />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Catch-all route (Page Not Found) */}
             <Route path="*" element={<div className="container mx-auto mt-40 text-center"><h1 className="text-4xl">404 - Page Not Found 🧐</h1></div>} />
