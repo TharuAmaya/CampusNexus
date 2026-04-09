@@ -42,7 +42,7 @@ public class AdminBookingController {
      * @return Detailed review information for the booking
      */
     @GetMapping("/{bookingId}/review")
-    public ResponseEntity<AdminBookingReviewResponse> getBookingReviewDetails(@PathVariable String bookingId) {
+    public ResponseEntity<AdminBookingReviewResponse> getBookingReviewDetails(@PathVariable("bookingId") String bookingId) {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS).cachePrivate())
                 .body(adminBookingService.getBookingReviewDetails(bookingId));
@@ -57,7 +57,7 @@ public class AdminBookingController {
      */
     @PatchMapping("/{bookingId}/approve")
     public ResponseEntity<BookingResponse> approveBooking(
-            @PathVariable String bookingId,
+            @PathVariable("bookingId") String bookingId,
             @Valid @RequestBody ApproveBookingRequest request) {
         return ResponseEntity.ok(adminBookingService.approveBooking(bookingId, request));
     }
@@ -71,7 +71,7 @@ public class AdminBookingController {
      */
     @PatchMapping("/{bookingId}/reject")
     public ResponseEntity<BookingResponse> rejectBooking(
-            @PathVariable String bookingId,
+            @PathVariable("bookingId") String bookingId,
             @Valid @RequestBody RejectBookingRequest request) {
         return ResponseEntity.ok(adminBookingService.rejectBooking(bookingId, request));
     }
