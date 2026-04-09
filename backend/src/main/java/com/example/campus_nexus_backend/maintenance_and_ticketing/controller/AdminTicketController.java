@@ -1,6 +1,7 @@
 package com.example.campus_nexus_backend.maintenance_and_ticketing.controller;
 
-import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.AdminTicketPatchDTO;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.AssignTechnicianDTO;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.RejectTicketDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketSummaryDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.UpdateTicketStatusDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.service.AdminTicketService;
@@ -38,37 +39,34 @@ public class AdminTicketController {
         }
     }
 
-    // 3. Patch ticket fields (assignment and status/rejection)
+    // 3. Assign a technician to a ticket
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchTicket(
+    public ResponseEntity<?> assignTechnician(
             @PathVariable Long id, 
-            @RequestBody AdminTicketPatchDTO dto,
-            Authentication authentication) {
+            @RequestBody AssignTechnicianDTO dto) {
         try {
-            if (dto.getAssignedTechnicianId() != null) {
-                adminTicketService.assignTechnician(id, dto.getAssignedTechnicianId());
-                return ResponseEntity.ok("Technician assigned successfully.");
-            }
-
-            if (dto.getStatus() != null && !dto.getStatus().isBlank()) {
-                String normalizedStatus = dto.getStatus().trim().toUpperCase().replace("-", "_");
-
-                if ("REJECTED".equals(normalizedStatus)) {
-                    adminTicketService.rejectTicket(id, dto.getRejectionReason(), authentication.getName());
-                    return ResponseEntity.ok("Ticket has been rejected.");
-                }
-
-                adminTicketService.updateTicketStatus(id, dto.getStatus(), authentication.getName());
-                return ResponseEntity.ok("Ticket status manually updated to " + dto.getStatus());
-            }
-
-            return ResponseEntity.badRequest().body("Request must include assignedTechnicianId or status.");
+            adminTicketService.assignTechnician(id, dto.getAssignedTechnicianId());
+            return ResponseEntity.ok("Technician assigned successfully.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // 4. Manually update ticket status
+    // 4. Reject a ticket
+    @PatchMapping("/{id}/reject")
+    public ResponseEntity<?> rejectTicket(
+            @PathVariable Long id, 
+            @RequestBody RejectTicketDTO dto,
+            Authentication authentication) {
+        try {
+            adminTicketService.rejectTicket(id, dto.getRejectionReason(), authentication.getName());
+            return ResponseEntity.ok("Ticket has been rejected.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 5. Manually update ticket status
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateTicketStatus(
             @PathVariable Long id,
@@ -82,7 +80,7 @@ public class AdminTicketController {
         }
     }
 
-    // 5. Delete a closed ticket
+    // 6. Delete a closed ticket
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteClosedTicket(@PathVariable Long id) {
         try {

@@ -296,13 +296,13 @@ const AdminTicketDetails = () => {
             setRejectSuccess(false);
 
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/reject`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ status: 'REJECTED', rejectionReason: rejectReason.trim() })
+                body: JSON.stringify({ rejectionReason: rejectReason.trim() })
             });
 
             const responseText = await response.text();
