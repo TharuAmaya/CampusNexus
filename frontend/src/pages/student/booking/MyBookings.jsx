@@ -69,8 +69,8 @@ const MyBookings = () => {
     };
 
     return (
-        <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
-            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-44 pb-20">
+        <DashboardLayout title="My Bookings" noPadding={true}>
+            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-44">
 
                 {/* Immersive Background Image (library.jpg) */}
                 <div

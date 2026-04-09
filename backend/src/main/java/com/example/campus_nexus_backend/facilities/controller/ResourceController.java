@@ -20,18 +20,19 @@ public class ResourceController {
     public ResourcesModel newResourceModel(@RequestBody ResourcesModel newResourceModel) {
         return resourceRepository.save(newResourceModel);
     }
+
     @PostMapping("/resources/resourceImg")
     public String resourceImg(@RequestParam("file") MultipartFile file) {
         String folder = "src/main/uploads/";
         String resourceImg = file.getOriginalFilename();
 
-        try{
+        try {
             File uploadDir = new File(folder);
             if (!uploadDir.exists()) {
                 uploadDir.mkdir();
             }
-            file.transferTo(Paths.get(folder+resourceImg));
-            }catch (IOException e) {
+            file.transferTo(Paths.get(folder + resourceImg));
+        } catch (IOException e) {
             e.printStackTrace();
             return "Error uploading file; " + resourceImg;
         }
