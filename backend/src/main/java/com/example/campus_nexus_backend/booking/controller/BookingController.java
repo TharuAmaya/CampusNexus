@@ -49,7 +49,7 @@ public class BookingController {
      */
     @PutMapping("/{bookingId}")
     public ResponseEntity<BookingResponse> updateBooking(
-            @PathVariable String bookingId,
+            @PathVariable("bookingId") String bookingId,
             @Valid @RequestBody UpdateBookingRequest request) {
         return ResponseEntity.ok(bookingService.updateBooking(bookingId, request));
     }
@@ -61,7 +61,7 @@ public class BookingController {
      * @return A list of booking summaries associated with the user
      */
     @GetMapping("/my")
-    public ResponseEntity<List<BookingSummaryResponse>> getMyBookings(@RequestParam String userId) {
+    public ResponseEntity<List<BookingSummaryResponse>> getMyBookings(@RequestParam("userId") String userId) {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS).cachePrivate())
                 .body(bookingService.getUserBookings(userId));
@@ -74,7 +74,7 @@ public class BookingController {
      * @return The booking details
      */
     @GetMapping("/{bookingId}")
-    public ResponseEntity<BookingResponse> getBooking(@PathVariable String bookingId) {
+    public ResponseEntity<BookingResponse> getBooking(@PathVariable("bookingId") String bookingId) {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS).cachePrivate())
                 .body(bookingService.getBookingByCode(bookingId));
@@ -89,8 +89,8 @@ public class BookingController {
      */
     @PatchMapping("/{bookingId}/cancel")
     public ResponseEntity<BookingResponse> cancelBooking(
-            @PathVariable String bookingId,
-            @RequestParam String cancelledBy) {
+            @PathVariable("bookingId") String bookingId,
+            @RequestParam("cancelledBy") String cancelledBy) {
         return ResponseEntity.ok(bookingService.cancelBooking(bookingId, cancelledBy));
     }
 
@@ -101,7 +101,7 @@ public class BookingController {
      * @return The QR token response
      */
     @GetMapping("/{bookingId}/qr")
-    public ResponseEntity<BookingQrResponse> getBookingQrToken(@PathVariable String bookingId) {
+    public ResponseEntity<BookingQrResponse> getBookingQrToken(@PathVariable("bookingId") String bookingId) {
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS).cachePrivate())
                 .body(bookingService.getBookingQrToken(bookingId));
