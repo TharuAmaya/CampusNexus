@@ -100,7 +100,7 @@ const AdminTicketDetails = () => {
                 setIsTechniciansLoading(true);
                 setAssignError('');
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE_URL}/api/admin/tickets/technicians`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/technicians`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
