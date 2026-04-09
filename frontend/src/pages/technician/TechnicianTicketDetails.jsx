@@ -202,7 +202,7 @@ const TechnicianTicketDetails = () => {
             const token = localStorage.getItem('token');
             const isEditing = Boolean(editingCommentId);
             const endpoint = isEditing
-                ? `${API_BASE_URL}/api/comments/${editingCommentId}`
+                ? `${API_BASE_URL}/api/tickets/${ticketId}/comments/${editingCommentId}`
                 : `${API_BASE_URL}/api/tickets/${ticketId}/comments`;
             const response = await fetch(endpoint, {
                 method: isEditing ? 'PUT' : 'POST',

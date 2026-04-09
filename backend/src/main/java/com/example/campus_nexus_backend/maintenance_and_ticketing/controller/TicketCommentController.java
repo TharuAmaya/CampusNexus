@@ -40,7 +40,7 @@ public class TicketCommentController {
     }
 
     // 3. Update an existing comment
-    @PutMapping("/comments/{commentId}")
+    @PutMapping("/{commentId}")
     public ResponseEntity<?> updateComment(
             @PathVariable Long commentId, 
             @RequestBody TicketCommentRequestDTO dto, 
