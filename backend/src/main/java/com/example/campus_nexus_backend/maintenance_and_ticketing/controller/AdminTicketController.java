@@ -35,7 +35,21 @@ public class AdminTicketController {
         try {
             return ResponseEntity.ok(ticketService.getTicketDetails(id, authentication.getName()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            String message = e.getMessage() == null ? "Request failed" : e.getMessage();
+
+            if (message.toLowerCase().contains("not found")) {
+                return ResponseEntity.status(404).body(message);
+            }
+
+            if (message.toLowerCase().contains("unauthorized") || message.toLowerCase().contains("only")) {
+                return ResponseEntity.status(403).body(message);
+            }
+
+            if (message.toLowerCase().contains("denied")) {
+                return ResponseEntity.status(409).body(message);
+            }
+
+            return ResponseEntity.badRequest().body(message);
         }
     }
 
