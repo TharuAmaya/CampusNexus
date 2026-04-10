@@ -127,8 +127,8 @@ public class AdminTicketService {
             return;
         }
 
-        if ("CLOSED".equals(normalizedStatus) && !"RESOLVED".equals(oldStatus)) {
-            throw new RuntimeException("Action denied: Ticket must be RESOLVED before setting status to CLOSED.");
+        if ("CLOSED".equals(normalizedStatus) && !List.of("REJECTED", "RESOLVED").contains(oldStatus)) {
+            throw new RuntimeException("Action denied: Ticket must be REJECTED or RESOLVED before setting status to CLOSED.");
         }
 
         ticket.setStatus(normalizedStatus);

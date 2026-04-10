@@ -218,8 +218,8 @@ const AdminTicketDetails = () => {
             return;
         }
 
-        if (selectedStatus === 'CLOSED' && ticket?.status !== 'RESOLVED') {
-            setStatusError('Ticket must be RESOLVED before setting status to CLOSED.');
+        if (selectedStatus === 'CLOSED' && !['REJECTED', 'RESOLVED'].includes(ticket?.status)) {
+            setStatusError('Ticket must be REJECTED or RESOLVED before setting status to CLOSED.');
             return;
         }
 
@@ -614,7 +614,7 @@ const AdminTicketDetails = () => {
                                         >
                                             INPROGRESS
                                         </option>
-                                        <option value="CLOSED" disabled={ticket?.status !== 'RESOLVED'}>CLOSED</option>
+                                        <option value="CLOSED" disabled={!['REJECTED', 'RESOLVED'].includes(ticket?.status)}>CLOSED</option>
                                     </select>
                                     <button
                                         type="button"
