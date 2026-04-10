@@ -10,4 +10,6 @@ import java.util.List;
 public interface TicketAttachmentRepository extends JpaRepository<TicketAttachment, Long> {
     // Fetches all attachments for a specific ticket
     List<TicketAttachment> findByTicket_TicketId(Long ticketId);
+
+    void deleteByTicket_TicketId(Long ticketId);
 }

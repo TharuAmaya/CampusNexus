@@ -32,9 +32,6 @@ public class Ticket {
     @Column(name = "resource_id")
     private Long resourceId;
 
-    @Column(name = "location_text")
-    private String locationText;
-
     @Column(nullable = false)
     private String category;
 
