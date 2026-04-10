@@ -123,6 +123,10 @@ public class AdminTicketService {
             throw new RuntimeException("Action denied: Ticket status can move to IN_PROGRESS only from OPEN.");
         }
 
+        if ("OPEN".equals(normalizedStatus) && "CLOSED".equals(oldStatus)) {
+            throw new RuntimeException("Action denied: CLOSED tickets cannot be moved back to OPEN.");
+        }
+
         if (normalizedStatus.equals(oldStatus)) {
             return;
         }

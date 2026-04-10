@@ -208,6 +208,11 @@ const AdminTicketDetails = () => {
             return;
         }
 
+        if (selectedStatus === 'OPEN' && ticket?.status === 'CLOSED') {
+            setStatusError('OPEN is not available when the current ticket status is CLOSED.');
+            return;
+        }
+
         if (selectedStatus === 'INPROGRESS' && ticket?.status !== 'OPEN') {
             setStatusError('INPROGRESS can be selected only when the current status is OPEN.');
             return;
@@ -607,7 +612,7 @@ const AdminTicketDetails = () => {
                                         className="w-full rounded-lg border border-emerald-400 bg-emerald-100/60 px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-emerald-100"
                                     >
                                         <option value="">Choose a status</option>
-                                        <option value="OPEN">OPEN</option>
+                                        <option value="OPEN" disabled={ticket?.status === 'CLOSED'}>OPEN</option>
                                         <option
                                             value="INPROGRESS"
                                             disabled={ticket?.status !== 'OPEN' || !ticket?.assignedToEmail}
