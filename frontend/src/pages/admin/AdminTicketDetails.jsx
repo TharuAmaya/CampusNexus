@@ -638,7 +638,7 @@ const AdminTicketDetails = () => {
                                 <button
                                     type="button"
                                     onClick={openDeleteModal}
-                                    disabled={(!['CLOSED', 'REJECTED'].includes(ticket.status)) || isDeleting}
+                                    disabled={ticket.status !== 'CLOSED' || isDeleting}
                                     className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-rose-400 bg-rose-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <FaTrashAlt /> Delete
@@ -729,7 +729,7 @@ const AdminTicketDetails = () => {
                         )}
 
                         <p className="mb-6 text-sm text-slate-600">
-                            This will permanently delete ticket #{ticketId}. Admin can delete only CLOSED or REJECTED tickets.
+                            This will permanently delete ticket #{ticketId}. Admin can delete only CLOSED tickets.
                         </p>
 
                         <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
