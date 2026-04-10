@@ -18,6 +18,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 })
 public class MaintenanceandticketExceptionHandler {
 
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<String> handleFileStorageException(FileStorageException ex) {
+        String message = ex.getMessage() == null ? "File storage operation failed" : ex.getMessage();
+        return ResponseEntity.status(500).body(withStatusCode(500, message));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
         String message = ex.getMessage() == null ? "Request failed" : ex.getMessage();
