@@ -82,8 +82,8 @@ public class AdminTicketService {
         User changedBy = userRepository.findByEmail(changedByEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if ("CLOSED".equals(ticket.getStatus())) {
-            throw new RuntimeException("Cannot reject a CLOSED ticket.");
+        if (!"OPEN".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: Admin can only reject tickets with an 'OPEN' status.");
         }
 
         String oldStatus = ticket.getStatus();

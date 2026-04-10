@@ -300,6 +300,11 @@ const AdminTicketDetails = () => {
             return;
         }
 
+        if (ticket?.status !== 'OPEN') {
+            setRejectError('Reject is available only when the current ticket status is OPEN.');
+            return;
+        }
+
         try {
             setIsRejecting(true);
             setRejectError('');
@@ -635,7 +640,7 @@ const AdminTicketDetails = () => {
                                 <button
                                     type="button"
                                     onClick={openRejectModal}
-                                    disabled={isRejecting}
+                                    disabled={ticket?.status !== 'OPEN' || isRejecting}
                                     className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <FaBan /> Reject Ticket
