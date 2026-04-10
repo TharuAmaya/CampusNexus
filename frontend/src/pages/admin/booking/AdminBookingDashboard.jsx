@@ -14,7 +14,8 @@ const AdminBookingDashboard = () => {
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch('http://localhost:8081/api/admin/bookings', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
                 });
                 
                 if (response.ok) {
