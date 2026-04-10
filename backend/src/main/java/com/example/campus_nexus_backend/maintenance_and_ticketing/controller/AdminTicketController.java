@@ -32,25 +32,7 @@ public class AdminTicketController {
     // 2. View specific ticket details (Reusing method from TicketService)
     @GetMapping("/{id}")
     public ResponseEntity<?> getTicketDetails(@PathVariable Long id, Authentication authentication) {
-        try {
-            return ResponseEntity.ok(ticketService.getTicketDetails(id, authentication.getName()));
-        } catch (Exception e) {
-            String message = e.getMessage() == null ? "Request failed" : e.getMessage();
-
-            if (message.toLowerCase().contains("not found")) {
-                return ResponseEntity.status(404).body(message);
-            }
-
-            if (message.toLowerCase().contains("unauthorized") || message.toLowerCase().contains("only")) {
-                return ResponseEntity.status(403).body(message);
-            }
-
-            if (message.toLowerCase().contains("denied")) {
-                return ResponseEntity.status(409).body(message);
-            }
-
-            return ResponseEntity.badRequest().body(message);
-        }
+        return ResponseEntity.ok(ticketService.getTicketDetails(id, authentication.getName()));
     }
 
     // 3. Assign a technician to a ticket
@@ -58,12 +40,8 @@ public class AdminTicketController {
     public ResponseEntity<?> assignTechnician(
             @PathVariable Long id, 
             @RequestBody AssignTechnicianDTO dto) {
-        try {
-            adminTicketService.assignTechnician(id, dto.getAssignedTechnicianId());
-            return ResponseEntity.ok("Technician assigned successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        adminTicketService.assignTechnician(id, dto.getAssignedTechnicianId());
+        return ResponseEntity.ok("Technician assigned successfully.");
     }
 
     // 4. Reject a ticket
@@ -72,12 +50,8 @@ public class AdminTicketController {
             @PathVariable Long id, 
             @RequestBody RejectTicketDTO dto,
             Authentication authentication) {
-        try {
-            adminTicketService.rejectTicket(id, dto.getRejectionReason(), authentication.getName());
-            return ResponseEntity.ok("Ticket has been rejected.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        adminTicketService.rejectTicket(id, dto.getRejectionReason(), authentication.getName());
+        return ResponseEntity.ok("Ticket has been rejected.");
     }
 
     // 5. Manually update ticket status
@@ -86,22 +60,14 @@ public class AdminTicketController {
             @PathVariable Long id,
             @RequestBody UpdateTicketStatusDTO dto,
             Authentication authentication) {
-        try {
-            adminTicketService.updateTicketStatus(id, dto.getNewStatus(), authentication.getName());
-            return ResponseEntity.ok("Ticket status manually updated to " + dto.getNewStatus());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        adminTicketService.updateTicketStatus(id, dto.getNewStatus(), authentication.getName());
+        return ResponseEntity.ok("Ticket status manually updated to " + dto.getNewStatus());
     }
 
     // 6. Delete a closed ticket
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteClosedTicket(@PathVariable Long id) {
-        try {
-            adminTicketService.deleteClosedTicket(id);
-            return ResponseEntity.ok("CLOSED ticket deleted successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        adminTicketService.deleteClosedTicket(id);
+        return ResponseEntity.ok("CLOSED ticket deleted successfully.");
     }
 }
