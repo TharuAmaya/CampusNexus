@@ -97,6 +97,25 @@ public class AdminTicketService {
         saveStatusHistory(ticket, oldStatus, "REJECTED", changedBy);
     }
 
+    // 4b. Cancel Rejection
+    public void cancelRejection(Long ticketId, String changedByEmail) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        User changedBy = userRepository.findByEmail(changedByEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!"REJECTED".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: Only REJECTED tickets can have rejection cancelled.");
+        }
+
+        String oldStatus = ticket.getStatus();
+        ticket.setStatus("OPEN");
+        ticket.setRejectionReason(null);
+        ticketRepository.save(ticket);
+        saveStatusHistory(ticket, oldStatus, "OPEN", changedBy);
+    }
+
     // 5. Manually Update Status
     public void updateTicketStatus(Long ticketId, String newStatus, String changedByEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)

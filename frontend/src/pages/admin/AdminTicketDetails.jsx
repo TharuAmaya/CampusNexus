@@ -28,6 +28,7 @@ const AdminTicketDetails = () => {
     const [isRejecting, setIsRejecting] = useState(false);
     const [rejectError, setRejectError] = useState('');
     const [rejectSuccess, setRejectSuccess] = useState(false);
+    const [cancelRejectionSuccess, setCancelRejectionSuccess] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState('');
@@ -290,6 +291,46 @@ const AdminTicketDetails = () => {
         if (isDeleting) return;
         setDeleteError('');
         setIsDeleteModalOpen(false);
+    };
+
+    const handleCancelRejection = async () => {
+        if (ticket?.status !== 'REJECTED') {
+            return;
+        }
+
+        try {
+            setStatusError('');
+            setCancelRejectionSuccess(false);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/cancel-rejection`, {
+                method: 'PATCH',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const responseText = await response.text();
+            if (!response.ok) {
+                throw new Error(responseText || `HTTP ${response.status}: Failed to cancel rejection.`);
+            }
+
+            const ticketResponse = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (ticketResponse.ok) {
+                const updatedTicket = await ticketResponse.json();
+                setTicket(updatedTicket);
+                setSelectedStatus('');
+                setCancelRejectionSuccess(true);
+                setTimeout(() => setCancelRejectionSuccess(false), 3000);
+            } else {
+                throw new Error('Failed to refresh ticket details after cancelling rejection.');
+            }
+        } catch (error) {
+            setStatusError(error.message || 'Unable to cancel rejection.');
+        }
     };
 
     const handleRejectTicket = async (event) => {
@@ -583,6 +624,13 @@ const AdminTicketDetails = () => {
                             </div>
                         )}
 
+                        {cancelRejectionSuccess && (
+                            <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                                <FaInfoCircle className="mt-0.5 shrink-0" />
+                                <span>Ticket rejection cancelled. Status is now OPEN.</span>
+                            </div>
+                        )}
+
                         <div className="grid gap-3 md:grid-cols-[1fr_1fr_420px]">
                             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
                                 <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.15em] text-blue-700">Assign Technician</label>
@@ -644,6 +692,14 @@ const AdminTicketDetails = () => {
                                     className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <FaBan /> Reject Ticket
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleCancelRejection}
+                                    disabled={ticket?.status !== 'REJECTED'}
+                                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-blue-400 bg-blue-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <FaTrashAlt /> Cancel Rejection
                                 </button>
                                 <button
                                     type="button"

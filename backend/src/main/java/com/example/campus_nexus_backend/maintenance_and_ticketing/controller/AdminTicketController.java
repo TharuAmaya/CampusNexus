@@ -54,6 +54,15 @@ public class AdminTicketController {
         return ResponseEntity.ok("Ticket has been rejected.");
     }
 
+    // 4b. Cancel rejection for a ticket
+    @PatchMapping("/{id}/cancel-rejection")
+    public ResponseEntity<?> cancelRejection(
+            @PathVariable Long id,
+            Authentication authentication) {
+        adminTicketService.cancelRejection(id, authentication.getName());
+        return ResponseEntity.ok("Ticket rejection cancelled.");
+    }
+
     // 5. Manually update ticket status
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateTicketStatus(
