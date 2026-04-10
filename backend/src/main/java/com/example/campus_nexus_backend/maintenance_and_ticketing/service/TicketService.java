@@ -3,6 +3,7 @@ package com.example.campus_nexus_backend.maintenance_and_ticketing.service;
 import com.example.campus_nexus_backend.auth.User;
 import com.example.campus_nexus_backend.auth.UserRepository;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.attachment.AttachmentDTO;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.exception.FileStorageException;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketRequestDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketResponseDTO;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.ticket.TicketStatusHistoryDTO;
@@ -46,7 +47,7 @@ public class TicketService {
     private final String UPLOAD_DIR = "uploads/tickets/";
 
     // 1. Create Ticket
-    public void createTicket(TicketRequestDTO dto, List<MultipartFile> files, String userEmail) throws IOException {
+    public void createTicket(TicketRequestDTO dto, List<MultipartFile> files, String userEmail) {
         User student = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -79,7 +80,11 @@ public class TicketService {
                 if (!file.isEmpty()) {
                     String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                     Path filePath = Paths.get(UPLOAD_DIR + fileName);
-                    Files.copy(file.getInputStream(), filePath);
+                    try {
+                        Files.copy(file.getInputStream(), filePath);
+                    } catch (IOException e) {
+                        throw new FileStorageException("Failed to store ticket attachment.", e);
+                    }
 
                     TicketAttachment attachment = new TicketAttachment();
                     attachment.setTicket(savedTicket);
@@ -136,7 +141,7 @@ public class TicketService {
 
     // 4. Update Ticket (including attachment replacement)
     @Transactional(rollbackFor = Exception.class)
-    public void updateTicket(Long ticketId, TicketRequestDTO dto, List<MultipartFile> files, String userEmail) throws IOException {
+    public void updateTicket(Long ticketId, TicketRequestDTO dto, List<MultipartFile> files, String userEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
@@ -187,7 +192,11 @@ public class TicketService {
                 String safeOriginalName = file.getOriginalFilename() == null ? "attachment" : file.getOriginalFilename();
                 String fileName = UUID.randomUUID() + "_" + safeOriginalName;
                 Path filePath = Paths.get(UPLOAD_DIR, fileName);
-                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                try {
+                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    throw new FileStorageException("Failed to store updated ticket attachment.", e);
+                }
 
                 TicketAttachment attachment = new TicketAttachment();
                 attachment.setTicket(ticket);
