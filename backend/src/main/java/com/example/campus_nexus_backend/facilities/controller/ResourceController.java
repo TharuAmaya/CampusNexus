@@ -65,13 +65,13 @@ public class ResourceController {
     }
 
     @GetMapping("/resources/{id}")
-    public ResourcesModel getResourceById(@PathVariable Long id) {
+    public ResourcesModel getResourceById(@PathVariable("id") Long id) {
         return resourceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
     @GetMapping("/uploads/{filename}")
-    public ResponseEntity<FileSystemResource> getImage(@PathVariable String filename) {
+    public ResponseEntity<FileSystemResource> getImage(@PathVariable("filename") String filename) {
 
         Path uploadDirPath = resolveUploadDirectory();
         Path filePath = uploadDirPath.resolve(filename);
@@ -99,7 +99,7 @@ public class ResourceController {
     public ResourcesModel updateResource(
             @RequestPart("resourceDetails") String resourceDetails,
             @RequestPart(value = "file", required = false) MultipartFile file,
-            @PathVariable Long id) {
+            @PathVariable("id") Long id) {
 
         ObjectMapper mapper = new ObjectMapper();
         ResourcesModel newResource;
