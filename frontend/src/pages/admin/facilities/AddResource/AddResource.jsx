@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import DashboardLayout from "../../components/DashboardLayout.jsx";
+import DashboardLayout from "../../../../components/DashboardLayout.jsx";
 
 const RESOURCE_TYPES = [
   "LECTURE_HALL",

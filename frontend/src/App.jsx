@@ -36,10 +36,10 @@ import CreateBooking from './pages/student/booking/CreateBooking.jsx';
 import BookingDetails from './pages/student/booking/BookingDetails.jsx';
 
 //Resource management pages
-import ResourceHome from './components/ResourceHome/ResourceHome.jsx';
-import AddResource from './components/AddResource/AddResource.jsx';
-import DisplayResource from './components/DisplayResource/DisplayResource.jsx';
-import UpdateResource from './components/UpdateResource/UpdateResource.jsx';
+import ResourceHome from './pages/admin/facilities/ResourceHome/ResourceHome.jsx';
+import AddResource from './pages/admin/facilities/AddResource/AddResource.jsx';
+import DisplayResource from './pages/admin/facilities/DisplayResource/DisplayResource.jsx';
+import UpdateResource from './pages/admin/facilities/UpdateResource/UpdateResource.jsx';
 
 function App() {
   return (

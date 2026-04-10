@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import DashboardLayout from '../../components/DashboardLayout.jsx';
+import DashboardLayout from '../../../../components/DashboardLayout.jsx';
 
 function ResourceHome() {
   return (
