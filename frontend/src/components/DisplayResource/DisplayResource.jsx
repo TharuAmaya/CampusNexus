@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8081";
 
@@ -64,6 +65,36 @@ function DisplayResource() {
     return <div>{error}</div>;
   }
 
+  const deleteResource = async (id) => {
+
+    const confirmMessage = window.confirm(
+      "Are you sure you want to delete this resource?"
+    );
+
+    if (confirmMessage) {
+      try {
+        await axios.delete(`${API_BASE_URL}/resources/${id}`, {
+          headers: {
+            ...getAuthHeaders(),
+          },
+        });
+
+        alert("Resource deleted successfully");
+
+        // reload data
+        loadResources();
+
+      } catch (error) {
+        console.error(error);
+        const serverMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          (typeof error?.response?.data === "string" ? error.response.data : "");
+        alert(serverMessage || "Error deleting resource");
+      }
+    }
+  };
+
   return (
     <div>
       <h1>Resources</h1>
@@ -101,6 +132,9 @@ function DisplayResource() {
         <td>
           <button onClick={() => updateNavigate(resource.resourceId)}>
             Update
+          </button>
+          <button onClick={() => deleteResource(resource.resourceId)}>
+            Delete
           </button>
         </td>
         </tr>

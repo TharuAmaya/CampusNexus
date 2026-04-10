@@ -139,4 +139,34 @@ public class ResourceController {
 
         }).orElseThrow(() -> new ResourceNotFoundException(id));
     }
+
+    @DeleteMapping("/resources/{id}")
+    public String deleteResource(@PathVariable Long id) {
+
+        // Check if resource exists
+        ResourcesModel resource = resourceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id));
+
+        // Get image name
+        String imageName = resource.getImageName();
+
+        // Delete image from folder
+        if (imageName != null && !imageName.isEmpty()) {
+
+            File imageFile = new File("src/main/uploads/" + imageName);
+
+            if (imageFile.exists()) {
+                if (imageFile.delete()) {
+                    System.out.println("Image Deleted");
+                } else {
+                    System.out.println("Failed to delete image");
+                }
+            }
+        }
+
+        // Delete resource from DB
+        resourceRepository.deleteById(id);
+
+        return "Resource with id " + id + " deleted successfully";
+    }
 }
