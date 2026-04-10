@@ -21,17 +21,28 @@ const CreateBooking = () => {
     });
 
     const [resources, setResources] = useState([]);
+    const [selectedResource, setSelectedResource] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
+
+    useEffect(() => {
+        if (formData.resourceId && resources.length > 0) {
+            const resource = resources.find(r => String(r.resourceId) === String(formData.resourceId));
+            setSelectedResource(resource || null);
+        } else {
+            setSelectedResource(null);
+        }
+    }, [formData.resourceId, resources]);
 
     useEffect(() => {
         // Fetch Available Resources
         const fetchResources = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch('http://localhost:8081/api/resources/available', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const res = await fetch('http://localhost:8081/resources', {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
                 });
                 if (res.ok) {
                     const data = await res.json();
@@ -62,13 +73,19 @@ const CreateBooking = () => {
             return;
         }
 
+        if (selectedResource && Number(formData.expectedAttendees) > selectedResource.capacity) {
+            alert(`The requested attendees (${formData.expectedAttendees}) exceeds the maximum capacity of ${selectedResource.name} (${selectedResource.capacity} people).`);
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const token = localStorage.getItem('token');
             
             // Get User Profile first to find current user ID
             const profileRes = await fetch('http://localhost:8081/api/user/profile', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store'
             });
             
             if (!profileRes.ok) throw new Error('Auth failure');
@@ -140,39 +157,118 @@ const CreateBooking = () => {
                         {/* Glass Luster Accent */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100/20 rounded-bl-full filter blur-3xl pointer-events-none opacity-50 z-0"></div>
 
-                        {/* Left: Decorative Info Panel (using dark theme to match BookingDetails sidebar) */}
+                        {/* Left: Dynamic Info Panel — shows resource details when selected, decorative content otherwise */}
                         <div className="md:w-1/3 bg-[#111e2f]/90 p-10 text-white flex flex-col justify-between relative overflow-hidden border-r border-white/10 z-10">
                             <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl -mt-24 -mr-24 opacity-30"></div>
                             
-                            <div className="z-10 relative">
-                                <FaShieldAlt className="text-4xl text-blue-400 mb-6 opacity-90" />
-                                <h2 className="text-white text-4xl lg:text-5xl font-black tracking-tighter uppercase mb-6 leading-tight">Secure Your Campus Space</h2>
-                                <p className="text-white/50 text-[11px] uppercase tracking-widest mb-12 leading-relaxed font-light">
-                                    Systematic conflict detection for all facility requests. Process entails mandatory administrative validation.
-                                </p>
-                                
-                                <div className="space-y-6 pt-8 border-t border-white/10">
-                                    <div className="flex gap-4">
-                                        <FaCheckCircle className="text-emerald-400 mt-1 shrink-0" />
-                                        <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Real-Time Allocation Check</p>
+                            {selectedResource ? (
+                                /* ── Selected Resource Details ── */
+                                <div className="z-10 relative flex flex-col h-full">
+                                    {/* Resource Image */}
+                                    <div className="w-full h-40 bg-black/30 overflow-hidden relative border border-white/10 mb-6 shadow-lg">
+                                        {selectedResource.imageName ? (
+                                            <img 
+                                                src={`http://localhost:8081/uploads/${selectedResource.imageName}`} 
+                                                alt={selectedResource.name} 
+                                                className="w-full h-full object-cover opacity-90 hover:opacity-100 hover:scale-105 transition-all duration-700" 
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-900/50 to-black/50">
+                                                <FaMapMarkerAlt className="text-4xl text-blue-400/40 mb-2" />
+                                                <span className="text-[9px] uppercase tracking-[0.3em] font-bold text-white/30">No Image Available</span>
+                                            </div>
+                                        )}
+                                        {/* Status Badge */}
+                                        <div className={`absolute top-3 right-3 px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] backdrop-blur-md border shadow-lg ${
+                                            selectedResource.status === 'ACTIVE' 
+                                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30' 
+                                                : 'bg-red-500/20 text-red-300 border-red-400/30'
+                                        }`}>
+                                            {selectedResource.status || 'AVAILABLE'}
+                                        </div>
                                     </div>
-                                    <div className="flex gap-4">
-                                        <FaCheckCircle className="text-emerald-400 mt-1 shrink-0" />
-                                        <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Encrypted Access Generation</p>
+
+                                    {/* Resource Name */}
+                                    <h2 className="text-white text-2xl lg:text-3xl font-black tracking-tighter uppercase mb-2 leading-tight">
+                                        {selectedResource.name}
+                                    </h2>
+                                    <p className="text-blue-400/70 text-[10px] uppercase tracking-[0.3em] font-bold mb-8">
+                                        Selected Facility
+                                    </p>
+
+                                    {/* Resource Metadata Grid */}
+                                    <div className="space-y-5 pt-6 border-t border-white/10">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-8 h-8 bg-blue-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                                                <FaShieldAlt className="text-blue-400 text-xs" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] text-white/35 font-bold uppercase tracking-[0.2em] mb-1">Facility Type</p>
+                                                <p className="text-sm font-bold text-white/90 uppercase tracking-wide">{selectedResource.type?.replace(/_/g, ' ')}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-8 h-8 bg-blue-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                                                <FaMapMarkerAlt className="text-blue-400 text-xs" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] text-white/35 font-bold uppercase tracking-[0.2em] mb-1">Location</p>
+                                                <p className="text-sm font-bold text-white/90 tracking-wide">{selectedResource.location}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-8 h-8 bg-blue-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                                                <FaUsers className="text-blue-400 text-xs" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] text-white/35 font-bold uppercase tracking-[0.2em] mb-1">Max Capacity</p>
+                                                <p className="text-2xl font-black text-white">{selectedResource.capacity} <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">People</span></p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-4">
-                                        <FaCheckCircle className="text-amber-500 mt-1 shrink-0" />
-                                        <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Mandatory Rule Adherence</p>
+
+                                    {/* Bottom Support */}
+                                    <div className="mt-auto pt-8 border-t border-white/10">
+                                        <p className="text-[10px] font-bold text-white/30 tracking-widest uppercase mb-4">Support Reference</p>
+                                        <p className="text-[11px] font-mono text-blue-400 bg-black/40 py-2 px-4 tracking-widest border border-white/5 shadow-inner">
+                                            ext. 4455 // IT TEAM
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div className="z-10 mt-12 pt-8 border-t border-white/10">
-                                <p className="text-[10px] font-bold text-white/30 tracking-widest uppercase mb-4">Support Reference</p>
-                                <p className="text-[11px] font-mono text-blue-400 bg-black/40 py-2 px-4 tracking-widest border border-white/5 shadow-inner">
-                                    ext. 4455 // IT TEAM
-                                </p>
-                            </div>
+                            ) : (
+                                /* ── Default Decorative Content ── */
+                                <>
+                                <div className="z-10 relative">
+                                    <FaShieldAlt className="text-4xl text-blue-400 mb-6 opacity-90" />
+                                    <h2 className="text-white text-4xl lg:text-5xl font-black tracking-tighter uppercase mb-6 leading-tight">Secure Your Campus Space</h2>
+                                    <p className="text-white/50 text-[11px] uppercase tracking-widest mb-12 leading-relaxed font-light">
+                                        Systematic conflict detection for all facility requests. Process entails mandatory administrative validation.
+                                    </p>
+                                    
+                                    <div className="space-y-6 pt-8 border-t border-white/10">
+                                        <div className="flex gap-4">
+                                            <FaCheckCircle className="text-emerald-400 mt-1 shrink-0" />
+                                            <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Real-Time Allocation Check</p>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <FaCheckCircle className="text-emerald-400 mt-1 shrink-0" />
+                                            <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Encrypted Access Generation</p>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <FaCheckCircle className="text-amber-500 mt-1 shrink-0" />
+                                            <p className="text-xs font-semibold text-white/80 leading-relaxed tracking-wide uppercase">Mandatory Rule Adherence</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="z-10 mt-12 pt-8 border-t border-white/10">
+                                    <p className="text-[10px] font-bold text-white/30 tracking-widest uppercase mb-4">Support Reference</p>
+                                    <p className="text-[11px] font-mono text-blue-400 bg-black/40 py-2 px-4 tracking-widest border border-white/5 shadow-inner">
+                                        ext. 4455 // IT TEAM
+                                    </p>
+                                </div>
+                                </>
+                            )}
                         </div>
 
                         {/* Right: Booking Form */}
@@ -201,7 +297,7 @@ const CreateBooking = () => {
                                             <option value="">— Choose a facility —</option>
                                             {resources.map(res => (
                                                 <option key={res.resourceId} value={res.resourceId}>
-                                                    {res.name} (Code: {res.resourceId})
+                                                    {res.name}
                                                 </option>
                                             ))}
                                         </select>
