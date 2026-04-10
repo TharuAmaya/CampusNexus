@@ -25,12 +25,8 @@ public class TicketController {
             @RequestPart("ticketDetails") TicketRequestDTO ticketDTO,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             Authentication authentication) {
-        try {
-            ticketService.createTicket(ticketDTO, images, authentication.getName());
-            return ResponseEntity.status(HttpStatus.CREATED).body("Ticket created successfully!");
-        } catch (Exception e) {
-            return mapExceptionToResponse(e);
-        }
+        ticketService.createTicket(ticketDTO, images, authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body("Ticket created successfully!");
     }
 
     // 2. Get all tickets for the logged-in student
@@ -42,11 +38,7 @@ public class TicketController {
     // 3. Get full details of a specific ticket
     @GetMapping("/{id}")
     public ResponseEntity<?> getTicketDetails(@PathVariable Long id, Authentication authentication) {
-        try {
-            return ResponseEntity.ok(ticketService.getTicketDetails(id, authentication.getName()));
-        } catch (Exception e) {
-            return mapExceptionToResponse(e);
-        }
+        return ResponseEntity.ok(ticketService.getTicketDetails(id, authentication.getName()));
     }
 
     // 4. Update an existing ticket
@@ -56,40 +48,14 @@ public class TicketController {
             @RequestPart("ticketDetails") TicketRequestDTO ticketDTO,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             Authentication authentication) {
-        try {
-            ticketService.updateTicket(id, ticketDTO, images, authentication.getName());
-            return ResponseEntity.ok("Ticket updated successfully!");
-        } catch (Exception e) {
-            return mapExceptionToResponse(e);
-        }
+        ticketService.updateTicket(id, ticketDTO, images, authentication.getName());
+        return ResponseEntity.ok("Ticket updated successfully!");
     }
 
     // 5. Delete a ticket
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTicket(@PathVariable Long id, Authentication authentication) {
-        try {
-            ticketService.deleteTicket(id, authentication.getName());
-            return ResponseEntity.ok("Ticket deleted successfully!");
-        } catch (Exception e) {
-            return mapExceptionToResponse(e);
-        }
-    }
-
-    private ResponseEntity<String> mapExceptionToResponse(Exception e) {
-        String message = e.getMessage() == null ? "Request failed" : e.getMessage();
-
-        if (message.toLowerCase().contains("not found")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
-        }
-
-        if (message.toLowerCase().contains("unauthorized") || message.toLowerCase().contains("only")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
-        }
-
-        if (message.toLowerCase().contains("denied")) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
-        }
-
-        return ResponseEntity.badRequest().body(message);
+        ticketService.deleteTicket(id, authentication.getName());
+        return ResponseEntity.ok("Ticket deleted successfully!");
     }
 }
