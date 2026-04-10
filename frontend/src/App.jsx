@@ -171,6 +171,11 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <AdminTickets />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/admin/booking"
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
@@ -184,6 +189,11 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <AdminTicketDetails />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/admin/booking/review/:id"
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
