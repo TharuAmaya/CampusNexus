@@ -9,6 +9,7 @@ import {
 
 const MyBookings = () => {
     const [bookings, setBookings] = useState([]);
+    const [resourcesMap, setResourcesMap] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -20,7 +21,8 @@ const MyBookings = () => {
 
                 // First get the user profile to find the user ID
                 const profileRes = await fetch('http://localhost:8081/api/user/profile', {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
                 });
 
                 if (!profileRes.ok) throw new Error('Failed to fetch user profile');
@@ -30,12 +32,27 @@ const MyBookings = () => {
                 const userId = user.id.toString();
 
                 const bookingsRes = await fetch(`http://localhost:8081/api/bookings/my?userId=${userId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    cache: 'no-store'
                 });
 
                 if (bookingsRes.ok) {
                     const data = await bookingsRes.json();
                     setBookings(data);
+                    
+                    // Also fetch resources to map IDs to Names
+                    const resResp = await fetch('http://localhost:8081/resources', {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        cache: 'no-store'
+                    });
+                    if (resResp.ok) {
+                        const resourcesData = await resResp.json();
+                        const map = {};
+                        resourcesData.forEach(r => {
+                            map[r.resourceId] = r.name;
+                        });
+                        setResourcesMap(map);
+                    }
                 } else {
                     setError('Unable to retrieve your bookings at this time.');
                 }
@@ -164,8 +181,8 @@ const MyBookings = () => {
                                             </span>
                                         </div>
 
-                                        <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-[#f4511e] transition-colors duration-500 tracking-tight uppercase">
-                                            {booking.resourceId || 'Facility Booking'}
+                                        <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 line-clamp-1 group-hover:text-[#f4511e] transition-colors duration-500 tracking-tight uppercase" title={resourcesMap[booking.resourceId] || booking.resourceId}>
+                                            {resourcesMap[booking.resourceId] || booking.resourceId || 'Facility Booking'}
                                         </h3>
                                         <p className="text-xs font-bold text-[#f4511e] mb-12 flex items-center gap-2 uppercase tracking-widest opacity-80">
                                             <FaMapMarkerAlt className="opacity-70" />
