@@ -208,6 +208,11 @@ const AdminTicketDetails = () => {
             return;
         }
 
+        if (selectedStatus === 'INPROGRESS' && ticket?.status !== 'OPEN') {
+            setStatusError('INPROGRESS can be selected only when the current status is OPEN.');
+            return;
+        }
+
         if (selectedStatus === 'INPROGRESS' && !ticket?.assignedToEmail) {
             setStatusError('Assign a technician before setting status to INPROGRESS.');
             return;
@@ -605,7 +610,7 @@ const AdminTicketDetails = () => {
                                         <option value="OPEN">OPEN</option>
                                         <option
                                             value="INPROGRESS"
-                                            disabled={!ticket?.assignedToEmail}
+                                            disabled={ticket?.status !== 'OPEN' || !ticket?.assignedToEmail}
                                         >
                                             INPROGRESS
                                         </option>

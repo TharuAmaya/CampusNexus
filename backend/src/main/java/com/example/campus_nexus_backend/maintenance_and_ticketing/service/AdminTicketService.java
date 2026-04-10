@@ -113,11 +113,16 @@ public class AdminTicketService {
             throw new RuntimeException("Invalid status value. Allowed: OPEN, IN_PROGRESS, RESOLVED, CLOSED, REJECTED");
         }
 
+        String oldStatus = ticket.getStatus();
+
         if ("IN_PROGRESS".equals(normalizedStatus) && ticket.getAssignedTo() == null) {
             throw new RuntimeException("Assign a technician before setting status to IN_PROGRESS.");
         }
 
-        String oldStatus = ticket.getStatus();
+        if ("IN_PROGRESS".equals(normalizedStatus) && !"OPEN".equals(oldStatus)) {
+            throw new RuntimeException("Action denied: Ticket status can move to IN_PROGRESS only from OPEN.");
+        }
+
         if (normalizedStatus.equals(oldStatus)) {
             return;
         }
