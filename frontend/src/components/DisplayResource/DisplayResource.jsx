@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const API_BASE_URL = "http://localhost:8081";
 
@@ -95,9 +97,38 @@ function DisplayResource() {
     }
   };
 
+  const generatePdf = (resources) => {
+    if (!resources.length) {
+      alert("No resources to export.");
+      return;
+    }
+
+    const doc = new jsPDF("portrait");
+
+    doc.text("Resource List", 14, 10);
+
+    const tableData = resources.map((item) => [
+      item.resourceId,
+      item.name,
+      item.type,
+      item.capacity,
+      item.location,
+      item.status,
+    ]);
+
+    autoTable(doc, {
+      head: [["ID", "Name", "Type", "Capacity", "Location", "Status"]],
+      body: tableData,
+      startY: 20,
+    });
+
+    doc.save("resource_list.pdf");
+  };
+
   return (
     <div>
       <h1>Resources</h1>
+      <button onClick={() => generatePdf(resource)}>Generate PDF</button>
       <table>
         <thead>
           <tr>
