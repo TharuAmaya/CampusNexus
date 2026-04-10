@@ -16,6 +16,7 @@ function DisplayResource() {
   const [resource, setResource] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const updateNavigate = (id) => {
     navigate(`/updateresource/${id}`);
@@ -125,10 +126,23 @@ function DisplayResource() {
     doc.save("resource_list.pdf");
   };
 
+  const filteredData = resource.filter((item) =>
+    String(item.resourceId ?? "").includes(searchQuery.trim()) ||
+    (item.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.location || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.type || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div>
       <h1>Resources</h1>
       <button onClick={() => generatePdf(resource)}>Generate PDF</button>
+      <input
+        type="text"
+        placeholder="search by id and name"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
       <table>
         <thead>
           <tr>
@@ -142,7 +156,7 @@ function DisplayResource() {
           </tr>
         </thead>
         <tbody>
-    {resource.map((resource, index) => (
+    {filteredData.map((resource, index) => (
       <tr key={resource.resourceId ?? index}>
         <td>{resource.resourceId}</td>
 
