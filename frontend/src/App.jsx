@@ -29,12 +29,23 @@ import Profile from './pages/Profile.jsx';
 //admin user management page
 import ManageUsers from './pages/admin/ManageUsers';
 
+//admin booking management pages
+import AdminBookingDashboard from './pages/admin/booking/AdminBookingDashboard.jsx';
+import AdminBookingReview from './pages/admin/booking/AdminBookingReview.jsx';
+import AdminBookingScanner from './pages/admin/booking/AdminBookingScanner.jsx';
+
 import Tickets from './pages/student/Tickets.jsx';
 import AllTickets from './pages/student/AllTickets.jsx';
 import StudentTicketDetails from './pages/student/StudentTicketDetails.jsx';
 import MyBookings from './pages/student/booking/MyBookings.jsx';
 import CreateBooking from './pages/student/booking/CreateBooking.jsx';
 import BookingDetails from './pages/student/booking/BookingDetails.jsx';
+
+//Resource management pages
+import ResourceHome from './components/ResourceHome/ResourceHome.jsx';
+import AddResource from './components/AddResource/AddResource.jsx';
+import DisplayResource from './components/DisplayResource/DisplayResource.jsx';
+import UpdateResource from './components/UpdateResource/UpdateResource.jsx';
 
 function App() {
   return (
@@ -160,6 +171,10 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <AdminTickets />
+              path="/admin/booking"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminBookingDashboard />
                 </ProtectedRoute>
               }
             />
@@ -169,6 +184,19 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <AdminTicketDetails />
+              path="/admin/booking/review/:id"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminBookingReview />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/booking/scanner"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminBookingScanner />
                 </ProtectedRoute>
               }
             />
@@ -215,6 +243,39 @@ function App() {
               }
             />
 
+{/*/* Resource management routes (Admin only) */}
+            <Route
+              path="/resourcehome"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <ResourceHome />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/addresource"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AddResource />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/displayresource"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <DisplayResource />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/updateresource/:id"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <UpdateResource />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Catch-all route (Page Not Found) */}
             <Route path="*" element={<div className="container mx-auto mt-40 text-center"><h1 className="text-4xl">404 - Page Not Found 🧐</h1></div>} />

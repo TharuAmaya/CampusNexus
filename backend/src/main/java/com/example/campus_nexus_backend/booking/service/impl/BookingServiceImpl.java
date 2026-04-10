@@ -177,9 +177,9 @@ public class BookingServiceImpl implements BookingService {
 
     private void checkForConflicts(String resourceId, LocalDate date, java.time.LocalTime start, java.time.LocalTime end, Long excludeId) {
         List<Booking> conflicts = bookingRepository.findConflictingBookings(
-                resourceId, date, start, end, BookingStatus.APPROVED, excludeId);
+                resourceId, date, start, end, List.of(BookingStatus.APPROVED, BookingStatus.PENDING), excludeId);
         if (!conflicts.isEmpty()) {
-            throw new BookingConflictException("The selected time slot conflicts with an existing approved booking.");
+            throw new BookingConflictException("The selected time slot conflicts with an existing approved or pending booking.");
         }
     }
 

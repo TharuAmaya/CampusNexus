@@ -28,6 +28,8 @@ public class ResourcesModel {
     @NotBlank
     private String location;
 
+    private String imageName;
+
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -41,12 +43,13 @@ public class ResourcesModel {
 
     }
 
-    public ResourcesModel(Long resourceId, String name, ResourceType type, int capacity, String location, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ResourcesModel(Long resourceId, String name, ResourceType type, int capacity, String location, String imageName, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.resourceId = resourceId;
         this.name = name;
         this.type = type;
         this.capacity = capacity;
         this.location = location;
+        this.imageName = imageName;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -90,6 +93,14 @@ public class ResourcesModel {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
     public Status getStatus() {

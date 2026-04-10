@@ -26,7 +26,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
 
     @Query("SELECT b FROM Booking b WHERE b.resourceId = :resourceId " +
            "AND b.bookingDate = :bookingDate " +
-           "AND b.status = :status " +
+           "AND b.status IN :statuses " +
            "AND b.startTime < :endTime " +
            "AND b.endTime > :startTime " +
            "AND (:excludeId IS NULL OR b.id != :excludeId)")
@@ -34,6 +34,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
                                           @Param("bookingDate") LocalDate bookingDate,
                                           @Param("startTime") LocalTime startTime,
                                           @Param("endTime") LocalTime endTime,
-                                          @Param("status") BookingStatus status,
+                                          @Param("statuses") List<BookingStatus> statuses,
                                           @Param("excludeId") Long excludeId);
 }

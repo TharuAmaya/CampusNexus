@@ -32,7 +32,11 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // යට තියෙන CORS configuration එක පාවිච්චි කරන්න කියනවා
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**", "/login/**", "/oauth2/**", "/error").permitAll()
+//merge conflict resolved here
+                        .requestMatchers("/auth/**", "/login/**", "/oauth2/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/uploads/**", "/resources", "/resources/*").permitAll()
+                    .requestMatchers(HttpMethod.PUT, "/resources/**").permitAll()
+
 
                         // මෙන්න අලුත් පේළිය: Admin ගේ API වලට යන්න පුළුවන් ROLE_ADMIN අයට විතරයි!
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")

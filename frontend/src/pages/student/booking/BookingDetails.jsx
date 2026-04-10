@@ -12,6 +12,7 @@ const BookingDetails = () => {
     const navigate = useNavigate();
     
     const [booking, setBooking] = useState(null);
+    const [resourceDetails, setResourceDetails] = useState(null);
     const [qrToken, setQrToken] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -72,6 +73,18 @@ const BookingDetails = () => {
         fetchBookingDetails();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
+
+    useEffect(() => {
+        if (booking?.resourceId) {
+            const token = localStorage.getItem('token');
+            fetch(`http://localhost:8081/resources/${booking.resourceId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => data && setResourceDetails(data))
+            .catch(err => console.error(err));
+        }
+    }, [booking?.resourceId]);
 
     const handleCancel = async () => {
         if (!window.confirm('Are you sure you want to cancel this booking? This action cannot be undone.')) {
@@ -155,7 +168,7 @@ const BookingDetails = () => {
 
     if (isLoading) {
         return (
-            <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
+            <DashboardLayout title="Booking Details" noPadding={true}>
                 <div className="relative min-h-screen bg-gray-950 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#f4511e]"></div>
                 </div>
@@ -165,7 +178,7 @@ const BookingDetails = () => {
 
     if (error || !booking) {
         return (
-            <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
+            <DashboardLayout title="Booking Details" noPadding={true}>
                 <div className="relative min-h-screen bg-gray-950 flex items-center justify-center p-8">
                     <div className="bg-white/95 backdrop-blur-xl p-12 text-center shadow-2xl border border-white/20 max-w-lg w-full">
                         <FaInfoCircle className="text-5xl text-rose-500 mx-auto mb-6" />
@@ -183,8 +196,8 @@ const BookingDetails = () => {
     const { status, bookingCode, resourceId, resourceName, purpose, expectedAttendees, bookingDate, startTime, endTime, adminDecisionReason } = booking;
 
     return (
-        <DashboardLayout hideTitle={true} hideBranding={true} hideHeader={true} hideSidebar={true} noPadding={true}>
-            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-32 pb-20">
+        <DashboardLayout title="Booking Details" noPadding={true}>
+            <div className="relative min-h-screen font-sans overflow-hidden bg-gray-950 flex flex-col pt-32">
                 
                 {/* Immersive Background Image (library02.png) */}
                 <div
@@ -234,7 +247,7 @@ const BookingDetails = () => {
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-8 pb-8 border-b border-gray-100">
                                         <div>
                                             <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 tracking-tighter uppercase leading-tight mb-4">
-                                                {resourceName || resourceId}
+                                                {resourceDetails?.name || resourceName || resourceId}
                                             </h3>
                                             <div className={`inline-flex items-center gap-2 px-5 py-2 text-[11px] font-bold uppercase tracking-widest rounded-none border shadow-sm ${getStatusBadgeClass(status)}`}>
                                                 {getStatusIcon(status)}
@@ -346,12 +359,38 @@ const BookingDetails = () => {
                                                 )}
                                             </div>
 
-                                            {/* Facility Key */}
-                                            <div className="bg-gray-50/80 p-6 border border-gray-100 shadow-sm group hover:bg-white transition-all duration-300">
-                                                <p className="text-[10px] font-bold text-[#f4511e] uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
-                                                    <FaTags /> Facility Code
-                                                </p>
-                                                <p className="text-2xl font-bold text-gray-800 tracking-widest">{resourceId}</p>
+                                            {/* Facility Information */}
+                                            <div className="bg-[#111e2f] p-0 shadow-[0_20px_50px_rgba(0,0,0,0.2)] group transition-all duration-500 overflow-hidden relative h-full flex flex-col justify-between">
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mt-16 -mr-16 opacity-30"></div>
+                                                
+                                                {resourceDetails ? (
+                                                    <div className="flex flex-col h-full z-10 relative">
+                                                        <div className="w-full h-28 bg-black/40 relative overflow-hidden shrink-0 border-b border-white/5">
+                                                            {resourceDetails.imageName ? (
+                                                                <img src={`http://localhost:8081/uploads/${resourceDetails.imageName}`} alt={resourceDetails.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900/50 to-black/50"><FaMapMarkerAlt className="text-3xl text-blue-400/20" /></div>
+                                                            )}
+                                                        </div>
+                                                        <div className="p-6 flex-1 flex flex-col justify-center">
+                                                            <p className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                                                                <FaTags /> Assigned Venue
+                                                            </p>
+                                                            <h4 className="text-xl font-black text-white uppercase tracking-tight leading-tight">{resourceDetails.name}</h4>
+                                                            <div className="mt-3 pt-3 border-t border-white/10">
+                                                                <span className="text-[9px] text-white/40 uppercase tracking-widest font-bold block mb-1">Located In</span>
+                                                                <span className="text-xs font-bold text-gray-300 tracking-wide truncate">{resourceDetails.location}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-6 flex flex-col justify-center h-full">
+                                                        <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2 opacity-80">
+                                                            <FaTags /> Facility Code
+                                                        </p>
+                                                        <p className="text-3xl font-bold text-white tracking-widest">{resourceId}</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 

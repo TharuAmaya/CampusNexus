@@ -72,7 +72,7 @@ public class AdminBookingServiceImpl implements AdminBookingService {
                 booking.getResourceId(), booking.getBookingDate(), BookingStatus.APPROVED);
                 
         List<Booking> overlapping = bookingRepository.findConflictingBookings(
-                booking.getResourceId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime(), BookingStatus.APPROVED, booking.getId());
+                booking.getResourceId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime(), List.of(BookingStatus.APPROVED), booking.getId());
                 
         boolean hasOverlap = !overlapping.isEmpty();
         boolean canApprove = booking.getStatus() == BookingStatus.PENDING && !hasOverlap;
@@ -199,7 +199,7 @@ public class AdminBookingServiceImpl implements AdminBookingService {
 
     private void checkForConflicts(String resourceId, LocalDate date, java.time.LocalTime start, java.time.LocalTime end, Long excludeId) {
         List<Booking> conflicts = bookingRepository.findConflictingBookings(
-                resourceId, date, start, end, BookingStatus.APPROVED, excludeId);
+                resourceId, date, start, end, List.of(BookingStatus.APPROVED), excludeId);
         if (!conflicts.isEmpty()) {
             throw new BookingConflictException("The selected time slot conflicts with an existing approved booking.");
         }
@@ -235,7 +235,7 @@ public class AdminBookingServiceImpl implements AdminBookingService {
         Boolean hasConflict = false;
         if (checkConflict && b.getStatus() == BookingStatus.PENDING) {
             hasConflict = !bookingRepository.findConflictingBookings(
-                    b.getResourceId(), b.getBookingDate(), b.getStartTime(), b.getEndTime(), BookingStatus.APPROVED, b.getId()).isEmpty();
+                    b.getResourceId(), b.getBookingDate(), b.getStartTime(), b.getEndTime(), List.of(BookingStatus.APPROVED), b.getId()).isEmpty();
         }
         
         return BookingSummaryResponse.builder()
