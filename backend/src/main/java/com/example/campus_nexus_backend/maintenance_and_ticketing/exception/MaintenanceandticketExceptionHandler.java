@@ -5,7 +5,6 @@ import com.example.campus_nexus_backend.maintenance_and_ticketing.controller.Adm
 import com.example.campus_nexus_backend.maintenance_and_ticketing.controller.TechnicianTicketController;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.controller.TicketCommentController;
 import com.example.campus_nexus_backend.maintenance_and_ticketing.controller.TicketController;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,23 +24,27 @@ public class MaintenanceandticketExceptionHandler {
         String lowered = message.toLowerCase();
 
         if (lowered.contains("not found")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+            return ResponseEntity.status(404).body(withStatusCode(404, message));
         }
 
         if (lowered.contains("unauthorized") || lowered.contains("only")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
+            return ResponseEntity.status(403).body(withStatusCode(403, message));
         }
 
         if (lowered.contains("denied")) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
+            return ResponseEntity.status(409).body(withStatusCode(409, message));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+        return ResponseEntity.status(400).body(withStatusCode(400, message));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception ex) {
         String message = ex.getMessage() == null ? "Unexpected server error" : ex.getMessage();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(message);
+        return ResponseEntity.status(500).body(withStatusCode(500, message));
+    }
+
+    private String withStatusCode(int statusCode, String message) {
+        return statusCode + " " + message;
     }
 }
