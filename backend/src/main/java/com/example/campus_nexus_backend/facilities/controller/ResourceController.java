@@ -178,7 +178,7 @@ public class ResourceController {
     }
 
     @GetMapping("/api/resources/{id}")
-    public ResponseEntity<ResourceDropdownDTO> getResourceById(@PathVariable Long id) {
+    public ResponseEntity<ResourceDropdownDTO> getResourceDropdownById(@PathVariable Long id) {
         return resourceRepository.findById(id)
                 .map(resource -> ResponseEntity.ok(new ResourceDropdownDTO(
                         resource.getResourceId(),
