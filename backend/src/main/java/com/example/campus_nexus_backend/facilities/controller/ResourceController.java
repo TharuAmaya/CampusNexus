@@ -40,7 +40,7 @@ public class ResourceController {
 
     @PostMapping("/resources")
     public ResourcesModel newResourceModel(@RequestBody ResourcesModel newResourceModel) {
-        validateAvailabilityWindow(newResourceModel.getAvailableFrom(), newResourceModel.getAvailableTo());
+        validateResourceMetadata(newResourceModel);
         return resourceRepository.save(newResourceModel);
     }
 
@@ -155,10 +155,10 @@ public class ResourceController {
             existingResource.setType(newResource.getType());
             existingResource.setCapacity(newResource.getCapacity());
             existingResource.setLocation(newResource.getLocation());
-            validateAvailabilityWindow(newResource.getAvailableFrom(), newResource.getAvailableTo());
             existingResource.setAvailableFrom(newResource.getAvailableFrom());
             existingResource.setAvailableTo(newResource.getAvailableTo());
             existingResource.setStatus(newResource.getStatus());
+            validateResourceMetadata(existingResource);
 
             if (file != null && !file.isEmpty()) {
                 Path uploadDirPath = resolveUploadDirectory();
@@ -219,6 +219,37 @@ public class ResourceController {
 
         if (!availableFrom.isBefore(availableTo)) {
             throw new BadRequestException("Invalid availability window: availableFrom must be before availableTo.");
+        }
+    }
+
+    private void validateResourceMetadata(ResourcesModel resource) {
+        if (resource.getName() == null || resource.getName().trim().isEmpty()) {
+            throw new BadRequestException("Name is required.");
+        }
+
+        if (resource.getType() == null) {
+            throw new BadRequestException("Type is required.");
+        }
+
+        if (resource.getStatus() == null) {
+            throw new BadRequestException("Status is required.");
+        }
+
+        if (resource.getCapacity() < 0) {
+            throw new BadRequestException("Capacity/quantity cannot be negative.");
+        }
+
+        validateAvailabilityWindow(resource.getAvailableFrom(), resource.getAvailableTo());
+
+        if (resource.getType() == ResourceType.EQUIPMENT) {
+            if (resource.getLocation() == null || resource.getLocation().trim().isEmpty()) {
+                resource.setLocation("N/A");
+            }
+            return;
+        }
+
+        if (resource.getLocation() == null || resource.getLocation().trim().isEmpty()) {
+            throw new BadRequestException("Location is required for this resource type.");
         }
     }
 }

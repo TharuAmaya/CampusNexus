@@ -37,6 +37,7 @@ function AddResource() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+  const isEquipment = formData.type === "EQUIPMENT";
 
   useEffect(() => {
     if (!imageFile) {
@@ -85,9 +86,17 @@ function AddResource() {
 
   const validateForm = () => {
     if (!formData.name.trim()) return "Name is required.";
-    if (!formData.location.trim()) return "Location is required.";
-    if (formData.capacity === "") return "Capacity is required.";
-    if (Number(formData.capacity) < 0) return "Capacity cannot be negative.";
+    if (formData.capacity === "") {
+      return isEquipment ? "Quantity is required." : "Capacity is required.";
+    }
+    if (Number(formData.capacity) < 0) {
+      return isEquipment
+        ? "Quantity cannot be negative."
+        : "Capacity cannot be negative.";
+    }
+    if (!isEquipment && !formData.location.trim()) {
+      return "Location is required for this resource type.";
+    }
     if (!formData.availableFrom || !formData.availableTo) {
       return "Availability window is required.";
     }
@@ -247,7 +256,7 @@ function AddResource() {
                   className="mb-2 block text-sm font-semibold text-slate-700"
                   htmlFor="capacity"
                 >
-                  Capacity
+                  {isEquipment ? "Quantity" : "Capacity"}
                 </label>
                 <input
                   id="capacity"
@@ -256,7 +265,7 @@ function AddResource() {
                   min="0"
                   value={formData.capacity}
                   onChange={handleChange}
-                  placeholder="Ex: 120"
+                  placeholder={isEquipment ? "Ex: 10 units" : "Ex: 120"}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                   required
                 />
@@ -266,7 +275,7 @@ function AddResource() {
                   className="mb-2 block text-sm font-semibold text-slate-700"
                   htmlFor="location"
                 >
-                  Location
+                  Location {isEquipment ? "(Optional for equipment)" : ""}
                 </label>
                 <input
                   id="location"
@@ -274,9 +283,13 @@ function AddResource() {
                   type="text"
                   value={formData.location}
                   onChange={handleChange}
-                  placeholder="Ex: Block A, Ground Floor"
+                  placeholder={
+                    isEquipment
+                      ? "Ex: Storage Room A (optional)"
+                      : "Ex: Block A, Ground Floor"
+                  }
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  required
+                  required={!isEquipment}
                 />
               </div>
               <div>

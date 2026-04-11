@@ -5,6 +5,7 @@ import com.example.campus_nexus_backend.facilities.model.enums.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,21 +21,24 @@ public class ResourcesModel {
     @NotBlank
     private String name;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ResourceType type;
 
     @Min(0)
     private int capacity;
 
-    @NotBlank
     private String location;
 
+    @NotNull
     private LocalTime availableFrom;
 
+    @NotNull
     private LocalTime availableTo;
 
     private String imageName;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Status status;
 

@@ -239,7 +239,9 @@ function ResourceCatalogue() {
 												<dt className="text-slate-500">Location</dt>
 												<dd>{item.location || "-"}</dd>
 
-												<dt className="text-slate-500">Capacity</dt>
+												<dt className="text-slate-500">
+													{item.type === "EQUIPMENT" ? "Quantity" : "Capacity"}
+												</dt>
 												<dd>{item.capacity ?? "-"}</dd>
 
 												<dt className="text-slate-500">Available</dt>

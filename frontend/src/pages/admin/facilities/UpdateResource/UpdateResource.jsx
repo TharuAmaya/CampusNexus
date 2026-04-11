@@ -37,6 +37,7 @@ function UpdateResource() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const isEquipment = formData.type === "EQUIPMENT";
 
   // Load existing resource
   useEffect(() => {
@@ -84,10 +85,39 @@ function UpdateResource() {
     }));
   };
 
+  const validateForm = () => {
+    if (!formData.name?.trim()) return "Name is required.";
+    if (formData.capacity === "") {
+      return isEquipment ? "Quantity is required." : "Capacity is required.";
+    }
+    if (Number(formData.capacity) < 0) {
+      return isEquipment
+        ? "Quantity cannot be negative."
+        : "Capacity cannot be negative.";
+    }
+    if (!isEquipment && !formData.location?.trim()) {
+      return "Location is required for this resource type.";
+    }
+    if (!formData.availableFrom || !formData.availableTo) {
+      return "Availability window is required.";
+    }
+    if (formData.availableFrom >= formData.availableTo) {
+      return "availableFrom must be before availableTo.";
+    }
+    return "";
+  };
+
   // Submit update
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     setSaving(true);
 
     const data = new FormData();
@@ -99,7 +129,7 @@ function UpdateResource() {
         name: formData.name,
         type: formData.type,
         capacity: Number(formData.capacity),
-        location: formData.location,
+        location: formData.location.trim(),
         availableFrom: formData.availableFrom,
         availableTo: formData.availableTo,
         status: formData.status,
@@ -151,88 +181,116 @@ function UpdateResource() {
       {error && <p className="mb-4 text-red-600">{error}</p>}
 
       <form onSubmit={onSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={onInputChange}
-          placeholder="Name"
-          className="w-full rounded border p-2"
-          required
-        />
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">Resource Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={onInputChange}
+            placeholder="Name"
+            className="w-full rounded border p-2"
+            required
+          />
+        </div>
 
-        <select
-          name="type"
-          value={formData.type}
-          onChange={onInputChange}
-          className="w-full rounded border p-2"
-        >
-          {RESOURCE_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">Type</label>
+          <select
+            name="type"
+            value={formData.type}
+            onChange={onInputChange}
+            className="w-full rounded border p-2"
+          >
+            {RESOURCE_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <input
-          type="number"
-          name="capacity"
-          min="0"
-          value={formData.capacity}
-          onChange={onInputChange}
-          placeholder="Capacity"
-          className="w-full rounded border p-2"
-          required
-        />
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">
+            {isEquipment ? "Quantity" : "Capacity"}
+          </label>
+          <input
+            type="number"
+            name="capacity"
+            min="0"
+            value={formData.capacity}
+            onChange={onInputChange}
+            placeholder={isEquipment ? "Quantity" : "Capacity"}
+            className="w-full rounded border p-2"
+            required
+          />
+        </div>
 
-        <input
-          type="text"
-          name="location"
-          value={formData.location}
-          onChange={onInputChange}
-          placeholder="Location"
-          className="w-full rounded border p-2"
-          required
-        />
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">
+            Location {isEquipment ? "(Optional for equipment)" : ""}
+          </label>
+          <input
+            type="text"
+            name="location"
+            value={formData.location}
+            onChange={onInputChange}
+            placeholder={isEquipment ? "Location (optional)" : "Location"}
+            className="w-full rounded border p-2"
+            required={!isEquipment}
+          />
+        </div>
 
-        <input
-          type="time"
-          name="availableFrom"
-          value={formData.availableFrom}
-          onChange={onInputChange}
-          className="w-full rounded border p-2"
-          required
-        />
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">Available From</label>
+          <input
+            type="time"
+            name="availableFrom"
+            value={formData.availableFrom}
+            onChange={onInputChange}
+            className="w-full rounded border p-2"
+            required
+          />
+        </div>
 
-        <input
-          type="time"
-          name="availableTo"
-          value={formData.availableTo}
-          onChange={onInputChange}
-          className="w-full rounded border p-2"
-          required
-        />
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">Available To</label>
+          <input
+            type="time"
+            name="availableTo"
+            value={formData.availableTo}
+            onChange={onInputChange}
+            className="w-full rounded border p-2"
+            required
+          />
+        </div>
 
-        <select
-          name="status"
-          value={formData.status}
-          onChange={onInputChange}
-          className="w-full rounded border p-2"
-        >
-          {RESOURCE_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">Status</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={onInputChange}
+            className="w-full rounded border p-2"
+          >
+            {RESOURCE_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <input
-          type="file"
-          name="image"
-          accept="image/*"
-          onChange={onInputChange}
-          className="w-full rounded border p-2"
-        />
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">Image</label>
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={onInputChange}
+            className="w-full rounded border p-2"
+          />
+        </div>
 
         <button
           type="submit"
