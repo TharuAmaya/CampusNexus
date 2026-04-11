@@ -40,6 +40,7 @@ import ResourceHome from './pages/admin/facilities/ResourceHome/ResourceHome.jsx
 import AddResource from './pages/admin/facilities/AddResource/AddResource.jsx';
 import DisplayResource from './pages/admin/facilities/DisplayResource/DisplayResource.jsx';
 import UpdateResource from './pages/admin/facilities/UpdateResource/UpdateResource.jsx';
+import ResourceCatalogue from './pages/student/facilities/ResourceCatalogue.jsx';
 
 function App() {
   return (
@@ -114,6 +115,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
                   <BookingDetails />
+                </ProtectedRoute>}
+            />
+
+{/*/* Resource management routes (Student only) */}
+            <Route
+              path="/student/resources"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <ResourceCatalogue />
                 </ProtectedRoute>}
             />
 
