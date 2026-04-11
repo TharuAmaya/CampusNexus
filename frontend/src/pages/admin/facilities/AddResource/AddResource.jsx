@@ -24,6 +24,8 @@ const initialForm = {
   type: RESOURCE_TYPES[0],
   capacity: "",
   location: "",
+  availableFrom: "08:00",
+  availableTo: "17:00",
   status: RESOURCE_STATUSES[0],
 };
 
@@ -86,6 +88,12 @@ function AddResource() {
     if (!formData.location.trim()) return "Location is required.";
     if (formData.capacity === "") return "Capacity is required.";
     if (Number(formData.capacity) < 0) return "Capacity cannot be negative.";
+    if (!formData.availableFrom || !formData.availableTo) {
+      return "Availability window is required.";
+    }
+    if (formData.availableFrom >= formData.availableTo) {
+      return "availableFrom must be before availableTo.";
+    }
     return "";
   };
 
@@ -111,6 +119,8 @@ function AddResource() {
         type: formData.type,
         capacity: Number(formData.capacity),
         location: formData.location.trim(),
+        availableFrom: formData.availableFrom,
+        availableTo: formData.availableTo,
         imageName: uploadedFilename || null,
         status: formData.status,
       };
@@ -265,6 +275,40 @@ function AddResource() {
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="Ex: Block A, Ground Floor"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  htmlFor="availableFrom"
+                >
+                  Available From
+                </label>
+                <input
+                  id="availableFrom"
+                  name="availableFrom"
+                  type="time"
+                  value={formData.availableFrom}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  className="mb-2 block text-sm font-semibold text-slate-700"
+                  htmlFor="availableTo"
+                >
+                  Available To
+                </label>
+                <input
+                  id="availableTo"
+                  name="availableTo"
+                  type="time"
+                  value={formData.availableTo}
+                  onChange={handleChange}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                   required
                 />

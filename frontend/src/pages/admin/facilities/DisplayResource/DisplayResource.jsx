@@ -17,6 +17,9 @@ function DisplayResource() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [minCapacityFilter, setMinCapacityFilter] = useState("");
 
   const updateNavigate = (id) => {
     navigate(`/updateresource/${id}`);
@@ -114,11 +117,13 @@ function DisplayResource() {
       item.type,
       item.capacity,
       item.location,
+      item.availableFrom || "-",
+      item.availableTo || "-",
       item.status,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Name", "Type", "Capacity", "Location", "Status"]],
+      head: [["ID", "Name", "Type", "Capacity", "Location", "Available From", "Available To", "Status"]],
       body: tableData,
       startY: 20,
     });
@@ -127,11 +132,18 @@ function DisplayResource() {
   };
 
   const filteredData = resource.filter((item) =>
-    String(item.resourceId ?? "").includes(searchQuery.trim()) ||
-    (item.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (item.location || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (item.type || "").toLowerCase().includes(searchQuery.toLowerCase())
+    (searchQuery.trim() === "" ||
+      String(item.resourceId ?? "").includes(searchQuery.trim()) ||
+      (item.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.location || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.type || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
+    (typeFilter === "" || (item.type || "") === typeFilter) &&
+    (locationFilter.trim() === "" ||
+      (item.location || "").toLowerCase().includes(locationFilter.toLowerCase())) &&
+    (minCapacityFilter === "" || (item.capacity ?? 0) >= Number(minCapacityFilter))
   );
+
+  const uniqueTypes = Array.from(new Set(resource.map((item) => item.type).filter(Boolean)));
 
   return (
     <div>
@@ -139,9 +151,30 @@ function DisplayResource() {
       <button onClick={() => generatePdf(resource)}>Generate PDF</button>
       <input
         type="text"
-        placeholder="search by id and name"
+        placeholder="Search by ID, name, type, location"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
+      />
+      <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+        <option value="">All Types</option>
+        {uniqueTypes.map((type) => (
+          <option key={type} value={type}>
+            {type}
+          </option>
+        ))}
+      </select>
+      <input
+        type="number"
+        min="0"
+        placeholder="Min Capacity"
+        value={minCapacityFilter}
+        onChange={(e) => setMinCapacityFilter(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Filter by location"
+        value={locationFilter}
+        onChange={(e) => setLocationFilter(e.target.value)}
       />
       <table>
         <thead>
@@ -151,6 +184,8 @@ function DisplayResource() {
             <th>Type</th>
             <th>Capacity</th>
             <th>Location</th>
+            <th>Available From</th>
+            <th>Available To</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
@@ -173,6 +208,8 @@ function DisplayResource() {
         <td>{resource.type}</td>
         <td>{resource.capacity}</td>
         <td>{resource.location}</td>
+        <td>{resource.availableFrom || "-"}</td>
+        <td>{resource.availableTo || "-"}</td>
         <td>{resource.status}</td>
         <td>
           <button onClick={() => updateNavigate(resource.resourceId)}>

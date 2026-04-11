@@ -29,6 +29,8 @@ function UpdateResource() {
     type: RESOURCE_TYPES[0],
     capacity: "",
     location: "",
+    availableFrom: "08:00",
+    availableTo: "17:00",
     status: RESOURCE_STATUSES[0],
     image: null,
   });
@@ -57,6 +59,8 @@ function UpdateResource() {
           type: data.type || "",
           capacity: data.capacity || "",
           location: data.location || "",
+          availableFrom: data.availableFrom || "08:00",
+          availableTo: data.availableTo || "17:00",
           status: data.status || "",
           image: null,
         });
@@ -96,6 +100,8 @@ function UpdateResource() {
         type: formData.type,
         capacity: Number(formData.capacity),
         location: formData.location,
+        availableFrom: formData.availableFrom,
+        availableTo: formData.availableTo,
         status: formData.status,
       })
     );
@@ -185,6 +191,24 @@ function UpdateResource() {
           value={formData.location}
           onChange={onInputChange}
           placeholder="Location"
+          className="w-full rounded border p-2"
+          required
+        />
+
+        <input
+          type="time"
+          name="availableFrom"
+          value={formData.availableFrom}
+          onChange={onInputChange}
+          className="w-full rounded border p-2"
+          required
+        />
+
+        <input
+          type="time"
+          name="availableTo"
+          value={formData.availableTo}
+          onChange={onInputChange}
           className="w-full rounded border p-2"
           required
         />

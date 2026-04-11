@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,6 +29,10 @@ public class ResourcesModel {
     @NotBlank
     private String location;
 
+    private LocalTime availableFrom;
+
+    private LocalTime availableTo;
+
     private String imageName;
 
     @Enumerated(EnumType.STRING)
@@ -43,12 +48,14 @@ public class ResourcesModel {
 
     }
 
-    public ResourcesModel(Long resourceId, String name, ResourceType type, int capacity, String location, String imageName, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ResourcesModel(Long resourceId, String name, ResourceType type, int capacity, String location, LocalTime availableFrom, LocalTime availableTo, String imageName, Status status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.resourceId = resourceId;
         this.name = name;
         this.type = type;
         this.capacity = capacity;
         this.location = location;
+        this.availableFrom = availableFrom;
+        this.availableTo = availableTo;
         this.imageName = imageName;
         this.status = status;
         this.createdAt = createdAt;
@@ -93,6 +100,22 @@ public class ResourcesModel {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public LocalTime getAvailableFrom() {
+        return availableFrom;
+    }
+
+    public void setAvailableFrom(LocalTime availableFrom) {
+        this.availableFrom = availableFrom;
+    }
+
+    public LocalTime getAvailableTo() {
+        return availableTo;
+    }
+
+    public void setAvailableTo(LocalTime availableTo) {
+        this.availableTo = availableTo;
     }
 
     public String getImageName() {
