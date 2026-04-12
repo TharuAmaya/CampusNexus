@@ -82,8 +82,8 @@ public class AdminTicketService {
         User changedBy = userRepository.findByEmail(changedByEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if ("CLOSED".equals(ticket.getStatus())) {
-            throw new RuntimeException("Cannot reject a CLOSED ticket.");
+        if (!"OPEN".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: Admin can only reject tickets with an 'OPEN' status.");
         }
 
         String oldStatus = ticket.getStatus();
@@ -97,6 +97,25 @@ public class AdminTicketService {
         saveStatusHistory(ticket, oldStatus, "REJECTED", changedBy);
     }
 
+    // 4b. Cancel Rejection
+    public void cancelRejection(Long ticketId, String changedByEmail) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        User changedBy = userRepository.findByEmail(changedByEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!"REJECTED".equals(ticket.getStatus())) {
+            throw new RuntimeException("Action denied: Only REJECTED tickets can have rejection cancelled.");
+        }
+
+        String oldStatus = ticket.getStatus();
+        ticket.setStatus("OPEN");
+        ticket.setRejectionReason(null);
+        ticketRepository.save(ticket);
+        saveStatusHistory(ticket, oldStatus, "OPEN", changedBy);
+    }
+
     // 5. Manually Update Status
     public void updateTicketStatus(Long ticketId, String newStatus, String changedByEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
@@ -105,7 +124,7 @@ public class AdminTicketService {
         User changedBy = userRepository.findByEmail(changedByEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String normalizedStatus = newStatus.toUpperCase();
+        String normalizedStatus = normalizeStatus(newStatus);
 
         // Validate that the status is one of the allowed values
         List<String> allowedStatuses = List.of("OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED");
@@ -113,13 +132,26 @@ public class AdminTicketService {
             throw new RuntimeException("Invalid status value. Allowed: OPEN, IN_PROGRESS, RESOLVED, CLOSED, REJECTED");
         }
 
+        String oldStatus = ticket.getStatus();
+
         if ("IN_PROGRESS".equals(normalizedStatus) && ticket.getAssignedTo() == null) {
             throw new RuntimeException("Assign a technician before setting status to IN_PROGRESS.");
         }
 
-        String oldStatus = ticket.getStatus();
+        if ("IN_PROGRESS".equals(normalizedStatus) && !"OPEN".equals(oldStatus)) {
+            throw new RuntimeException("Action denied: Ticket status can move to IN_PROGRESS only from OPEN.");
+        }
+
+        if ("OPEN".equals(normalizedStatus) && "CLOSED".equals(oldStatus)) {
+            throw new RuntimeException("Action denied: CLOSED tickets cannot be moved back to OPEN.");
+        }
+
         if (normalizedStatus.equals(oldStatus)) {
             return;
+        }
+
+        if ("CLOSED".equals(normalizedStatus) && !List.of("REJECTED", "RESOLVED").contains(oldStatus)) {
+            throw new RuntimeException("Action denied: Ticket must be REJECTED or RESOLVED before setting status to CLOSED.");
         }
 
         ticket.setStatus(normalizedStatus);
@@ -127,7 +159,20 @@ public class AdminTicketService {
         saveStatusHistory(ticket, oldStatus, normalizedStatus, changedBy);
     }
 
-    // 6. Delete CLOSED Ticket ONLY
+    private String normalizeStatus(String status) {
+        if (status == null) {
+            throw new RuntimeException("Status is required.");
+        }
+
+        String cleanedStatus = status.trim().toUpperCase().replace("-", "_");
+        if ("INPROGRESS".equals(cleanedStatus)) {
+            return "IN_PROGRESS";
+        }
+
+        return cleanedStatus;
+    }
+
+    // 6. Delete CLOSED ticket ONLY
     public void deleteClosedTicket(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));

@@ -1,5 +1,6 @@
 package com.example.campus_nexus_backend.facilities.controller;
 
+import com.example.campus_nexus_backend.facilities.dto.ResourceDropdownDTO;
 import com.example.campus_nexus_backend.facilities.exception.BadRequestException;
 import com.example.campus_nexus_backend.facilities.exception.ResourceNotFoundException;
 import com.example.campus_nexus_backend.facilities.model.ResourcesModel;
@@ -24,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -79,8 +81,8 @@ public class ResourceController {
         return Paths.get("src", "main", "uploads");
     }
 
-        @GetMapping("/resources")
-        public List<ResourcesModel> getAllResources(
+    @GetMapping("/resources")
+    public List<ResourcesModel> getAllResources(
             @RequestParam(value = "type", required = false) ResourceType type,
             @RequestParam(value = "status", required = false) Status status,
             @RequestParam(value = "minCapacity", required = false) Integer minCapacity,
@@ -251,5 +253,49 @@ public class ResourceController {
         if (resource.getLocation() == null || resource.getLocation().trim().isEmpty()) {
             throw new BadRequestException("Location is required for this resource type.");
         }
+    }
+
+    @GetMapping("/api/resources/types")
+    public ResponseEntity<List<String>> getResourceTypes() {
+        List<ResourceType> types = resourceRepository.findDistinctTypes();
+        List<String> typeStrings = types.stream()
+                .map(ResourceType::toString)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(typeStrings);
+    }
+
+    @GetMapping("/api/resources/names")
+    public ResponseEntity<List<ResourceDropdownDTO>> getResourceNamesByType(@RequestParam String type) {
+        try {
+            List<ResourcesModel> resources = resourceRepository.findAll();
+            ResourceType resourceType = ResourceType.valueOf(type.toUpperCase());
+            resources = resources.stream()
+                    .filter(resource -> resource.getType() == resourceType)
+                    .toList();
+
+            List<ResourceDropdownDTO> dropdownItems = resources.stream()
+                    .sorted(Comparator.comparing(ResourcesModel::getName, String.CASE_INSENSITIVE_ORDER))
+                    .map(resource -> new ResourceDropdownDTO(
+                            resource.getResourceId(),
+                            resource.getName(),
+                            resource.getType() != null ? resource.getType().name() : null
+                    ))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dropdownItems);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/api/resources/{id}")
+    public ResponseEntity<ResourceDropdownDTO> getResourceDropdownById(@PathVariable Long id) {
+        return resourceRepository.findById(id)
+                .map(resource -> ResponseEntity.ok(new ResourceDropdownDTO(
+                        resource.getResourceId(),
+                        resource.getName(),
+                        resource.getType() != null ? resource.getType().name() : null
+                )))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

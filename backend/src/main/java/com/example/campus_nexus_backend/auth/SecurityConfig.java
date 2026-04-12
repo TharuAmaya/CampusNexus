@@ -63,8 +63,8 @@ public class SecurityConfig {
         // React Frontend එකට ඉඩ දෙනවා
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
 
-        // GET, POST, PUT ඔක්කොටම ඉඩ දෙනවා
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // GET, POST, PUT, PATCH, DELETE ඔක්කොටම ඉඩ දෙනවා
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         // Tokens ගේන්න ඉඩ දෙනවා
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*"));

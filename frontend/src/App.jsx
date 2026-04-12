@@ -13,8 +13,12 @@ import Footer from './components/Footer.jsx';
 
 // --- අලුත් IMPORTS ---
 import AdminHome from './pages/admin/AdminHome.jsx'; // Folder structure එක බලන්න
+import AdminTickets from './pages/admin/AdminTickets.jsx';
+import AdminTicketDetails from './pages/admin/AdminTicketDetails.jsx';
 import StudentHome from './pages/student/StudentHome.jsx';
 import TechnicianHome from './pages/technician/TechnicianHome.jsx';
+import AssignedTickets from './pages/technician/AssignedTickets.jsx';
+import TechnicianTicketDetails from './pages/technician/TechnicianTicketDetails.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // ආරක්‍ෂක component එක
 
 ///View grades page එක
@@ -31,6 +35,8 @@ import AdminBookingReview from './pages/admin/booking/AdminBookingReview.jsx';
 import AdminBookingScanner from './pages/admin/booking/AdminBookingScanner.jsx';
 
 import Tickets from './pages/student/Tickets.jsx';
+import AllTickets from './pages/student/AllTickets.jsx';
+import StudentTicketDetails from './pages/student/StudentTicketDetails.jsx';
 import MyBookings from './pages/student/booking/MyBookings.jsx';
 import CreateBooking from './pages/student/booking/CreateBooking.jsx';
 import BookingDetails from './pages/student/booking/BookingDetails.jsx';
@@ -95,6 +101,22 @@ function App() {
             />
 
             <Route
+              path="/student/all-tickets"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <AllTickets />
+                </ProtectedRoute>}
+            />
+
+            <Route
+              path="/student/all-tickets/:ticketId"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <StudentTicketDetails />
+                </ProtectedRoute>}
+            />
+
+            <Route
               path="/student/booking"
               element={
                 <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
@@ -155,10 +177,28 @@ function App() {
             />
 
             <Route
+              path="/admin/tickets"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminTickets />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/admin/booking"
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
                   <AdminBookingDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/tickets/:ticketId"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminTicketDetails />
                 </ProtectedRoute>
               }
             />
@@ -189,6 +229,24 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
                   <TechnicianHome />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/technician/tickets"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
+                  <AssignedTickets />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/technician/tickets/:ticketId"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
+                  <TechnicianTicketDetails />
                 </ProtectedRoute>
               }
             />
@@ -252,3 +310,5 @@ function App() {
 }
 
 export default App;
+
+//sahiru
