@@ -14,6 +14,8 @@
     "axios": "^1.14.0",
     "framer-motion": "^12.23.26",
     "html5-qrcode": "^2.3.8",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.561.0",
     "react": "^19.2.0",
