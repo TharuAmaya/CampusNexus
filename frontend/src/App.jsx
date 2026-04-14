@@ -300,6 +300,3 @@ function App() {
 }
 
 export default App;
-
-//sahiru
-//guneds
