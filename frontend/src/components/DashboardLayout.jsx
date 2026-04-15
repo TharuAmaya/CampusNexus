@@ -24,14 +24,15 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
     const getSidebarLinks = () => {
         const commonLinks = [
             { name: 'Dashboard Home', path: userRole === 'ROLE_ADMIN' ? '/admin-dashboard' : userRole === 'ROLE_TECHNICIAN' ? '/technician-dashboard' : '/student-dashboard', icon: <FaHome /> },
-            { name: 'Profile', path: '/profile', icon: <FaUser /> },
-            { name: 'Notifications', path: '/notifications', icon: <FaBell /> }
+            { name: 'Profile', path: '/profile', icon: <FaUser /> }
         ];
 
         if (userRole === 'ROLE_ADMIN') {
             return [...commonLinks,
             { name: 'Ticket Management', path: '/admin/tickets', icon: <FaTicketAlt /> },
             { name: 'User List', path: '/admin/users', icon: <FaUsers /> },
+            //notification admin
+            { name: 'Admin Notifications', path: '/admin/notifications', icon: <FaBell /> }, // අලුත් එක
             /**newly added */
             { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> }];
 
@@ -41,6 +42,9 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             { name: 'Publish Ticket', path: '/student/publish-ticket', icon: <FaTicketAlt /> },
             { name: 'All Tickets', path: '/student/all-tickets', icon: <FaTicketAlt /> },
             { name: 'Resources', path: '/student/resources', icon: <FaBoxes /> },
+
+            { name: 'Student Notifications', path: '/student/notifications', icon: <FaBell /> }, // අලුත් එක
+
             // මෙන්න අලුතින් දාපු එක:
             { name: 'View Grades', path: '/student/grades', icon: <FaGraduationCap /> },
             { name: 'Resource Booking', path: '/student/booking', icon: <FaCalendarAlt /> }];
@@ -48,6 +52,9 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
         } else if (userRole === 'ROLE_TECHNICIAN') {
             return [...commonLinks,
             { name: 'Assigned Tickets', path: '/technician/tickets', icon: <FaTicketAlt /> },
+
+            { name: 'Technician Notifications', path: '/technician/notifications', icon: <FaBell /> }, // අලුත් එක
+            
             { name: 'Maintenance Logs', path: '/technician/logs', icon: <FaTools /> }];
         }
         return commonLinks;
