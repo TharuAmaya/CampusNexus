@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 //merge conflict resolved here
                         .requestMatchers("/auth/**", "/login/**", "/oauth2/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/uploads/**", "/resources", "/resources/*").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/uploads/**", "/resources", "/resources/*", "/test-bookings").permitAll()
                     .requestMatchers(HttpMethod.PUT, "/resources/**").permitAll()
 
 
@@ -64,7 +64,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
 
         // GET, POST, PUT ඔක්කොටම ඉඩ දෙනවා
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         // Tokens ගේන්න ඉඩ දෙනවා
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*"));
