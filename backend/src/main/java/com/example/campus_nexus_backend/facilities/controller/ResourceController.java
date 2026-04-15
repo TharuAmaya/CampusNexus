@@ -73,11 +73,19 @@ public class ResourceController {
     }
 
     private Path resolveUploadDirectory() {
+        // Try original path for team members
         Path backendRelative = Paths.get("backend", "src", "main", "uploads");
         if (backendRelative.toFile().exists() || Paths.get("backend", "src", "main").toFile().exists()) {
             return backendRelative;
         }
 
+        // Try CampusNexus/backend path structure
+        Path campusNexusPath = Paths.get("CampusNexus", "backend", "src", "main", "uploads");
+        if (campusNexusPath.toFile().exists()) {
+            return campusNexusPath;
+        }
+
+        // Fallback to original default
         return Paths.get("src", "main", "uploads");
     }
 
