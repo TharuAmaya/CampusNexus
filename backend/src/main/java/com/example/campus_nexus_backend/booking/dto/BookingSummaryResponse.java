@@ -1,6 +1,8 @@
 package com.example.campus_nexus_backend.booking.dto;
 
 import com.example.campus_nexus_backend.booking.enums.BookingStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,11 +10,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Map;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BookingSummaryResponse {
     private Long id;
     private String bookingCode;
@@ -22,4 +26,8 @@ public class BookingSummaryResponse {
     private LocalTime endTime;
     private BookingStatus status;
     private Boolean hasConflict;
+
+    /** HATEOAS links for navigating from a collection item to the full resource. */
+    @JsonProperty("_links")
+    private Map<String, String> links;
 }
