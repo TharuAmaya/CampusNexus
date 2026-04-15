@@ -32,6 +32,7 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             return [...commonLinks,
             { name: 'Ticket Management', path: '/admin/tickets', icon: <FaTicketAlt /> },
             { name: 'User List', path: '/admin/users', icon: <FaUsers /> },
+            { name: 'Booking Management', path: '/admin/booking', icon: <FaCalendarAlt /> },
             /**newly added */
             { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> }];
 
