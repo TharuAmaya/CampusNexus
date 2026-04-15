@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class AssignTechnicianDTO {
-    private Long technicianId;
+    private Long assignedTechnicianId;
 }

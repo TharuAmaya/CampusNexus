@@ -64,6 +64,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
 
         // GET, POST, PUT ඔක්කොටම ඉඩ දෙනවා
+        // GET, POST, PUT, PATCH, DELETE ඔක්කොටම ඉඩ දෙනවා
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         // Tokens ගේන්න ඉඩ දෙනවා

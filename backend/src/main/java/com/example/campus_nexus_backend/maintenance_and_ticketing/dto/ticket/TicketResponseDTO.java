@@ -9,7 +9,6 @@ import com.example.campus_nexus_backend.maintenance_and_ticketing.dto.attachment
 public class TicketResponseDTO {
     private Long ticketId;
     private Long resourceId;
-    private String locationText;
     private String category;
     private String description;
     private String priority;
@@ -17,6 +16,8 @@ public class TicketResponseDTO {
     private String status;
     private String resolutionNotes;
     private LocalDateTime createdAt;
+    private String assignedToEmail;
+    private String createdByEmail;
     
     // To send attachment details back to the frontend
     private List<AttachmentDTO> attachments;

@@ -21,4 +21,13 @@ public class ResourceNotFoundAdvice {
 
         return errorMap;
     }
+
+    @ResponseBody
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> badRequestHandler(BadRequestException exception) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("errorMessage", exception.getMessage());
+        return errorMap;
+    }
 }
