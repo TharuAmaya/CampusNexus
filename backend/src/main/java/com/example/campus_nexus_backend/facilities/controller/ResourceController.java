@@ -102,17 +102,20 @@ public class ResourceController {
         String normalizedKeyword = keyword == null ? "" : keyword.toLowerCase(Locale.ROOT);
 
         return resourceRepository.findAll().stream()
-            .filter(r -> type == null || r.getType() == type)
-            .filter(r -> status == null || r.getStatus() == status)
-            .filter(r -> minCapacity == null || r.getCapacity() >= minCapacity)
-            .filter(r -> maxCapacity == null || r.getCapacity() <= maxCapacity)
-            .filter(r -> normalizedLocation.isBlank() || (r.getLocation() != null && r.getLocation().toLowerCase(Locale.ROOT).contains(normalizedLocation)))
-            .filter(r -> normalizedKeyword.isBlank() ||
-                String.valueOf(r.getResourceId()).contains(normalizedKeyword) ||
-                (r.getName() != null && r.getName().toLowerCase(Locale.ROOT).contains(normalizedKeyword)) ||
-                (r.getType() != null && r.getType().name().toLowerCase(Locale.ROOT).contains(normalizedKeyword)) ||
-                (r.getLocation() != null && r.getLocation().toLowerCase(Locale.ROOT).contains(normalizedKeyword)))
-            .collect(Collectors.toList());
+                .filter(r -> type == null || r.getType() == type)
+                .filter(r -> status == null || r.getStatus() == status)
+                .filter(r -> minCapacity == null || r.getCapacity() >= minCapacity)
+                .filter(r -> maxCapacity == null || r.getCapacity() <= maxCapacity)
+                .filter(r -> normalizedLocation.isBlank() || (r.getLocation() != null
+                        && r.getLocation().toLowerCase(Locale.ROOT).contains(normalizedLocation)))
+                .filter(r -> normalizedKeyword.isBlank() ||
+                        String.valueOf(r.getResourceId()).contains(normalizedKeyword) ||
+                        (r.getName() != null && r.getName().toLowerCase(Locale.ROOT).contains(normalizedKeyword)) ||
+                        (r.getType() != null && r.getType().name().toLowerCase(Locale.ROOT).contains(normalizedKeyword))
+                        ||
+                        (r.getLocation() != null
+                                && r.getLocation().toLowerCase(Locale.ROOT).contains(normalizedKeyword)))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/resources/{id}")
@@ -286,8 +289,7 @@ public class ResourceController {
                     .map(resource -> new ResourceDropdownDTO(
                             resource.getResourceId(),
                             resource.getName(),
-                            resource.getType() != null ? resource.getType().name() : null
-                    ))
+                            resource.getType() != null ? resource.getType().name() : null))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(dropdownItems);
@@ -302,8 +304,7 @@ public class ResourceController {
                 .map(resource -> ResponseEntity.ok(new ResourceDropdownDTO(
                         resource.getResourceId(),
                         resource.getName(),
-                        resource.getType() != null ? resource.getType().name() : null
-                )))
+                        resource.getType() != null ? resource.getType().name() : null)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

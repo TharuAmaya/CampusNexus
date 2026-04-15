@@ -48,6 +48,12 @@ import DisplayResource from './pages/admin/facilities/DisplayResource/DisplayRes
 import UpdateResource from './pages/admin/facilities/UpdateResource/UpdateResource.jsx';
 import ResourceCatalogue from './pages/student/facilities/ResourceCatalogue.jsx';
 
+
+// Notifications Pages
+import AdminNotifications from './pages/admin/AdminNotifications.jsx';
+import StudentNotifications from './pages/student/StudentNotifications.jsx';
+import TechnicianNotifications from './pages/technician/TechnicianNotifications.jsx';
+
 function App() {
   return (
     <Router>
@@ -140,7 +146,7 @@ function App() {
                 </ProtectedRoute>}
             />
 
-{/*/* Resource management routes (Student only) */}
+            {/*/* Resource management routes (Student only) */}
             <Route
               path="/student/resources"
               element={
@@ -149,10 +155,17 @@ function App() {
                 </ProtectedRoute>}
             />
 
+                {/*/* Student Notifications */}
+            <Route
+              path="/student/notifications"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <StudentNotifications />
+                </ProtectedRoute>}
+            />
 
 
 
-            
 
 
             {/* -- ADMIN DASHBOARD -- */}
@@ -221,6 +234,16 @@ function App() {
               }
             />
 
+              {/* Admin Notifications */}
+              <Route
+              path="/admin/notifications"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminNotifications />
+                </ProtectedRoute>
+              }
+            />
+
 
 
             {/* -- TECHNICIAN DASHBOARD -- */}
@@ -251,6 +274,17 @@ function App() {
               }
             />
 
+              {/* Technician Notifications */}
+            <Route
+              path="/technician/notifications"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
+                  <TechnicianNotifications />
+                </ProtectedRoute>
+              }
+            />
+
+
 
 
             {/* -- COMMON PROTECTED ROUTES (හැමෝටම යන්න පුළුවන්) -- */}
@@ -263,7 +297,7 @@ function App() {
               }
             />
 
-{/*/* Resource management routes (Admin only) */}
+            {/*/* Resource management routes (Admin only) */}
             <Route
               path="/resourcehome"
               element={
