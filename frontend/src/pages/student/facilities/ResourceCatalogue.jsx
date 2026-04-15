@@ -119,6 +119,10 @@ function ResourceCatalogue() {
 		navigate(targetPath);
 	};
 
+	const handleViewAvailability = (resourceId) => {
+		navigate(`/resources/availability?resourceId=${resourceId}`);
+	};
+
 	return (
 		<DashboardLayout title="Resource Catalogue">
 			<div className="space-y-5">
@@ -250,13 +254,22 @@ function ResourceCatalogue() {
 												</dd>
 											</dl>
 
-											<button
-												type="button"
-												onClick={() => handleQuickBook(item.resourceId)}
-												className="mt-3 w-full rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
-											>
-												Quick Book
-											</button>
+											<div className="mt-3 grid grid-cols-2 gap-2">
+												<button
+													type="button"
+													onClick={() => handleViewAvailability(item.resourceId)}
+													className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+												>
+													Calendar
+												</button>
+												<button
+													type="button"
+													onClick={() => handleQuickBook(item.resourceId)}
+													className="w-full rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+												>
+													Quick Book
+												</button>
+											</div>
 										</div>
 									</article>
 								);

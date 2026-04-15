@@ -145,6 +145,12 @@ function ResourceHome() {
             View All Resources
           </Link>
           <Link
+            to="/resources/availability"
+            className="rounded-2xl border border-blue-300 bg-blue-50 px-6 py-4 text-center text-base font-semibold text-blue-700 transition hover:bg-blue-100"
+          >
+            Manage Availability Calendar
+          </Link>
+          <Link
             to="/"
             className="rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center text-base font-semibold text-slate-700 transition hover:bg-slate-100"
           >

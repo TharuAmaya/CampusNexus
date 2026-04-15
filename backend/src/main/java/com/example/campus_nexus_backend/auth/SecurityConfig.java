@@ -1,9 +1,11 @@
 package com.example.campus_nexus_backend.auth; // ඔයාගේ package නම හරියටම තියෙනවද බලන්න
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,6 +37,10 @@ public class SecurityConfig {
 //merge conflict resolved here
                         .requestMatchers("/auth/**", "/login/**", "/oauth2/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/uploads/**", "/resources", "/resources/*").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/resources/*/availability-blocks").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/resources/*/availability-blocks").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/resources/*/availability-blocks/*").hasAuthority("ROLE_ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/resources/*/availability-blocks/*").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/resources/**").permitAll()
 
 
@@ -44,6 +50,24 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/user/**").authenticated()
                         .anyRequest().authenticated())
+                    .exceptionHandling(ex -> ex
+                        .defaultAuthenticationEntryPointFor(
+                            (request, response, authEx) -> {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                                response.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
+                            },
+                            request -> request.getRequestURI() != null && request.getRequestURI().startsWith("/resources/")
+                        )
+                        .defaultAccessDeniedHandlerFor(
+                            (request, response, deniedEx) -> {
+                                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                                response.getWriter().write("{\"status\":403,\"error\":\"Forbidden\",\"message\":\"You are not allowed to perform this action\"}");
+                            },
+                            request -> request.getRequestURI() != null && request.getRequestURI().startsWith("/resources/")
+                        )
+                    )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler))
 
