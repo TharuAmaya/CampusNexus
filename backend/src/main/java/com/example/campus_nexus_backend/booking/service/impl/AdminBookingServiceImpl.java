@@ -27,6 +27,19 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation for administrator-level booking operations.
+ *
+ * <p>Handles the full admin lifecycle: listing all bookings with optional filtering,
+ * reviewing individual booking details (conflict checking, overlap detection),
+ * approving or rejecting pending bookings, and verifying QR-based facility check-ins.</p>
+ *
+ * <p>All write operations are wrapped in {@code @Transactional} to ensure atomicity.
+ * Read-only operations use {@code @Transactional(readOnly = true)} for query optimisation.</p>
+ *
+ * @see com.example.campus_nexus_backend.booking.service.AdminBookingService
+ * @see com.example.campus_nexus_backend.booking.controller.AdminBookingController
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -82,7 +95,7 @@ public class AdminBookingServiceImpl implements AdminBookingService {
 
         return AdminBookingReviewResponse.builder()
                 .bookingDetails(mapToResponse(booking))
-                .resourceSummary("Resource capacity overview placeholder")
+                .resourceSummary("View all approved bookings for this resource on the selected date below.")
                 .approvedBookingsForDate(approvedForDate.stream().map(b -> mapToSummaryResponse(b, false)).collect(Collectors.toList()))
                 .overlappingBookings(overlapping.stream().map(b -> mapToSummaryResponse(b, false)).collect(Collectors.toList()))
                 .canApprove(canApprove)
@@ -232,7 +245,7 @@ public class AdminBookingServiceImpl implements AdminBookingService {
     }
     
     private BookingSummaryResponse mapToSummaryResponse(Booking b, boolean checkConflict) {
-        Boolean hasConflict = false;
+        boolean hasConflict = false;
         if (checkConflict && b.getStatus() == BookingStatus.PENDING) {
             hasConflict = !bookingRepository.findConflictingBookings(
                     b.getResourceId(), b.getBookingDate(), b.getStartTime(), b.getEndTime(), List.of(BookingStatus.APPROVED), b.getId()).isEmpty();

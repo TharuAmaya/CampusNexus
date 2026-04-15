@@ -21,6 +21,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation for student-level booking operations.
+ *
+ * <p>Manages the core booking lifecycle from the student's perspective: creating new
+ * bookings, updating pending bookings, cancelling approved or pending bookings, and
+ * retrieving booking details and QR check-in tokens.</p>
+ *
+ * <p>Conflict detection is enforced on every create and update to prevent double-booking
+ * of the same resource. All write operations are wrapped in {@code @Transactional}.
+ * Read-only queries use {@code @Transactional(readOnly = true)} for performance.</p>
+ *
+ * @see com.example.campus_nexus_backend.booking.service.BookingService
+ * @see com.example.campus_nexus_backend.booking.controller.BookingController
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
