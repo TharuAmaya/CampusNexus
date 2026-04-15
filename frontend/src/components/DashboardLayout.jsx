@@ -33,6 +33,7 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             { name: 'User List', path: '/admin/users', icon: <FaUsers /> },
             //notification admin
             { name: 'Admin Notifications', path: '/admin/notifications', icon: <FaBell /> }, // අලුත් එක
+            { name: 'Booking Management', path: '/admin/booking', icon: <FaCalendarAlt /> },
             /**newly added */
             { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> }];
 
