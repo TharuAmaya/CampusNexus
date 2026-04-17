@@ -21,6 +21,29 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation for student-level booking operations.
+ *
+ * <p>
+ * Manages the core booking lifecycle from the student's perspective: creating
+ * new
+ * bookings, updating pending bookings, cancelling approved or pending bookings,
+ * and
+ * retrieving booking details and QR check-in tokens.
+ * </p>
+ *
+ * <p>
+ * Conflict detection is enforced on every create and update to prevent
+ * double-booking
+ * of the same resource. All write operations are wrapped in
+ * {@code @Transactional}.
+ * Read-only queries use {@code @Transactional(readOnly = true)} for
+ * performance.
+ * </p>
+ *
+ * @see com.example.campus_nexus_backend.booking.service.BookingService
+ * @see com.example.campus_nexus_backend.booking.controller.BookingController
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,9 +56,10 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponse createBooking(CreateBookingRequest request) {
         log.info("Creating new booking for user {} on resource {}", request.getUserId(), request.getResourceId());
-        
+
         validateBookingRules(request.getBookingDate(), request.getStartTime(), request.getEndTime());
-        checkForConflicts(request.getResourceId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(), null);
+        checkForConflicts(request.getResourceId(), request.getBookingDate(), request.getStartTime(),
+                request.getEndTime(), null);
 
         Booking booking = Booking.builder()
                 .bookingCode(generateUniqueCode())
@@ -47,6 +71,8 @@ public class BookingServiceImpl implements BookingService {
                 .purpose(request.getPurpose())
                 .expectedAttendees(request.getExpectedAttendees())
                 .status(BookingStatus.PENDING)
+                .studentName(request.getStudentName())
+                .studentRegNumber(request.getStudentRegNumber())
                 .build();
 
         Booking saved = bookingRepository.save(booking);
@@ -59,13 +85,14 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse updateBooking(String bookingCode, UpdateBookingRequest request) {
         log.info("Updating booking {}", bookingCode);
         Booking booking = getBookingEntity(bookingCode);
-        
+
         if (booking.getStatus() != BookingStatus.PENDING) {
             throw new InvalidBookingStateException("Only PENDING bookings can be updated.");
         }
 
         validateBookingRules(request.getBookingDate(), request.getStartTime(), request.getEndTime());
-        checkForConflicts(request.getResourceId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(), booking.getId());
+        checkForConflicts(request.getResourceId(), request.getBookingDate(), request.getStartTime(),
+                request.getEndTime(), booking.getId());
 
         booking.setResourceId(request.getResourceId());
         booking.setBookingDate(request.getBookingDate());
@@ -75,7 +102,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setExpectedAttendees(request.getExpectedAttendees());
 
         Booking saved = bookingRepository.save(booking);
-        recordHistory(saved.getId(), BookingStatus.PENDING, BookingStatus.PENDING, booking.getUserId(), "User updated booking details");
+        recordHistory(saved.getId(), BookingStatus.PENDING, BookingStatus.PENDING, booking.getUserId(),
+                "User updated booking details");
         return mapToResponse(saved);
     }
 
@@ -84,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse cancelBooking(String bookingCode, String cancelledBy) {
         log.info("Cancelling booking {}", bookingCode);
         Booking booking = getBookingEntity(bookingCode);
-        
+
         if (booking.getStatus() != BookingStatus.APPROVED && booking.getStatus() != BookingStatus.PENDING) {
             throw new InvalidBookingStateException("Only APPROVED or PENDING bookings can be cancelled.");
         }
@@ -121,9 +149,9 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getStatus() != BookingStatus.APPROVED || booking.getQrToken() == null) {
             throw new InvalidBookingStateException("QR token is not available. Booking must be APPROVED.");
         }
-        
+
         String qrBase64 = generateQRCodeImageBase64(booking.getQrToken());
-        
+
         return BookingQrResponse.builder()
                 .bookingCode(bookingCode)
                 .qrToken(qrBase64)
@@ -135,7 +163,7 @@ public class BookingServiceImpl implements BookingService {
             int width = 300, height = 300;
             com.google.zxing.qrcode.QRCodeWriter qrCodeWriter = new com.google.zxing.qrcode.QRCodeWriter();
             com.google.zxing.common.BitMatrix bitMatrix = qrCodeWriter.encode(
-                    "CHECKIN_TOKEN:" + token, 
+                    "CHECKIN_TOKEN:" + token,
                     com.google.zxing.BarcodeFormat.QR_CODE, width, height);
 
             java.io.ByteArrayOutputStream pngOutputStream = new java.io.ByteArrayOutputStream();
@@ -150,7 +178,8 @@ public class BookingServiceImpl implements BookingService {
 
     // --- Private Helper Methods ---
 
-    private void recordHistory(Long bookingId, BookingStatus oldStatus, BookingStatus newStatus, String changedBy, String reason) {
+    private void recordHistory(Long bookingId, BookingStatus oldStatus, BookingStatus newStatus, String changedBy,
+            String reason) {
         historyRepository.save(BookingStatusHistory.builder()
                 .bookingId(bookingId)
                 .previousStatus(oldStatus)
@@ -175,11 +204,13 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void checkForConflicts(String resourceId, LocalDate date, java.time.LocalTime start, java.time.LocalTime end, Long excludeId) {
+    private void checkForConflicts(String resourceId, LocalDate date, java.time.LocalTime start,
+            java.time.LocalTime end, Long excludeId) {
         List<Booking> conflicts = bookingRepository.findConflictingBookings(
                 resourceId, date, start, end, List.of(BookingStatus.APPROVED, BookingStatus.PENDING), excludeId);
         if (!conflicts.isEmpty()) {
-            throw new BookingConflictException("The selected time slot conflicts with an existing approved or pending booking.");
+            throw new BookingConflictException(
+                    "The selected time slot conflicts with an existing approved or pending booking.");
         }
     }
 
@@ -210,9 +241,11 @@ public class BookingServiceImpl implements BookingService {
                 .cancelledBy(b.getCancelledBy())
                 .createdAt(b.getCreatedAt())
                 .updatedAt(b.getUpdatedAt())
+                .studentName(b.getStudentName())
+                .studentRegNumber(b.getStudentRegNumber())
                 .build();
     }
-    
+
     private BookingSummaryResponse mapToSummaryResponse(Booking b) {
         return BookingSummaryResponse.builder()
                 .id(b.getId())
@@ -223,6 +256,8 @@ public class BookingServiceImpl implements BookingService {
                 .endTime(b.getEndTime())
                 .status(b.getStatus())
                 .hasConflict(false) // Never checked externally for raw generic user lists to save DB loads
+                .studentName(b.getStudentName())
+                .studentRegNumber(b.getStudentRegNumber())
                 .build();
     }
 }

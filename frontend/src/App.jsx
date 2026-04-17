@@ -20,6 +20,7 @@ import TechnicianHome from './pages/technician/TechnicianHome.jsx';
 import AssignedTickets from './pages/technician/AssignedTickets.jsx';
 import TechnicianTicketDetails from './pages/technician/TechnicianTicketDetails.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // ආරක්‍ෂක component එක
+import ScrollToTop from './components/ScrollToTop.jsx';
 
 ///View grades page එක
 import ViewGrades from './pages/student/ViewGrades.jsx';
@@ -40,16 +41,19 @@ import StudentTicketDetails from './pages/student/StudentTicketDetails.jsx';
 import MyBookings from './pages/student/booking/MyBookings.jsx';
 import CreateBooking from './pages/student/booking/CreateBooking.jsx';
 import BookingDetails from './pages/student/booking/BookingDetails.jsx';
+import VerifyBooking from './pages/student/booking/VerifyBooking.jsx';
 
 //Resource management pages
-import ResourceHome from './components/ResourceHome/ResourceHome.jsx';
-import AddResource from './components/AddResource/AddResource.jsx';
-import DisplayResource from './components/DisplayResource/DisplayResource.jsx';
-import UpdateResource from './components/UpdateResource/UpdateResource.jsx';
+import ResourceHome from './pages/admin/facilities/ResourceHome/ResourceHome.jsx';
+import AddResource from './pages/admin/facilities/AddResource/AddResource.jsx';
+import DisplayResource from './pages/admin/facilities/DisplayResource/DisplayResource.jsx';
+import UpdateResource from './pages/admin/facilities/UpdateResource/UpdateResource.jsx';
+import ResourceCatalogue from './pages/student/facilities/ResourceCatalogue.jsx';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col">
         <Navbar />
 
@@ -64,6 +68,7 @@ function App() {
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/verify-booking/:token" element={<VerifyBooking />} />
 
 
 
@@ -136,6 +141,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
                   <BookingDetails />
+                </ProtectedRoute>}
+            />
+
+{/*/* Resource management routes (Student only) */}
+            <Route
+              path="/student/resources"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <ResourceCatalogue />
                 </ProtectedRoute>}
             />
 
@@ -302,3 +316,4 @@ function App() {
 export default App;
 
 //sahiru
+//guneds

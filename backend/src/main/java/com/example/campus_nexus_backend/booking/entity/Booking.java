@@ -43,7 +43,7 @@ public class Booking {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    @Column(name = "purpose", nullable = false, length = 500)
+    @Column(name = "purpose", nullable = false, length = 150)
     private String purpose;
 
     @Column(name = "expected_attendees")
@@ -55,6 +55,12 @@ public class Booking {
 
     @Column(name = "admin_decision_reason", length = 500)
     private String adminDecisionReason;
+
+    @Column(name = "student_name", length = 200)
+    private String studentName;
+
+    @Column(name = "student_reg_number", length = 50)
+    private String studentRegNumber;
 
     @Column(name = "qr_token", unique = true, length = 255)
     private String qrToken;
