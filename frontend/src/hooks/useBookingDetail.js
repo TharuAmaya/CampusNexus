@@ -30,10 +30,12 @@ import {
 export function useBookingDetail(bookingCode) {
     const [booking, setBooking] = useState(() => bookingCache.getBookingDetail(bookingCode));
     const [resourceDetails, setResourceDetails] = useState(() => {
-        const cached = bookingCache.getBookingDetail(bookingCode);
-        return cached?.resourceId ? bookingCache.getResourceDetail(cached.resourceId) : null;
+        const cachedBooking = bookingCache.getBookingDetail(bookingCode);
+        return cachedBooking?.resourceId ? bookingCache.getResourceDetail(cachedBooking.resourceId) : null;
     });
-    const [qrToken, setQrToken] = useState(null);
+    const [qrToken, setQrToken] = useState(() => bookingCache.getQrToken(bookingCode));
+    
+    // STARTING STATE: If we have cached data (primed by dashboard), don't show the full spinner.
     const [isLoading, setIsLoading] = useState(!bookingCache.getBookingDetail(bookingCode));
     const [error, setError] = useState('');
 
@@ -48,51 +50,48 @@ export function useBookingDetail(bookingCode) {
         // Only show full-page skeleton on first-ever load
         if (!bookingCache.getBookingDetail(bookingCode)) setIsLoading(true);
 
-        const { data, error: bookingErr } = await fetchBookingById(bookingCode, token);
-        if (bookingErr || !data) {
+        // ── Step 1: Core Booking Data ──
+        const { data: freshBooking, error: bookingErr } = await fetchBookingById(bookingCode, token);
+        
+        if (bookingErr || !freshBooking) {
             setError(bookingErr || 'Booking not found.');
             setIsLoading(false);
             return;
         }
 
-        // Persist booking and update state
-        bookingCache.setBookingDetail(bookingCode, data);
-        setBooking(data);
+        // ── Step 2: Background Hydration (Resource & QR) ──
+        // Start QR fetch if approved
+        let qrPromise = (freshBooking.status === 'APPROVED')
+            ? fetchBookingQrToken(bookingCode, freshBooking._links?.['qr-token'], token)
+            : null;
 
-        // ── Follow HATEOAS _links for downstream requests ──────────────────
-        // The server controls URLs — client navigates via provided links
-        // (Uniform Interface — REST Constraint 4 / RFC 8288 Web Linking).
-        const links = data._links || {};
-        const resourceHateoasPath = links.resource || null;
-        const qrHateoasPath = links['qr-token'] || null;
+        // Start Resource fetch if we don't have it or it's different
+        const existingResource = bookingCache.getResourceDetail(freshBooking.resourceId);
+        let resourcePromise = (!existingResource)
+            ? fetchResourceById(freshBooking.resourceId, token)
+            : null;
 
-        // ── Resource detail — prefer SWR cache ────────────────────────────
-        const cachedResource = bookingCache.getResourceDetail(data.resourceId);
+        // Fetch remaining details in parallel
+        const [resourceResult, qrResult] = await Promise.all([
+            resourcePromise || Promise.resolve({ data: existingResource }),
+            qrPromise || Promise.resolve({ data: null })
+        ]);
 
-        // ── QR token — only fetch for APPROVED bookings ───────────────────
-        const qrPromise = data.status === 'APPROVED'
-            ? fetchBookingQrToken(bookingCode, qrHateoasPath, token)
-            : Promise.resolve({ data: null, error: null });
-
-        // Always fetch the resource directly by ID — the HATEOAS path (/resources/{id})
-        // cannot be passed to fetchBookingById (which builds /api/bookings/... URLs).
-        const resourcePromise = cachedResource
-            ? Promise.resolve({ data: cachedResource, error: null })
-            : fetchResourceById(data.resourceId, token);
-
-        const [resourceResult, qrResult] = await Promise.all([resourcePromise, qrPromise]);
-
-        if (!cachedResource && resourceResult.data) {
-            bookingCache.setResourceDetail(data.resourceId, resourceResult.data);
+        // ── Final Step: Unified State Update ──
+        // We update EVERYTHING in one go to prevent 'staggered' UI loading
+        if (resourceResult?.data) {
+            bookingCache.setResourceDetail(freshBooking.resourceId, resourceResult.data);
             setResourceDetails(resourceResult.data);
-        } else if (cachedResource) {
-            setResourceDetails(cachedResource);
         }
 
-        if (qrResult.data?.qrToken) {
+        if (qrResult?.data?.qrToken) {
             setQrToken(qrResult.data.qrToken);
         }
 
+        bookingCache.setBookingDetail(bookingCode, freshBooking);
+        setBooking(freshBooking);
+        
+        // UNLOCK UI: Everything is now ready for a unified render
         setIsLoading(false);
         setError('');
     }, [bookingCode]);

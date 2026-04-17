@@ -183,11 +183,12 @@ export async function fetchAdminBookingReview(bookingCode, token) {
 
 export async function approveBooking(bookingCode, adminId, reason, token) {
     try {
-        const res = await fetch(ENDPOINTS.adminApproveBooking(bookingCode), {
+        const url = ENDPOINTS.adminApproveBooking(encodeURIComponent(bookingCode));
+        const res = await fetch(url, {
             method: 'PATCH',
             headers: jsonHeaders(token),
             body: JSON.stringify({
-                adminDecisionReason: reason || 'Approved standard request',
+                adminDecisionReason: reason !== undefined && reason !== null ? reason : 'Approved standard request',
                 approvedBy: adminId,
             }),
         });
@@ -199,7 +200,8 @@ export async function approveBooking(bookingCode, adminId, reason, token) {
 
 export async function rejectBooking(bookingCode, adminId, reason, token) {
     try {
-        const res = await fetch(ENDPOINTS.adminRejectBooking(bookingCode), {
+        const url = ENDPOINTS.adminRejectBooking(encodeURIComponent(bookingCode));
+        const res = await fetch(url, {
             method: 'PATCH',
             headers: jsonHeaders(token),
             body: JSON.stringify({

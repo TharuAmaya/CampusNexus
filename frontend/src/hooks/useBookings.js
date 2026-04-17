@@ -14,6 +14,7 @@ import {
     fetchUserProfile,
     fetchBookingsByUser,
     fetchAllResources,
+    fetchBookingQrToken,
 } from '../services/bookingService';
 
 /**
@@ -96,6 +97,31 @@ export function useBookings() {
             bookingCache.setBookings(bookingsData);
             bookingCache.setResourcesMap(map);
             bookingCache.setResources(resourcesData); // pre-warms the Create Booking dropdown
+
+            // ── FULL-SPECTRUM PRIMING — Pre-populate all facility details ──
+            // This ensures every "Swimming Pool", "Lab", etc. is ready INSTANTLY.
+            resourcesData.forEach((r) => {
+                bookingCache.setResourceDetail(r.resourceId, r);
+            });
+
+            // ── DEEP CACHE PRIMING — Pre-populate individual detail caches ──
+            // This ensures clicking a card opens the detail page INSTANTLY (0ms wait)
+            bookingsData.forEach((b) => {
+                bookingCache.setBookingDetail(b.bookingCode, b);
+            });
+
+            // ── PREDICTIVE QR FETCHING — Pre-fetch approved booking QR tokens ──
+            // Fires in parallel in the background, making approved access instant.
+            const approvedBookings = bookingsData.filter(b => b.status === 'APPROVED');
+            approvedBookings.forEach(async (b) => {
+                // Skip if already in cache
+                if (bookingCache.getQrToken(b.bookingCode)) return;
+                
+                const { data: qrResult } = await fetchBookingQrToken(b.bookingCode, b._links?.['qr-token'], token);
+                if (qrResult?.qrToken) {
+                    bookingCache.setQrToken(b.bookingCode, qrResult.qrToken);
+                }
+            });
 
             // Sync UI state
             setBookings(bookingsData);

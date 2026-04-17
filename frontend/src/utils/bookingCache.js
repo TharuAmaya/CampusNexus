@@ -29,6 +29,9 @@ const _cache = {
 
     /** @type {Object} Map of resourceId -> resource detail object */
     resourceDetails: {},
+
+    /** @type {Object} Map of bookingCode -> QR token string */
+    qrTokens: {},
 };
 
 export const bookingCache = {
@@ -51,11 +54,18 @@ export const bookingCache = {
     // ── Individual booking detail ─────────────────────────────────
     getBookingDetail: (code) => _cache.bookingDetails[code] ?? null,
     setBookingDetail: (code, data) => { _cache.bookingDetails[code] = data; },
-    invalidateBookingDetail: (code) => { delete _cache.bookingDetails[code]; },
+    invalidateBookingDetail: (code) => { 
+        delete _cache.bookingDetails[code]; 
+        delete _cache.qrTokens[code];
+    },
 
     // ── Individual resource detail ────────────────────────────────
     getResourceDetail: (id) => _cache.resourceDetails[id] ?? null,
     setResourceDetail: (id, data) => { _cache.resourceDetails[id] = data; },
+
+    // ── QR Token Management ──────────────────────────────────────
+    getQrToken: (code) => _cache.qrTokens[code] ?? null,
+    setQrToken: (code, token) => { _cache.qrTokens[code] = token; },
 
     // ── Full cache clear (on logout etc.) ─────────────────────────
     clear: () => {
@@ -65,5 +75,6 @@ export const bookingCache = {
         _cache.resources = null;
         _cache.bookingDetails = {};
         _cache.resourceDetails = {};
+        _cache.qrTokens = {};
     },
 };
