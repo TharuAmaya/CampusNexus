@@ -11,6 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+//lakshan edits notification related
+// --- Notification Imports ---
+import com.example.campus_nexus_backend.notifications.NotificationService;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.TicketRepository;
+import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.Ticket;
+import com.example.campus_nexus_backend.auth.UserRepository;
+import com.example.campus_nexus_backend.auth.User;
+
+
 import java.util.List;
 
 @RestController
@@ -22,6 +31,20 @@ public class AdminTicketController {
 
     @Autowired
     private TicketService ticketService; 
+
+
+    // --- අපේ අලුත් Services සහ Repositories  Lakshan edits---
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private TicketRepository ticketRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+    // ----------------------------------------
+
+
 
     // 1. View all tickets (Summary format)
     @GetMapping
@@ -36,23 +59,73 @@ public class AdminTicketController {
     }
 
     // 3. Assign a technician to a ticket
+    // 3. Assign a technician to a ticket  lakshan edits notification related
     @PatchMapping("/{id}")
     public ResponseEntity<?> assignTechnician(
             @PathVariable Long id, 
             @RequestBody AssignTechnicianDTO dto) {
+            
+        // යාළුවාගේ කෝඩ් එක (Assign වෙනවා)
         adminTicketService.assignTechnician(id, dto.getAssignedTechnicianId());
+        
+        // --- Notification යවන කෑල්ල ---
+        try {
+            Ticket ticket = ticketRepository.findById(id).orElseThrow();
+            User technician = userRepository.findById(dto.getAssignedTechnicianId()).orElseThrow();
+
+            // 1. Technician ට Notification එකක් යවනවා
+            notificationService.sendNotification(
+                technician.getEmail(), 
+                "You have been assigned to a new Ticket #" + id, 
+                "TICKET"
+            );
+            
+            // 2. Ticket එක දාපු Student ට Notification එකක් යවනවා
+            notificationService.sendNotification(
+                ticket.getCreatedBy().getEmail(), 
+                "Your Ticket #" + id + " has been assigned to a technician.", 
+                "TICKET"
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send assign notifications: " + e.getMessage());
+        }
+        // ------------------------------
+
         return ResponseEntity.ok("Technician assigned successfully.");
     }
 
-    // 4. Reject a ticket
+
+
+    // 4. Reject a ticket  Lakshan edits notification related
     @PatchMapping("/{id}/reject")
     public ResponseEntity<?> rejectTicket(
             @PathVariable Long id, 
             @RequestBody RejectTicketDTO dto,
             Authentication authentication) {
+            
+        // යාළුවාගේ කෝඩ් එක
         adminTicketService.rejectTicket(id, dto.getRejectionReason(), authentication.getName());
+        
+        // --- Notification යවන කෑල්ල ---
+        try {
+            Ticket ticket = ticketRepository.findById(id).orElseThrow();
+            
+            // Student ට Notification එකක් යවනවා
+            notificationService.sendNotification(
+                ticket.getCreatedBy().getEmail(), 
+                "Your Ticket #" + id + " has been REJECTED. Reason: " + dto.getRejectionReason(), 
+                "TICKET"
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send reject notification: " + e.getMessage());
+        }
+        // ------------------------------
+
         return ResponseEntity.ok("Ticket has been rejected.");
     }
+
+
+
 
     // 4b. Cancel rejection for a ticket
     @PatchMapping("/{id}/cancel-rejection")
