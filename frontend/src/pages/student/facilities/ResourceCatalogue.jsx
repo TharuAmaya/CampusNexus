@@ -12,6 +12,11 @@ const prettifyType = (type) =>
 		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 		.join(" ");
 
+const getAuthHeaders = () => {
+	const token = localStorage.getItem("token");
+	return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 function ResourceCatalogue() {
 	const navigate = useNavigate();
 	const [resources, setResources] = useState([]);
@@ -23,6 +28,14 @@ function ResourceCatalogue() {
 	const [minCapacityFilter, setMinCapacityFilter] = useState("");
 	const [maxCapacityFilter, setMaxCapacityFilter] = useState("");
 	const [sortOption, setSortOption] = useState("name-asc");
+	const [recommendCapacity, setRecommendCapacity] = useState("");
+	const [recommendLocation, setRecommendLocation] = useState("");
+	const [recommendType, setRecommendType] = useState("");
+	const [recommendLimit, setRecommendLimit] = useState("3");
+	const [recommendations, setRecommendations] = useState([]);
+	const [recommendLoading, setRecommendLoading] = useState(false);
+	const [recommendError, setRecommendError] = useState("");
+	const [recommendSearched, setRecommendSearched] = useState(false);
 
 	useEffect(() => {
 		const loadResources = async () => {
@@ -123,9 +136,178 @@ function ResourceCatalogue() {
 		navigate(`/resources/availability?resourceId=${resourceId}`);
 	};
 
+	const handleRecommend = async (event) => {
+		event.preventDefault();
+		setRecommendSearched(true);
+		setRecommendError("");
+		setRecommendLoading(true);
+
+		try {
+			const params = new URLSearchParams();
+			if (recommendCapacity !== "") {
+				params.set("requiredCapacity", recommendCapacity);
+			}
+			if (recommendLocation.trim() !== "") {
+				params.set("preferredLocation", recommendLocation.trim());
+			}
+			if (recommendType !== "") {
+				params.set("preferredType", recommendType);
+			}
+			params.set("limit", recommendLimit || "3");
+
+			const response = await fetch(`${API_BASE_URL}/resources/recommendations?${params.toString()}`, {
+				headers: {
+					...getAuthHeaders(),
+				},
+			});
+			if (!response.ok) {
+				const errorBody = await response.json().catch(() => ({}));
+				throw new Error(errorBody?.message || "Failed to fetch recommendations.");
+			}
+
+			const data = await response.json();
+			setRecommendations(Array.isArray(data) ? data : []);
+		} catch (err) {
+			setRecommendError(err.message || "Unable to fetch recommendations.");
+			setRecommendations([]);
+		} finally {
+			setRecommendLoading(false);
+		}
+	};
+
 	return (
 		<DashboardLayout title="Resource Catalogue">
 			<div className="space-y-5">
+				<div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+					<h2 className="text-xl font-semibold text-slate-800">Smart Resource Recommendation</h2>
+					<p className="mt-1 text-sm text-slate-600">
+						Get top matches using your requirements (capacity, type, location).
+					</p>
+
+					<form onSubmit={handleRecommend} className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+						<input
+							type="number"
+							min="0"
+							value={recommendCapacity}
+							onChange={(e) => setRecommendCapacity(e.target.value)}
+							placeholder="Required capacity"
+							className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+						/>
+						<input
+							type="text"
+							value={recommendLocation}
+							onChange={(e) => setRecommendLocation(e.target.value)}
+							placeholder="Preferred location"
+							className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+						/>
+						<select
+							value={recommendType}
+							onChange={(e) => setRecommendType(e.target.value)}
+							className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+						>
+							<option value="">Any type</option>
+							{availableTypes.map((type) => (
+								<option key={type} value={type}>
+									{prettifyType(type)}
+								</option>
+							))}
+						</select>
+						<select
+							value={recommendLimit}
+							onChange={(e) => setRecommendLimit(e.target.value)}
+							className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+						>
+							<option value="3">Top 3</option>
+							<option value="5">Top 5</option>
+						</select>
+						<button
+							type="submit"
+							disabled={recommendLoading}
+							className="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+						>
+							{recommendLoading ? "Finding..." : "Find Best Matches"}
+						</button>
+					</form>
+
+					{recommendError ? <p className="mt-3 text-sm text-red-600">{recommendError}</p> : null}
+
+					{recommendSearched && !recommendLoading ? (
+						recommendations.length ? (
+							<div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+								{recommendations.map((item) => {
+									const recommendationImageName = item.imageName || item.itemImage || "";
+									const recommendationImageUrl = recommendationImageName
+										? `${API_BASE_URL}/uploads/${recommendationImageName}`
+										: "";
+
+									return (
+									<div
+										key={item.resourceId}
+										className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+									>
+										{recommendationImageUrl ? (
+											<img
+												src={recommendationImageUrl}
+												alt={item.name || "Resource"}
+												className="h-32 w-full object-cover"
+												loading="lazy"
+											/>
+										) : (
+											<div className="flex h-32 items-center justify-center bg-slate-200 text-sm text-slate-500">
+												No image
+											</div>
+										)}
+
+										<div className="p-4">
+										<div className="flex items-center justify-between gap-2">
+											<h3 className="text-base font-semibold text-slate-800">{item.name}</h3>
+											<span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700">
+												Score {item.score}
+											</span>
+										</div>
+										<p className="mt-1 text-sm text-slate-600">{prettifyType(item.type)}</p>
+										<p className="mt-2 text-sm text-slate-700">{item.recommendationReason}</p>
+										<dl className="mt-2 grid grid-cols-2 gap-y-1 text-sm text-slate-700">
+											<dt className="text-slate-500">Resource ID</dt>
+											<dd>#{item.resourceId}</dd>
+											<dt className="text-slate-500">Location</dt>
+											<dd>{item.location || "-"}</dd>
+											<dt className="text-slate-500">
+												{item.type === "EQUIPMENT" ? "Quantity" : "Capacity"}
+											</dt>
+											<dd>{item.capacity ?? "-"}</dd>
+											<dt className="text-slate-500">Available</dt>
+											<dd>
+												{item.availableFrom || "-"} - {item.availableTo || "-"}
+											</dd>
+										</dl>
+										<div className="mt-3 grid grid-cols-2 gap-2">
+											<button
+												type="button"
+												onClick={() => handleViewAvailability(item.resourceId)}
+												className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+											>
+												Calendar
+											</button>
+											<button
+												type="button"
+												onClick={() => handleQuickBook(item.resourceId)}
+												className="w-full rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+											>
+												Quick Book
+											</button>
+										</div>
+										</div>
+									</div>
+									);
+								})}
+							</div>
+						) : (
+							<p className="mt-3 text-sm text-slate-600">No recommendations found for the given requirements.</p>
+						)
+					) : null}
+				</div>
+
 				<div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
 					<h2 className="text-xl font-semibold text-slate-800">Available Resources</h2>
 					<p className="mt-1 text-sm text-slate-600">

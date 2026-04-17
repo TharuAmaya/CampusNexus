@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 //merge conflict resolved here
                         .requestMatchers("/auth/**", "/login/**", "/oauth2/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/resources/recommendations").authenticated()
                     .requestMatchers(HttpMethod.GET, "/uploads/**", "/resources", "/resources/*").permitAll()
                     .requestMatchers(HttpMethod.GET, "/resources/*/availability-blocks").authenticated()
                     .requestMatchers(HttpMethod.POST, "/resources/*/availability-blocks").hasAuthority("ROLE_ADMIN")
