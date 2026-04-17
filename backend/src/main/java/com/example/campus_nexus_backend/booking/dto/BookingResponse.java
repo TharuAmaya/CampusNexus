@@ -40,6 +40,8 @@ public class BookingResponse {
     private String cancelledBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String studentName;
+    private String studentRegNumber;
 
     /**
      * HATEOAS hypermedia links — Uniform Interface constraint (REST Constraint 4).

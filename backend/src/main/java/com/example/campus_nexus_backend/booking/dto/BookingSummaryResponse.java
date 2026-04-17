@@ -26,6 +26,10 @@ public class BookingSummaryResponse {
     private LocalTime endTime;
     private BookingStatus status;
     private Boolean hasConflict;
+    /** QR token — only populated for APPROVED bookings. */
+    private String qrToken;
+    private String studentName;
+    private String studentRegNumber;
 
     /** HATEOAS links for navigating from a collection item to the full resource. */
     @JsonProperty("_links")
