@@ -60,9 +60,19 @@ export function useAdminBookings() {
         load();
     }, [load]);
 
+    // Sort bookings: earliest date first, then earliest start time
+    const sortedBookings = [...bookings].sort((a, b) => {
+        const dateA = new Date(a.bookingDate).getTime();
+        const dateB = new Date(b.bookingDate).getTime();
+        if (dateA !== dateB) return dateA - dateB;
+
+        // If same date, sort by start time
+        return (a.startTime || '').localeCompare(b.startTime || '');
+    });
+
     const filteredBookings = filter === 'ALL'
-        ? bookings
-        : bookings.filter((b) => b.status === filter);
+        ? sortedBookings
+        : sortedBookings.filter((b) => b.status === filter);
 
     return { bookings, filteredBookings, resourcesMap, filter, setFilter, loading, error, reload: load };
 }
