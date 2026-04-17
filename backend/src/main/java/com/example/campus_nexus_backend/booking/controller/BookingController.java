@@ -16,34 +16,38 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * REST controller exposing the student Booking resource ({@code /api/bookings}).
+ * REST controller exposing the student Booking resource
+ * ({@code /api/bookings}).
  *
  * <h3>REST Architectural Constraints demonstrated in this controller:</h3>
  * <ol>
- *   <li><b>Client-Server</b> — UI (React) and data (Spring Boot) are completely decoupled;
- *       all interaction is over HTTP.</li>
- *   <li><b>Stateless</b> — Every request carries a self-contained JWT token; the server
- *       holds no session. Mutating responses carry {@code Cache-Control: no-store} to
- *       prevent intermediaries from caching them.</li>
- *   <li><b>Cacheable</b> — GET responses declare explicit {@code Cache-Control: max-age}
- *       directives so clients and proxies can cache safely. POST/PUT/PATCH responses
- *       use {@code no-store} to prevent stale mutations.</li>
- *   <li><b>Uniform Interface</b>:
- *     <ul>
- *       <li>Resources identified by URI ({@code /api/bookings/{id}}).</li>
- *       <li>Manipulation through JSON representations.</li>
- *       <li>Self-descriptive messages: 201 Created + Location for creation,
- *           200 OK for reads/updates, appropriate 4xx for errors.</li>
- *       <li>HATEOAS: every response includes a {@code _links} object and
- *           RFC 8288 {@code Link} headers so clients can navigate without
- *           hardcoding URLs.</li>
- *     </ul>
- *   </li>
- *   <li><b>Layered System</b> — Requests pass through a JWT security filter, then
- *       this controller, then the service layer, then the repository — each layer
- *       unaware of layers above it.</li>
- *   <li><b>Code-on-Demand</b> (optional) — The React SPA is executable JavaScript
- *       delivered to the browser from a static server.</li>
+ * <li><b>Client-Server</b> — UI (React) and data (Spring Boot) are completely
+ * decoupled;
+ * all interaction is over HTTP.</li>
+ * <li><b>Stateless</b> — Every request carries a self-contained JWT token; the
+ * server
+ * holds no session. Mutating responses carry {@code Cache-Control: no-store} to
+ * prevent intermediaries from caching them.</li>
+ * <li><b>Cacheable</b> — GET responses declare explicit
+ * {@code Cache-Control: max-age}
+ * directives so clients and proxies can cache safely. POST/PUT/PATCH responses
+ * use {@code no-store} to prevent stale mutations.</li>
+ * <li><b>Uniform Interface</b>:
+ * <ul>
+ * <li>Resources identified by URI ({@code /api/bookings/{id}}).</li>
+ * <li>Manipulation through JSON representations.</li>
+ * <li>Self-descriptive messages: 201 Created + Location for creation,
+ * 200 OK for reads/updates, appropriate 4xx for errors.</li>
+ * <li>HATEOAS: every response includes a {@code _links} object and
+ * RFC 8288 {@code Link} headers so clients can navigate without
+ * hardcoding URLs.</li>
+ * </ul>
+ * </li>
+ * <li><b>Layered System</b> — Requests pass through a JWT security filter, then
+ * this controller, then the service layer, then the repository — each layer
+ * unaware of layers above it.</li>
+ * <li><b>Code-on-Demand</b> (optional) — The React SPA is executable JavaScript
+ * delivered to the browser from a static server.</li>
  * </ol>
  */
 @RestController
@@ -60,10 +64,10 @@ public class BookingController {
     /** Builds the standard HATEOAS _links map for a single booking. */
     private Map<String, String> bookingLinks(String bookingId, String resourceId) {
         Map<String, String> links = new LinkedHashMap<>();
-        links.put("self",       "/api/bookings/" + bookingId);
-        links.put("update",     "/api/bookings/" + bookingId);
-        links.put("cancel",     "/api/bookings/" + bookingId + "/cancel");
-        links.put("qr-token",   "/api/bookings/" + bookingId + "/qr");
+        links.put("self", "/api/bookings/" + bookingId);
+        links.put("update", "/api/bookings/" + bookingId);
+        links.put("cancel", "/api/bookings/" + bookingId + "/cancel");
+        links.put("qr-token", "/api/bookings/" + bookingId + "/qr");
         if (resourceId != null) {
             links.put("resource", "/resources/" + resourceId);
         }
@@ -85,19 +89,20 @@ public class BookingController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // CREATE  (POST /api/bookings)
+    // CREATE (POST /api/bookings)
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Creates a new booking.
      *
      * <ul>
-     *   <li><b>201 Created</b> with a {@code Location} header pointing to the new resource
-     *       (Uniform Interface — self-descriptive messages).</li>
-     *   <li>{@code Cache-Control: no-store} prevents the creation response from being
-     *       cached (Stateless / Cacheable constraints).</li>
-     *   <li>{@code _links} in the body enables client navigation without URL coupling
-     *       (Uniform Interface — HATEOAS).</li>
+     * <li><b>201 Created</b> with a {@code Location} header pointing to the new
+     * resource
+     * (Uniform Interface — self-descriptive messages).</li>
+     * <li>{@code Cache-Control: no-store} prevents the creation response from being
+     * cached (Stateless / Cacheable constraints).</li>
+     * <li>{@code _links} in the body enables client navigation without URL coupling
+     * (Uniform Interface — HATEOAS).</li>
      * </ul>
      *
      * @param request The booking creation payload
@@ -122,21 +127,24 @@ public class BookingController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // READ — collection  (GET /api/bookings?userId={userId})
+    // READ — collection (GET /api/bookings?userId={userId})
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Retrieves all bookings for a specific user (query-parameter filter pattern).
      *
      * <ul>
-     *   <li>{@code Cache-Control: max-age=30, private} — response may be cached by the
-     *       client for 30 seconds (Cacheable constraint).</li>
-     *   <li>Each item in the returned list includes a {@code _links} object so the client
-     *       can navigate to individual bookings without constructing URLs (HATEOAS).</li>
+     * <li>{@code Cache-Control: max-age=30, private} — response may be cached by
+     * the
+     * client for 30 seconds (Cacheable constraint).</li>
+     * <li>Each item in the returned list includes a {@code _links} object so the
+     * client
+     * can navigate to individual bookings without constructing URLs (HATEOAS).</li>
      * </ul>
      *
      * @param userId The unique identifier of the user whose bookings to retrieve
-     * @return 200 OK with list of booking summaries, each containing navigation links
+     * @return 200 OK with list of booking summaries, each containing navigation
+     *         links
      */
     @GetMapping
     public ResponseEntity<List<BookingSummaryResponse>> getBookingsByUser(
@@ -151,9 +159,9 @@ public class BookingController {
         // Attach HATEOAS links to each summary item
         list.forEach(b -> {
             Map<String, String> links = new LinkedHashMap<>();
-            links.put("self",     "/api/bookings/" + b.getBookingCode());
+            links.put("self", "/api/bookings/" + b.getBookingCode());
             links.put("resource", "/api/resources/" + b.getResourceId());
-            links.put("cancel",   "/api/bookings/" + b.getBookingCode() + "/cancel");
+            links.put("cancel", "/api/bookings/" + b.getBookingCode() + "/cancel");
             b.setLinks(links);
         });
 
@@ -164,16 +172,16 @@ public class BookingController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // READ — single item  (GET /api/bookings/{bookingId})
+    // READ — single item (GET /api/bookings/{bookingId})
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Retrieves detailed information of a specific booking.
      *
      * <ul>
-     *   <li>{@code Cache-Control: max-age=60, private} — cache for 60 seconds.</li>
-     *   <li>{@code _links} includes self, update, cancel, qr-token, and the linked
-     *       resource — full HATEOAS navigation graph for this resource.</li>
+     * <li>{@code Cache-Control: max-age=60, private} — cache for 60 seconds.</li>
+     * <li>{@code _links} includes self, update, cancel, qr-token, and the linked
+     * resource — full HATEOAS navigation graph for this resource.</li>
      * </ul>
      *
      * @param bookingId The unique booking code
@@ -193,13 +201,16 @@ public class BookingController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // UPDATE  (PUT /api/bookings/{bookingId})
+    // UPDATE (PUT /api/bookings/{bookingId})
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Updates an existing booking.
      *
-     * <p>{@code Cache-Control: no-store} prevents the mutated response from being cached.</p>
+     * <p>
+     * {@code Cache-Control: no-store} prevents the mutated response from being
+     * cached.
+     * </p>
      *
      * @param bookingId The unique booking code
      * @param request   The updated booking details
@@ -220,13 +231,16 @@ public class BookingController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STATE TRANSITION  (PATCH /api/bookings/{bookingId}/cancel)
+    // STATE TRANSITION (PATCH /api/bookings/{bookingId}/cancel)
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Cancels a specific booking (state transition).
      *
-     * <p>{@code Cache-Control: no-store} — state-mutating operations must not be cached.</p>
+     * <p>
+     * {@code Cache-Control: no-store} — state-mutating operations must not be
+     * cached.
+     * </p>
      *
      * @param bookingId   The unique booking code
      * @param cancelledBy The ID of the user requesting cancellation
@@ -247,14 +261,16 @@ public class BookingController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // SUB-RESOURCE  (GET /api/bookings/{bookingId}/qr)
+    // SUB-RESOURCE (GET /api/bookings/{bookingId}/qr)
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Retrieves the QR token sub-resource for an approved booking check-in.
      *
-     * <p>{@code Cache-Control: max-age=60, private} — QR tokens are stable for the
-     * lifetime of an approved booking.</p>
+     * <p>
+     * {@code Cache-Control: max-age=60, private} — QR tokens are stable for the
+     * lifetime of an approved booking.
+     * </p>
      *
      * @param bookingId The unique booking code
      * @return 200 OK with the QR token
