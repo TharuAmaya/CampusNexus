@@ -1,7 +1,29 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaGraduationCap, FaFacebook, FaTwitter, FaLinkedin, FaGithub, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { jwtDecode } from "jwt-decode";
 
 const Footer = () => {
+  const [bookingPath, setBookingPath] = useState('/login');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.role === 'ROLE_ADMIN') {
+          setBookingPath('/admin/booking');
+        } else {
+          setBookingPath('/student/booking');
+        }
+      } catch (error) {
+        console.error("Invalid token in footer", error);
+        setBookingPath('/login');
+      }
+    } else {
+      setBookingPath('/login');
+    }
+  }, []);
   return (
     <footer className="bg-[#0B1120] text-gray-300 pt-16 pb-8 border-t border-gray-800">
       <div className="container mx-auto px-6 max-w-7xl">
@@ -39,7 +61,11 @@ const Footer = () => {
           <div>
             <h3 className="text-white text-lg font-bold mb-6">System Modules</h3>
             <ul className="space-y-3">
-              <li className="text-gray-400 hover:text-white transition-colors cursor-pointer">Booking Management</li>
+              <li>
+                <Link to={bookingPath} className="text-gray-400 hover:text-white transition-colors cursor-pointer">
+                  Booking Management
+                </Link>
+              </li>
               <li className="text-gray-400 hover:text-white transition-colors cursor-pointer">Incident Ticketing</li>
               <li className="text-gray-400 hover:text-white transition-colors cursor-pointer">Role-Based Dashboard</li>
               <li className="text-gray-400 hover:text-white transition-colors cursor-pointer">Smart Notifications</li>
