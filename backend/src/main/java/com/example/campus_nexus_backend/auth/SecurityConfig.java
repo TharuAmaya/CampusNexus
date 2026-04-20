@@ -42,7 +42,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.POST, "/resources/*/availability-blocks").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/resources/*/availability-blocks/*").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/resources/*/availability-blocks/*").hasAuthority("ROLE_ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/resources/**").permitAll()
+                    .requestMatchers(HttpMethod.PUT, "/resources/**").hasAuthority("ROLE_ADMIN")
 
 
                         // මෙන්න අලුත් පේළිය: Admin ගේ API වලට යන්න පුළුවන් ROLE_ADMIN අයට විතරයි!

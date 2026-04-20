@@ -70,7 +70,7 @@ function AddResource() {
     imageForm.append("file", imageFile);
     setUploading(true);
 
-    const response = await fetch(`${API_BASE_URL}/resources/resourceImg`, {
+    const response = await fetch(`${API_BASE_URL}/resources/image`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: imageForm,

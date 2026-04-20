@@ -43,12 +43,13 @@ public class ResourceController {
             .build();
 
     @PostMapping("/resources")
-    public ResourcesModel newResourceModel(@RequestBody ResourcesModel newResourceModel) {
+    public ResponseEntity<ResourcesModel> newResourceModel(@RequestBody ResourcesModel newResourceModel) {
         validateResourceMetadata(newResourceModel);
-        return resourceRepository.save(newResourceModel);
+        ResourcesModel savedResource = resourceRepository.save(newResourceModel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedResource);
     }
 
-    @PostMapping("/resources/resourceImg")
+    @PostMapping("/resources/image")
     public ResponseEntity<String> resourceImg(@RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File is required.");
