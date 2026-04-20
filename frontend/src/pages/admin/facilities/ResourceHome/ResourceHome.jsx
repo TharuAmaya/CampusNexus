@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../../../components/DashboardLayout.jsx';
+import { FaBoxes, FaPlusCircle, FaListAlt, FaCalendarAlt, FaArrowLeft } from 'react-icons/fa';
 
 const API_BASE_URL = 'http://localhost:8081';
 
@@ -73,10 +74,14 @@ function ResourceHome() {
 
   return (
     <DashboardLayout>
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-100 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-xl backdrop-blur sm:p-12">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">Facilities Management</p>
-        <h1 className="mt-3 text-3xl font-bold text-slate-800 sm:text-5xl">Resource Management Hub</h1>
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-slate-100 px-4 py-10 sm:px-6 lg:px-8">
+      <style>{`@keyframes facilitiesFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-xl backdrop-blur sm:p-12" style={{ animation: 'facilitiesFadeUp 420ms ease-out both' }}>
+        <div className="absolute -right-10 -top-8 h-36 w-36 rounded-full bg-cyan-200/40 blur-2xl" />
+        <div className="absolute -bottom-16 left-20 h-48 w-48 rounded-full bg-blue-200/35 blur-3xl" />
+        <div className="relative">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">Facilities Management</p>
+        <h1 className="mt-3 flex items-center gap-3 text-3xl font-bold text-slate-800 sm:text-5xl"><FaBoxes className="text-cyan-700" /> Resource Management Hub</h1>
         <p className="mt-5 max-w-2xl text-base text-slate-600 sm:text-lg">
           Add and maintain campus resources such as lecture halls, labs, meeting rooms, and equipment.
         </p>
@@ -88,25 +93,25 @@ function ResourceHome() {
           {!loading && !error ? (
             <>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
                   <p className="text-xs font-semibold uppercase text-slate-500">Total Resources</p>
                   <p className="mt-2 text-2xl font-bold text-slate-800">{stats.total}</p>
                 </div>
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
                   <p className="text-xs font-semibold uppercase text-emerald-700">Active</p>
                   <p className="mt-2 text-2xl font-bold text-emerald-800">{stats.active}</p>
                 </div>
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
                   <p className="text-xs font-semibold uppercase text-amber-700">Out Of Service</p>
                   <p className="mt-2 text-2xl font-bold text-amber-800">{stats.outOfService}</p>
                 </div>
-                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
                   <p className="text-xs font-semibold uppercase text-blue-700">Total Capacity</p>
                   <p className="mt-2 text-2xl font-bold text-blue-800">{stats.totalCapacity}</p>
                 </div>
-                <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
-                  <p className="text-xs font-semibold uppercase text-violet-700">Avg Capacity</p>
-                  <p className="mt-2 text-2xl font-bold text-violet-800">{stats.avgCapacity}</p>
+                <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
+                  <p className="text-xs font-semibold uppercase text-cyan-700">Avg Capacity</p>
+                  <p className="mt-2 text-2xl font-bold text-cyan-800">{stats.avgCapacity}</p>
                 </div>
               </div>
 
@@ -123,7 +128,10 @@ function ResourceHome() {
                       </span>
                     ))
                   ) : (
-                    <span className="text-sm text-slate-500">No resources yet.</span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-300 bg-slate-50 px-3 py-1 text-sm text-slate-500">
+                      <span className="inline-block h-2 w-2 rounded-full bg-slate-400" />
+                      No resources yet.
+                    </span>
                   )}
                 </div>
               </div>
@@ -134,28 +142,29 @@ function ResourceHome() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           <Link
             to="/addresource"
-            className="rounded-2xl bg-slate-900 px-6 py-4 text-center text-base font-semibold text-white transition hover:bg-slate-700"
+            className="rounded-2xl bg-gradient-to-r from-slate-900 to-cyan-800 px-6 py-4 text-center text-base font-semibold text-white transition hover:from-slate-800 hover:to-cyan-700 active:translate-y-px active:scale-[0.99]"
           >
-            Add New Resource
+            <span className="inline-flex items-center gap-2"><FaPlusCircle /> Add New Resource</span>
           </Link>
           <Link
             to="/displayresource"
-            className="rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center text-base font-semibold text-slate-700 transition hover:bg-slate-100"
+            className="rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center text-base font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100 active:translate-y-px active:scale-[0.99]"
           >
-            View All Resources
+            <span className="inline-flex items-center gap-2"><FaListAlt /> View All Resources</span>
           </Link>
           <Link
             to="/resources/availability"
-            className="rounded-2xl border border-blue-300 bg-blue-50 px-6 py-4 text-center text-base font-semibold text-blue-700 transition hover:bg-blue-100"
+            className="rounded-2xl border border-cyan-300 bg-cyan-50 px-6 py-4 text-center text-base font-semibold text-cyan-700 transition hover:-translate-y-0.5 hover:bg-cyan-100 active:translate-y-px active:scale-[0.99]"
           >
-            Manage Availability Calendar
+            <span className="inline-flex items-center gap-2"><FaCalendarAlt /> Manage Availability Calendar</span>
           </Link>
           <Link
             to="/"
-            className="rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center text-base font-semibold text-slate-700 transition hover:bg-slate-100"
+            className="rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center text-base font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100 active:translate-y-px active:scale-[0.99]"
           >
-            Back To Home
+            <span className="inline-flex items-center gap-2"><FaArrowLeft /> Back To Home</span>
           </Link>
+        </div>
         </div>
       </div>
     </div>

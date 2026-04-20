@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import DashboardLayout from '../../../components/DashboardLayout.jsx';
+import { FaCalendarAlt, FaPlusCircle } from 'react-icons/fa';
 
 const API_BASE_URL = 'http://localhost:8081';
 
@@ -349,7 +350,7 @@ function ResourceAvailabilityCalendar() {
     if (isEditing) {
       return (
         <div key={block.id} className="rounded-xl border border-blue-200 bg-blue-50 p-3">
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2">
             <input
               type="datetime-local"
               value={editForm.startAt}
@@ -384,14 +385,14 @@ function ResourceAvailabilityCalendar() {
             <button
               type="button"
               onClick={() => handleUpdateBlock(block.id)}
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700 active:translate-y-px active:scale-[0.98]"
             >
               Save
             </button>
             <button
               type="button"
               onClick={handleCancelEdit}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 active:translate-y-px active:scale-[0.98]"
             >
               Cancel
             </button>
@@ -411,14 +412,14 @@ function ResourceAvailabilityCalendar() {
               <button
                 type="button"
                 onClick={() => handleStartEdit(block)}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+                className="text-xs font-semibold text-blue-600 transition hover:text-blue-700 active:translate-y-px"
               >
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => handleDeleteBlock(block.id)}
-                className="text-xs font-semibold text-rose-600 hover:text-rose-700"
+                className="text-xs font-semibold text-rose-600 transition hover:text-rose-700 active:translate-y-px"
               >
                 Delete
               </button>
@@ -436,8 +437,13 @@ function ResourceAvailabilityCalendar() {
   return (
     <DashboardLayout title="Resource Availability Calendar">
       <div className="space-y-6">
-        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-          <h2 className="text-xl font-semibold text-slate-800">Resource Availability Calendar</h2>
+        <style>{`@keyframes facilitiesFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-cyan-50 via-white to-blue-100 p-5 shadow-sm" style={{ animation: 'facilitiesFadeUp 420ms ease-out both' }}>
+          <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-200/45 blur-2xl" />
+          <div className="absolute -bottom-10 left-16 h-36 w-36 rounded-full bg-blue-200/35 blur-2xl" />
+          <div className="relative">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Planner</p>
+          <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-800"><FaCalendarAlt className="text-cyan-700" /> Resource Availability Calendar</h2>
           <p className="mt-1 text-sm text-slate-600">
             View weekly availability windows and maintenance blocks per resource.
           </p>
@@ -474,42 +480,43 @@ function ResourceAvailabilityCalendar() {
             <button
               type="button"
               onClick={() => setViewMode('week')}
-              className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${viewMode === 'week' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition active:translate-y-px active:scale-[0.98] ${viewMode === 'week' ? 'bg-cyan-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
               Week View
             </button>
             <button
               type="button"
               onClick={() => setViewMode('month')}
-              className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${viewMode === 'month' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition active:translate-y-px active:scale-[0.98] ${viewMode === 'month' ? 'bg-cyan-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
               Month View
             </button>
           </div>
+          </div>
         </div>
 
         {isAdmin && resourceId ? (
-          <form onSubmit={handleCreateBlock} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <h3 className="text-base font-semibold text-slate-800">Add Availability Block</h3>
-            <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <form onSubmit={handleCreateBlock} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200" style={{ animation: 'facilitiesFadeUp 520ms ease-out both' }}>
+            <h3 className="inline-flex items-center gap-2 text-base font-semibold text-slate-800"><FaPlusCircle className="text-cyan-700" /> Add Availability Block</h3>
+            <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-12">
               <input
                 type="datetime-local"
                 value={form.startAt}
                 onChange={(e) => setForm((prev) => ({ ...prev, startAt: e.target.value }))}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 xl:col-span-4"
                 required
               />
               <input
                 type="datetime-local"
                 value={form.endAt}
                 onChange={(e) => setForm((prev) => ({ ...prev, endAt: e.target.value }))}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 xl:col-span-4"
                 required
               />
               <select
                 value={form.type}
                 onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 xl:col-span-2"
               >
                 <option value="AVAILABLE">Available</option>
                 <option value="UNAVAILABLE">Unavailable</option>
@@ -518,7 +525,7 @@ function ResourceAvailabilityCalendar() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-cyan-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-cyan-800 active:translate-y-px active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 xl:col-span-2"
               >
                 {saving ? 'Saving...' : 'Add Block'}
               </button>
@@ -540,7 +547,7 @@ function ResourceAvailabilityCalendar() {
         {!loading && resourceId && viewMode === 'week' ? (
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {weeklyCards.map((day) => (
-              <div key={day.dateText} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <div key={day.dateText} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-md">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold text-slate-800">{day.label}</h4>
                   <span className="text-xs text-slate-500">{day.items.length} blocks</span>
@@ -550,7 +557,8 @@ function ResourceAvailabilityCalendar() {
                   {day.items.length ? (
                     day.items.map((block) => renderBlock(block))
                   ) : (
-                    <div className="rounded-xl border border-dashed border-slate-300 p-3 text-xs text-slate-500">
+                    <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-500">
+                      <div className="mb-2 h-6 w-6 rounded border border-slate-400" />
                       No blocks for this day.
                     </div>
                   )}
@@ -591,7 +599,7 @@ function ResourceAvailabilityCalendar() {
                             key={`${cell.key}-${block.id}`}
                             type="button"
                             onClick={() => handleStartEdit(block)}
-                            className={`w-full truncate rounded px-2 py-1 text-left text-[10px] font-semibold ${getTagClass(block.type)}`}
+                            className={`w-full truncate rounded px-2 py-1 text-left text-[10px] font-semibold transition active:scale-[0.98] ${getTagClass(block.type)}`}
                             title={`${block.type} | ${new Date(block.startAt).toLocaleString()} - ${new Date(block.endAt).toLocaleString()}`}
                           >
                             {block.type}

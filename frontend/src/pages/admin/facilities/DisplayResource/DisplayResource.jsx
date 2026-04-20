@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import DashboardLayout from "../../../../components/DashboardLayout.jsx";
+import { FaBoxes, FaFilePdf } from "react-icons/fa";
 
 const API_BASE_URL = "http://localhost:8081";
 const BRAND_NAME = "CampusNexus";
@@ -13,6 +15,13 @@ const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
+
+const prettifyType = (type) =>
+  (type || "")
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 
 function DisplayResource() {
   const navigate = useNavigate();
@@ -68,11 +77,23 @@ function DisplayResource() {
   };
 
   if (loading) {
-    return <div>Loading resources...</div>;
+    return (
+      <DashboardLayout title="Resource Catalogue">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-600 shadow-sm">
+          Loading resources...
+        </div>
+      </DashboardLayout>
+    );
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <DashboardLayout title="Resource Catalogue">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700 shadow-sm">
+          {error}
+        </div>
+      </DashboardLayout>
+    );
   }
 
   const deleteResource = async (id) => {
@@ -134,6 +155,8 @@ function DisplayResource() {
     }
 
     const doc = new jsPDF("portrait");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const headerHeight = 34;
 
     const now = new Date();
     const generatedAt = now.toLocaleString();
@@ -141,26 +164,51 @@ function DisplayResource() {
     const outOfServiceCount = resources.filter((item) => item.status === "OUT_OF_SERVICE").length;
 
     const logoUrl = `${window.location.origin}${PDF_LOGO_PATH}`;
+
+    doc.setFillColor(8, 47, 73);
+    doc.rect(0, 0, pageWidth, headerHeight, "F");
+
+    const logoWidth = 40;
+    const logoHeight = 12;
+    const logoX = 14;
+    const logoY = (headerHeight - logoHeight) / 2;
+    const textX = logoX + logoWidth + 8;
     try {
       const logoDataUrl = await loadImageAsDataUrl(logoUrl);
-      doc.addImage(logoDataUrl, "PNG", 14, 8, 40, 12);
+      doc.addImage(logoDataUrl, "PNG", logoX, logoY, logoWidth, logoHeight);
     } catch (_) {
       // Continue without logo if image loading fails.
     }
 
     doc.setFontSize(14);
-    doc.setTextColor(30, 41, 59);
-    doc.text(BRAND_NAME, 58, 14);
+    doc.setTextColor(255, 255, 255);
+    doc.text(BRAND_NAME, textX, 13);
 
     doc.setFontSize(11);
-    doc.setTextColor(71, 85, 105);
-    doc.text(REPORT_TITLE, 58, 20);
+    doc.setTextColor(219, 234, 254);
+    doc.text(REPORT_TITLE, textX, 19);
 
-    doc.setFontSize(10);
-    doc.text(`Generated: ${generatedAt}`, 14, 30);
-    doc.text(`Total: ${resources.length}`, 14, 36);
-    doc.text(`Active: ${activeCount}`, 60, 36);
-    doc.text(`Out of Service: ${outOfServiceCount}`, 100, 36);
+    doc.setFontSize(9);
+    doc.setTextColor(224, 242, 254);
+    doc.text(`Generated: ${generatedAt}`, textX, 25);
+
+    doc.setDrawColor(14, 116, 144);
+    doc.setFillColor(236, 254, 255);
+    doc.roundedRect(14, 40, 44, 16, 2, 2, "FD");
+    doc.roundedRect(62, 40, 44, 16, 2, 2, "FD");
+    doc.roundedRect(110, 40, 44, 16, 2, 2, "FD");
+
+    doc.setFontSize(8);
+    doc.setTextColor(8, 47, 73);
+    doc.text("Total Resources", 18, 46);
+    doc.text("Active", 66, 46);
+    doc.text("Out of Service", 114, 46);
+
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text(String(resources.length), 18, 53);
+    doc.text(String(activeCount), 66, 53);
+    doc.text(String(outOfServiceCount), 114, 53);
 
     const tableData = resources.map((item) => [
       item.resourceId,
@@ -176,11 +224,27 @@ function DisplayResource() {
     autoTable(doc, {
       head: [["ID", "Name", "Type", "Capacity/Qty", "Location", "Available From", "Available To", "Status"]],
       body: tableData,
-      startY: 42,
+      startY: 62,
+      theme: "grid",
+      headStyles: {
+        fillColor: [8, 47, 73],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+      styles: {
+        fontSize: 8,
+        cellPadding: 2.5,
+        textColor: [30, 41, 59],
+      },
+      margin: { left: 14, right: 14 },
       didDrawPage: (data) => {
         doc.setFontSize(9);
-        doc.setTextColor(100);
+        doc.setTextColor(71, 85, 105);
         doc.text(`Page ${doc.internal.getNumberOfPages()}`, data.settings.margin.left, doc.internal.pageSize.height - 8);
+        doc.text("CampusNexus Facilities", pageWidth - 56, doc.internal.pageSize.height - 8);
       },
     });
 
@@ -203,91 +267,180 @@ function DisplayResource() {
   const uniqueTypes = Array.from(new Set(resource.map((item) => item.type).filter(Boolean)));
 
   return (
-    <div>
-      <h1>Resources</h1>
-      <button onClick={() => generatePdf(filteredData)}>Generate PDF</button>
-      <input
-        type="text"
-        placeholder="Search by ID, name, type, location"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
-      <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-        <option value="">All Types</option>
-        {uniqueTypes.map((type) => (
-          <option key={type} value={type}>
-            {type}
-          </option>
-        ))}
-      </select>
-      <input
-        type="number"
-        min="0"
-        placeholder="Min Capacity"
-        value={minCapacityFilter}
-        onChange={(e) => setMinCapacityFilter(e.target.value)}
-      />
-      <input
-        type="number"
-        min="0"
-        placeholder="Max Capacity"
-        value={maxCapacityFilter}
-        onChange={(e) => setMaxCapacityFilter(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Filter by location"
-        value={locationFilter}
-        onChange={(e) => setLocationFilter(e.target.value)}
-      />
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Capacity/Qty</th>
-            <th>Location</th>
-            <th>Available From</th>
-            <th>Available To</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-    {filteredData.map((resource, index) => (
-      <tr key={resource.resourceId ?? index}>
-        <td>{resource.resourceId}</td>
+    <DashboardLayout title="Resource Catalogue">
+      <div className="space-y-5">
+        <style>{`@keyframes facilitiesFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
+        <section
+          className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-cyan-50 via-white to-blue-100 p-6 shadow-sm"
+          style={{ animation: "facilitiesFadeUp 420ms ease-out both" }}
+        >
+          <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-200/40 blur-2xl" />
+          <div className="absolute -bottom-12 left-20 h-40 w-40 rounded-full bg-blue-300/30 blur-2xl" />
+          <div className="relative">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Facilities</p>
+            <h1 className="mt-2 flex items-center gap-2 text-2xl font-bold text-slate-800 sm:text-3xl"><FaBoxes className="text-cyan-700" /> Resource Library</h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Search, filter, update and export resources with a cleaner management view.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => generatePdf(filteredData)}
+                className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 active:translate-y-px active:scale-[0.98]"
+              >
+                <span className="inline-flex items-center gap-2"><FaFilePdf /> Generate PDF</span>
+              </button>
+              <span className="rounded-xl bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200">
+                Showing {filteredData.length} of {resource.length}
+              </span>
+            </div>
+          </div>
+        </section>
 
-        <td>
-            <img
-        src={`${API_BASE_URL}/uploads/${resource.imageName || resource.itemImage || ""}`}
-            alt={resource.name}
-            width="50"
-            height="50"
-         />
-        </td>
+        <section
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          style={{ animation: "facilitiesFadeUp 520ms ease-out both" }}
+        >
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-12">
+            <input
+              type="text"
+              placeholder="Search by ID, name, type, location"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 2xl:col-span-3"
+            />
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 2xl:col-span-2"
+            >
+              <option value="">All Types</option>
+              {uniqueTypes.map((type) => (
+                <option key={type} value={type}>
+                  {prettifyType(type)}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min="0"
+              placeholder="Min Capacity"
+              value={minCapacityFilter}
+              onChange={(e) => setMinCapacityFilter(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 2xl:col-span-2"
+            />
+            <input
+              type="number"
+              min="0"
+              placeholder="Max Capacity"
+              value={maxCapacityFilter}
+              onChange={(e) => setMaxCapacityFilter(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 2xl:col-span-2"
+            />
+            <input
+              type="text"
+              placeholder="Filter by location"
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-slate-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 2xl:col-span-3"
+            />
+          </div>
+        </section>
 
-        <td>{resource.name}</td>
-        <td>{resource.type}</td>
-        <td>{resource.capacity}</td>
-        <td>{resource.location}</td>
-        <td>{resource.availableFrom || "-"}</td>
-        <td>{resource.availableTo || "-"}</td>
-        <td>{resource.status}</td>
-        <td>
-          <button onClick={() => updateNavigate(resource.resourceId)}>
-            Update
-          </button>
-          <button onClick={() => deleteResource(resource.resourceId)}>
-            Delete
-          </button>
-        </td>
-        </tr>
-    ))}
-        </tbody>
-      </table>
-    </div>
+        <section
+          className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+          style={{ animation: "facilitiesFadeUp 620ms ease-out both" }}
+        >
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-100">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Image</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Name</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Type</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Capacity/Qty</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Location</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Available</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {!filteredData.length ? (
+                  <tr>
+                    <td colSpan={9} className="px-6 py-12">
+                      <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+                        <div className="relative mb-3 h-12 w-12 rounded-full bg-cyan-100">
+                          <div className="absolute left-3 top-3 h-6 w-6 rounded-md border-2 border-cyan-700" />
+                        </div>
+                        <p className="text-sm font-semibold text-slate-700">No resources match this filter set</p>
+                        <p className="mt-1 text-xs text-slate-500">Try clearing one or more filters or searching with broader keywords.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : null}
+                {filteredData.map((item, index) => {
+                  const imageUrl = `${API_BASE_URL}/uploads/${item.imageName || item.itemImage || ""}`;
+                  const isActive = item.status === "ACTIVE";
+
+                  return (
+                    <tr key={item.resourceId ?? index} className="hover:bg-cyan-50/50">
+                      <td className="px-4 py-3 text-sm font-medium text-slate-700">#{item.resourceId}</td>
+                      <td className="px-4 py-3">
+                        {item.imageName || item.itemImage ? (
+                          <img
+                            src={imageUrl}
+                            alt={item.name}
+                            className="h-12 w-12 rounded-lg object-cover ring-1 ring-slate-200"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-[11px] text-slate-500 ring-1 ring-slate-200">
+                            N/A
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold text-slate-800">{item.name}</td>
+                      <td className="px-4 py-3 text-sm text-slate-700">{prettifyType(item.type)}</td>
+                      <td className="px-4 py-3 text-sm text-slate-700">{item.capacity}</td>
+                      <td className="px-4 py-3 text-sm text-slate-700">{item.location || "-"}</td>
+                      <td className="px-4 py-3 text-sm text-slate-700">
+                        {item.availableFrom || "-"} - {item.availableTo || "-"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                            isActive ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => updateNavigate(item.resourceId)}
+                            className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-cyan-700 active:translate-y-px active:scale-[0.97]"
+                          >
+                            Update
+                          </button>
+                          <button
+                            onClick={() => deleteResource(item.resourceId)}
+                            className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-700 active:translate-y-px active:scale-[0.97]"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </DashboardLayout>
   );
 }
 
