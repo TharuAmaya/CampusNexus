@@ -383,7 +383,7 @@ const CreateTicketmsn = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => removeFile(file.name)}
-                                                        className="text-slate-500 hover:text-red-500 transition-colors"
+                                                        className="cursor-pointer text-slate-500 hover:text-red-500 transition-colors"
                                                         title="Remove file"
                                                     >
                                                         ✕
@@ -437,7 +437,7 @@ const CreateTicketmsn = () => {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full rounded-lg bg-[#f4511e] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-lg transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    className="w-full cursor-pointer rounded-lg bg-[#f4511e] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-lg transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     {isSubmitting ? 'Submitting...' : <><FaPaperPlane className="inline-block align-middle" /> Submit Ticket</>}
                                 </button>
