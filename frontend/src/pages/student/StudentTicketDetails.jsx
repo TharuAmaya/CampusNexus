@@ -7,6 +7,7 @@ import DashboardLayout from '../../components/DashboardLayout.jsx';
 const API_BASE_URL = 'http://localhost:8081';
 const categoryOptions = ['Maintenance', 'Electrical', 'Plumbing', 'Furniture', 'Cleanliness', 'Security', 'IT Support', 'Other'];
 const priorityOptions = ['Low', 'Medium', 'High', 'Urgent'];
+const allowedImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'svg', 'heic', 'heif', 'avif', 'ico', 'jfif'];
 
 const StudentTicketDetails = () => {
     const { ticketId } = useParams();
@@ -349,10 +350,28 @@ const StudentTicketDetails = () => {
 
     const handleUpdateAttachmentChange = (event) => {
         const newFiles = Array.from(event.target.files || []);
+
+        const nonImageFile = newFiles.find((file) => {
+            const mimeType = (file.type || '').toLowerCase();
+            if (mimeType.startsWith('image/')) {
+                return false;
+            }
+
+            const fileName = (file.name || '').toLowerCase();
+            const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+            return !allowedImageExtensions.includes(extension);
+        });
+
+        if (nonImageFile) {
+            setUpdateError('Only image files are allowed. Please select image attachments only.');
+            event.target.value = '';
+            return;
+        }
+
         const allFiles = [...updateFiles, ...newFiles];
 
         if (allFiles.length > 3) {
-            setUpdateError('You can attach a maximum of 3 files.');
+            setUpdateError('You can attach a maximum of 3 images.');
             event.target.value = '';
             return;
         }
@@ -376,7 +395,7 @@ const StudentTicketDetails = () => {
         }
 
         if (updateFiles.length > 3) {
-            setUpdateError('You can attach a maximum of 3 files.');
+            setUpdateError('You can attach a maximum of 3 images.');
             return;
         }
 
@@ -823,12 +842,12 @@ const StudentTicketDetails = () => {
                                         <input
                                             type="file"
                                             multiple
-                                            accept="image/*,.pdf,.png,.jpg,.jpeg"
+                                            accept="image/*"
                                             onChange={handleUpdateAttachmentChange}
                                             className="block w-full text-sm text-slate-600 file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#f4511e] file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-[#d84315]"
                                         />
                                         <p className="mt-3 text-xs leading-6 text-slate-500">
-                                            Select up to 3 files. Saving this form replaces previous attachments with the newly selected files.
+                                            Select up to 3 images. Saving this form replaces previous attachments with the newly selected files.
                                         </p>
 
                                         {Array.isArray(ticket?.attachments) && ticket.attachments.length > 0 && (
