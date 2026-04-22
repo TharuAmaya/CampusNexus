@@ -26,11 +26,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class TicketService {
+
+    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of(
+            "jpg", "jpeg", "png", "gif", "webp", "bmp", "tif", "tiff", "svg", "heic", "heif", "avif", "ico", "jfif"
+    );
 
     @Autowired
     private TicketRepository ticketRepository;
@@ -55,10 +61,7 @@ public class TicketService {
             throw new RuntimeException("Only students can create tickets.");
         }
 
-        // Check attachment limit
-        if (files != null && files.size() > 3) {
-            throw new RuntimeException("Maximum of 3 image attachments allowed.");
-        }
+        validateImageAttachments(files);
 
         Ticket ticket = new Ticket();
         ticket.setCreatedBy(student);
@@ -153,9 +156,7 @@ public class TicketService {
             throw new RuntimeException("Action denied: You can only edit tickets that are currently OPEN.");
         }
 
-        if (files != null && files.size() > 3) {
-            throw new RuntimeException("Maximum of 3 image attachments allowed.");
-        }
+        validateImageAttachments(files);
 
         ticket.setResourceId(dto.getResourceId());
         ticket.setCategory(dto.getCategory());
@@ -203,6 +204,39 @@ public class TicketService {
                 attachment.setFileName(safeOriginalName);
                 attachment.setFilePath(filePath.toString());
                 attachmentRepository.save(attachment);
+            }
+        }
+    }
+
+    private void validateImageAttachments(List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) {
+            return;
+        }
+
+        if (files.size() > 3) {
+            throw new RuntimeException("Maximum of 3 image attachments allowed.");
+        }
+
+        for (MultipartFile file : files) {
+            if (file == null || file.isEmpty()) {
+                continue;
+            }
+
+            String contentType = file.getContentType();
+            if (contentType != null && !contentType.isBlank()) {
+                if (contentType.toLowerCase(Locale.ROOT).startsWith("image/")) {
+                    continue;
+                }
+                throw new RuntimeException("Only image attachments are allowed.");
+            }
+
+            String originalName = file.getOriginalFilename();
+            String normalizedName = originalName == null ? "" : originalName.toLowerCase(Locale.ROOT);
+            int dotIndex = normalizedName.lastIndexOf('.');
+            String extension = dotIndex >= 0 ? normalizedName.substring(dotIndex + 1) : "";
+
+            if (!ALLOWED_IMAGE_EXTENSIONS.contains(extension)) {
+                throw new RuntimeException("Only image attachments are allowed.");
             }
         }
     }

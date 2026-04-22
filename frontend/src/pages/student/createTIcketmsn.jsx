@@ -24,6 +24,7 @@ const initialFormState = {
 
 const categoryOptions = ['Maintenance', 'Electrical', 'Plumbing', 'Furniture', 'Cleanliness', 'Security', 'IT Support', 'Other'];
 const priorityOptions = ['Low', 'Medium', 'High', 'Urgent'];
+const allowedImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'svg', 'heic', 'heif', 'avif', 'ico', 'jfif'];
 
 const CreateTicketmsn = () => {
     const [formData, setFormData] = useState(initialFormState);
@@ -106,6 +107,23 @@ const CreateTicketmsn = () => {
 
     const handleAttachmentChange = (event) => {
         const newFiles = Array.from(event.target.files || []);
+
+        const nonImageFile = newFiles.find((file) => {
+            const mimeType = (file.type || '').toLowerCase();
+            if (mimeType.startsWith('image/')) {
+                return false;
+            }
+
+            const fileName = (file.name || '').toLowerCase();
+            const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+            return !allowedImageExtensions.includes(extension);
+        });
+
+        if (nonImageFile) {
+            setErrorMessage('Only image files are allowed. Please select image attachments only.');
+            event.target.value = '';
+            return;
+        }
         
         // Combine already selected files with newly selected files
         const allFiles = [...selectedFiles, ...newFiles];
@@ -346,12 +364,12 @@ const CreateTicketmsn = () => {
                                             ref={fileInputRef}
                                             type="file"
                                             multiple
-                                            accept="image/*,.pdf,.png,.jpg,.jpeg"
+                                            accept="image/*"
                                             onChange={handleAttachmentChange}
                                             className="block w-full text-sm text-slate-600 file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#f4511e] file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-[#d84315]"
                                         />
                                         <p className="mt-3 text-xs leading-6 text-slate-500">
-                                            Select up to 3 files. Images are recommended when you need to show damage, errors, or a maintenance issue.
+                                            Select up to 3 images. Only image formats are supported.
                                         </p>
 
                                         <div className="mt-4 space-y-2">
