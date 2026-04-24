@@ -15,6 +15,8 @@ import com.example.campus_nexus_backend.maintenance_and_ticketing.repository.Tic
 import com.example.campus_nexus_backend.maintenance_and_ticketing.model.entity.Ticket;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/technician/tickets")
@@ -37,6 +39,31 @@ public class TechnicianTicketController {
     @GetMapping
     public ResponseEntity<List<TicketSummaryDTO>> getAssignedTickets(Authentication authentication) {
         return ResponseEntity.ok(technicianTicketService.getMyAssignedTickets(authentication.getName()));
+    }
+
+    // Dashboard stats for pie charts
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<Map<String, Object>> getDashboardStats(Authentication authentication) {
+        List<TicketSummaryDTO> tickets = technicianTicketService.getMyAssignedTickets(authentication.getName());
+        
+        Map<String, Long> byStatus = new HashMap<>();
+        Map<String, Long> byPriority = new HashMap<>();
+        
+        // Count by status
+        byStatus.put("IN_PROGRESS", tickets.stream().filter(t -> "IN_PROGRESS".equals(t.getStatus())).count());
+        byStatus.put("RESOLVED", tickets.stream().filter(t -> "RESOLVED".equals(t.getStatus())).count());
+        byStatus.put("CLOSED", tickets.stream().filter(t -> "CLOSED".equals(t.getStatus())).count());
+        
+        // Count by priority
+        byPriority.put("HIGH", tickets.stream().filter(t -> "HIGH".equalsIgnoreCase(t.getPriority())).count());
+        byPriority.put("MEDIUM", tickets.stream().filter(t -> "MEDIUM".equalsIgnoreCase(t.getPriority())).count());
+        byPriority.put("LOW", tickets.stream().filter(t -> "LOW".equalsIgnoreCase(t.getPriority())).count());
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("byStatus", byStatus);
+        response.put("byPriority", byPriority);
+        
+        return ResponseEntity.ok(response);
     }
 
     // 2. Add Resolution Notes & Mark RESOLVED
