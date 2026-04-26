@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 // අලුතින් Hamburger සහ Close icons ගමු
-import { FaUser, FaTicketAlt, FaUsers, FaUserPlus, FaBoxes, FaBell, FaTools, FaHome, FaBars, FaTimes, FaGraduationCap, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaTicketAlt, FaUsers, FaUserPlus, FaBoxes, FaBell, FaTools, FaHome, FaBars, FaTimes, FaGraduationCap, FaCalendarAlt, FaBullhorn } from 'react-icons/fa';
 
 const DashboardLayout = ({ children, title, noPadding = false, hideBranding = false, hideHeader = false, hideSidebar = false, hideTitle = false }) => {
     const location = useLocation();
@@ -34,6 +34,7 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             //notification admin
             { name: 'Admin Notifications', path: '/admin/notifications', icon: <FaBell /> }, // අලුත් එක
             { name: 'Booking Management', path: '/admin/booking', icon: <FaCalendarAlt /> },
+            { name: 'Announcements', path: '/admin/announcements', icon: <FaBullhorn /> }, //lakshan
             /**newly added */
             { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> }];
 
@@ -43,11 +44,12 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             { name: 'Publish Ticket', path: '/student/publish-ticket', icon: <FaTicketAlt /> },
             { name: 'All Tickets', path: '/student/all-tickets', icon: <FaTicketAlt /> },
             { name: 'Resources', path: '/student/resources', icon: <FaBoxes /> },
+            { name: 'Announcements', path: '/student/announcements', icon: <FaBullhorn /> }, //lakshan
 
             { name: 'Student Notifications', path: '/student/notifications', icon: <FaBell /> }, // අලුත් එක
 
             // මෙන්න අලුතින් දාපු එක:
-            { name: 'View Grades', path: '/student/grades', icon: <FaGraduationCap /> },
+            //{ name: 'View Grades', path: '/student/grades', icon: <FaGraduationCap /> },
             { name: 'Resource Booking', path: '/student/booking', icon: <FaCalendarAlt /> }];
 
         } else if (userRole === 'ROLE_TECHNICIAN') {
@@ -55,6 +57,8 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             { name: 'Assigned Tickets', path: '/technician/tickets', icon: <FaTicketAlt /> },
 
             { name: 'Technician Notifications', path: '/technician/notifications', icon: <FaBell /> }, // අලුත් එක
+
+            { name: 'Announcements', path: '/technician/announcements', icon: <FaBullhorn /> },//lakshan
             
             { name: 'Maintenance Logs', path: '/technician/logs', icon: <FaTools /> }];
         }
