@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+
+// --- Lakshan Notification Imports ---
+import com.example.campus_nexus_backend.notifications.NotificationService;
+import com.example.campus_nexus_backend.auth.UserRepository;
+import com.example.campus_nexus_backend.auth.User;
+
 /**
  * REST controller exposing the student Booking resource
  * ({@code /api/bookings}).
@@ -56,6 +62,10 @@ import java.util.concurrent.TimeUnit;
 public class BookingController {
 
     private final BookingService bookingService;
+
+    // --- අපේ අලුත් Services දෙක ---
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     // ─────────────────────────────────────────────────────────────────────────
     // Helpers
@@ -108,12 +118,30 @@ public class BookingController {
      * @param request The booking creation payload
      * @return 201 Created with Location header and the new booking representation
      */
-    @PostMapping
+   @PostMapping
     public ResponseEntity<BookingResponse> createBooking(
             @Valid @RequestBody CreateBookingRequest request) {
 
         BookingResponse response = bookingService.createBooking(request);
         response.setLinks(bookingLinks(response.getBookingCode(), response.getResourceId()));
+
+        // --- Notification part start ---
+        try {
+            // find all admins in system
+            List<User> admins = userRepository.findByRole("ROLE_ADMIN");
+            
+            // dending to all admins Notification as Booking
+            for (User admin : admins) {
+                notificationService.sendNotification(
+                    admin.getEmail(), 
+                    "A new resource booking request (" + response.getBookingCode() + ") has been submitted by student ID: " + request.getUserId(), 
+                    "BOOKING" // send this part for BOOKING sidebar tab because of this name
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send booking notification: " + e.getMessage());
+        }
+        // --- Notification part over ---
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
