@@ -66,10 +66,10 @@ public class BookingController {
         Map<String, String> links = new LinkedHashMap<>();
         links.put("self", "/api/bookings/" + bookingId);
         links.put("update", "/api/bookings/" + bookingId);
-        links.put("cancel", "/api/bookings/" + bookingId + "/cancel");
+        links.put("delete", "/api/bookings/" + bookingId);
         links.put("qr-token", "/api/bookings/" + bookingId + "/qr");
         if (resourceId != null) {
-            links.put("resource", "/resources/" + resourceId);
+            links.put("resource", "/api/resources/" + resourceId);
         }
         links.put("collection", "/api/bookings");
         return links;
@@ -79,10 +79,10 @@ public class BookingController {
     private String linkHeader(String bookingId, String resourceId) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("</api/bookings/%s>; rel=\"self\"", bookingId)).append(", ");
-        sb.append(String.format("</api/bookings/%s/cancel>; rel=\"cancel\"", bookingId)).append(", ");
+        sb.append(String.format("</api/bookings/%s>; rel=\"delete\"", bookingId)).append(", ");
         sb.append(String.format("</api/bookings/%s/qr>; rel=\"qr-token\"", bookingId)).append(", ");
         if (resourceId != null) {
-            sb.append(String.format("</resources/%s>; rel=\"resource\"", resourceId)).append(", ");
+            sb.append(String.format("</api/resources/%s>; rel=\"resource\"", resourceId)).append(", ");
         }
         sb.append("</api/bookings>; rel=\"collection\"");
         return sb.toString();
@@ -161,7 +161,7 @@ public class BookingController {
             Map<String, String> links = new LinkedHashMap<>();
             links.put("self", "/api/bookings/" + b.getBookingCode());
             links.put("resource", "/api/resources/" + b.getResourceId());
-            links.put("cancel", "/api/bookings/" + b.getBookingCode() + "/cancel");
+            links.put("delete", "/api/bookings/" + b.getBookingCode());
             b.setLinks(links);
         });
 
@@ -246,7 +246,7 @@ public class BookingController {
      * @param cancelledBy The ID of the user requesting cancellation
      * @return 200 OK with updated booking representation (status = CANCELLED)
      */
-    @PatchMapping("/{bookingId}/cancel")
+    @DeleteMapping("/{bookingId}")
     public ResponseEntity<BookingResponse> cancelBooking(
             @PathVariable("bookingId") String bookingId,
             @RequestParam("cancelledBy") String cancelledBy) {

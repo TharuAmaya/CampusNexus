@@ -193,7 +193,7 @@ export default function BookingDetails() {
         setIsCancelling(true);
         setActionError('');
         const token = localStorage.getItem('token');
-        const hateoasCancel = booking._links?.cancel || null;
+        const hateoasCancel = booking._links?.delete || null;
         const { error: cancelErr } = await cancelBooking(id, booking.userId, hateoasCancel, token);
         if (cancelErr) {
             setActionError(cancelErr);
@@ -613,7 +613,7 @@ export default function BookingDetails() {
                                 const linkMeta = {
                                     self: { label: 'Self', desc: 'Resource URI', icon: '🔗', color: 'text-blue-400' },
                                     update: { label: 'Update', desc: 'Mutation Path', icon: '✏️', color: 'text-amber-400' },
-                                    cancel: { label: 'Cancel', desc: 'Termination Path', icon: '🚫', color: 'text-rose-400' },
+                                    delete: { label: 'Delete', desc: 'Termination Path', icon: '🚫', color: 'text-rose-400' },
                                     'qr-token': { label: 'QR Key', desc: 'Security Token', icon: '📱', color: 'text-purple-400' },
                                     resource: { label: 'Ref', desc: 'Linked Facility', icon: '🏛️', color: 'text-emerald-400' },
                                     collection: { label: 'Root', desc: 'Booking Index', icon: '📋', color: 'text-indigo-400' },

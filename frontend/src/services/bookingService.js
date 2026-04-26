@@ -153,7 +153,7 @@ export async function cancelBooking(bookingCode, userId, hateoasPath, token) {
         : ENDPOINTS.cancelBooking(bookingCode, userId);
     try {
         const res = await fetch(url, {
-            method: 'PATCH',
+            method: 'DELETE',
             headers: authHeaders(token),
         });
         return handleResponse(res);
