@@ -87,8 +87,8 @@ export default function AdminBookingReview() {
     const [approvedCode, setApprovedCode] = useState(null); // set after successful approval
 
     const handleAction = async (actionType, explicitRemarks = null) => {
-        // Use the identifier from the loaded data for maximum reliability
-        const identifier = bookingDetails?.bookingCode || id;
+        // Use the ID from useParams for maximum reliability across scopes
+        const identifier = id;
         const remarksToUse = explicitRemarks !== null ? explicitRemarks : adminReason;
 
         if (actionType === 'REJECT' && !remarksToUse.trim()) {
@@ -551,7 +551,7 @@ export default function AdminBookingReview() {
                                                                 setIsEditingRemarks(false);
                                                                 setToast({ type: 'success', message: '✅ Official remarks updated successfully.' });
                                                                 // Premium Navigation: Automatically return to log with highlight
-                                                                setTimeout(() => navigate(`/admin/booking?highlight=${identifier}`), 1600);
+                                                                setTimeout(() => navigate(`/admin/booking?highlight=${id}`), 1600);
                                                             }
                                                         }}
                                                         disabled={submitting}
