@@ -47,6 +47,11 @@ const StudentTicketDetails = () => {
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        return emailRegex.test(email);
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -394,6 +399,11 @@ const StudentTicketDetails = () => {
             return;
         }
 
+        if (!validateEmail(updateForm.preferredContact)) {
+            setUpdateError('Please enter a valid email address.');
+            return;
+        }
+
         if (updateFiles.length > 3) {
             setUpdateError('You can attach a maximum of 3 images.');
             return;
@@ -574,7 +584,7 @@ const StudentTicketDetails = () => {
                         </div>
 
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Preferred Contact</p>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Preferred Email Address</p>
                             <p className="mt-1 font-semibold text-slate-900">{ticket.preferredContact || '-'}</p>
                         </div>
 
@@ -811,13 +821,14 @@ const StudentTicketDetails = () => {
                                 </div>
 
                                 <div className="md:col-span-2">
-                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Contact Details</label>
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Email Address</label>
                                     <input
-                                        type="text"
+                                        type="email"
                                         name="preferredContact"
                                         value={updateForm.preferredContact}
                                         onChange={handleUpdateChange}
                                         required
+                                        placeholder="example@email.com"
                                         className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
                                     />
                                 </div>

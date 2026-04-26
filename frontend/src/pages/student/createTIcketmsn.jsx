@@ -94,6 +94,11 @@ const CreateTicketmsn = () => {
         fetchResources();
     }, [formData.resourceType]);
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        return emailRegex.test(email);
+    };
+
     const handleChange = (event) => {
         const { name, value } = event.target;
         setFormData((previous) => ({
@@ -164,6 +169,11 @@ const CreateTicketmsn = () => {
 
         if (!formData.resourceType || !formData.resourceId || !formData.category || !formData.description || !formData.priority || !formData.preferredContact) {
             setErrorMessage('Please complete all required fields before submitting.');
+            return;
+        }
+
+        if (!validateEmail(formData.preferredContact)) {
+            setErrorMessage('Please enter a valid email address.');
             return;
         }
 
@@ -397,14 +407,14 @@ const CreateTicketmsn = () => {
                                 </div>
 
                                 <div className="md:col-span-2">
-                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Contact Details</label>
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Email Address</label>
                                     <input
-                                        type="text"
+                                        type="email"
                                         name="preferredContact"
                                         value={formData.preferredContact}
                                         onChange={handleChange}
                                         required
-                                        placeholder="Phone number, email address, or WhatsApp"
+                                        placeholder="example@email.com"
                                         className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
                                     />
                                 </div>
