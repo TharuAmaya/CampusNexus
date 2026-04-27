@@ -7,7 +7,7 @@ const StudentNotifications = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('ALL'); // 'ALL', 'TICKET', 'BOOKING'
 
-    // 1. Backend එකෙන් Notifications ටික ගෙනීම
+    // 1. fetch notifications from the backend
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -29,7 +29,7 @@ const StudentNotifications = () => {
         fetchNotifications();
     }, []);
 
-    // 2. Notification එකක් "Read" කියලා Mark කිරීම
+    // 2. Notification read and mark as read
     const handleMarkAsRead = async (id) => {
         try {
             const token = localStorage.getItem('token');
@@ -39,7 +39,7 @@ const StudentNotifications = () => {
             });
             
             if (response.ok) {
-                // UI එකේ State එක Update කරනවා (ආයෙත් Fetch කරන්නේ නැතුව)
+                //update UI state to mark this notification as read
                 setNotifications(notifications.map(notif => 
                     notif.id === id ? { ...notif, isRead: true } : notif
                 ));
@@ -49,7 +49,7 @@ const StudentNotifications = () => {
         }
     };
 
-    // 3. Tab එක අනුව Notifications ෆිල්ටර් කිරීම
+    // 3. Filter notifications based on active tab
     const filteredNotifications = notifications.filter(notif => {
         if (activeTab === 'ALL') return true;
         return notif.type === activeTab;

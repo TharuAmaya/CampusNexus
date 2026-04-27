@@ -19,11 +19,11 @@ const staggerContainer = {
 const Home = () => {
   const showcaseRef = useRef(null);
 
-  // --- අලුතින් එකතු කරපු කෑල්ල ---
+  // --- newly added part ---
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Token එක තියෙනවද කියලා බලනවා
+    // Check if token exists in localStorage
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);

@@ -9,7 +9,7 @@ const StudentHome = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Pie Chart එකට ලස්සන පාට ටිකක්
+    //add colors for charts
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#EF4444'];
     const BOOKING_COLORS = ['#8B5CF6', '#10B981', '#F59E0B', '#EF4444'];
 
@@ -19,13 +19,13 @@ const StudentHome = () => {
                 const token = localStorage.getItem('token');
                 const headers = { 'Authorization': `Bearer ${token}` };
 
-                // 1. User ගේ නම සහ ID එක ගන්නවා (Bookings වලට userId එක ඕනේ නිසා)
+                // 1. take user name and ID (for fetching bookings) from profile endpoint
                 const profileRes = await fetch('http://localhost:8081/api/user/profile', { headers });
-                let userId = ''; // <-- මෙතන email වෙනුවට userId කියලා හැදුවා
+                let userId = ''; // <-- replaced as user ID
                 if (profileRes.ok) {
                     const profileData = await profileRes.json();
                     setUserName(profileData.fullName || 'Student');
-                    userId = profileData.id; // <-- මෙතන email එක වෙනුවට id එක ගත්තා (යාළුවාගේ කෝඩ් එකේ වගේ)
+                    userId = profileData.id; // fetch the user ID for later use in fetching bookings
                 }
 
                 // 2. Student ගේ Tickets ටික ගන්නවා
@@ -33,9 +33,9 @@ const StudentHome = () => {
                 const ticketsData = ticketsRes.ok ? await ticketsRes.json() : [];
                 setTickets(ticketsData);
 
-                // 3. Student ගේ Bookings ටික ගන්නවා
-                if (userId) { // <-- මෙතන email වෙනුවට userId දැම්මා
-                    // යවන URL එකටත් userId එක දැම්මා
+                // 3. take student bookings
+                if (userId) { // <-- put userID
+                    // add user ID for fetching bookings of the logged in student
                     const bookingsRes = await fetch(`http://localhost:8081/api/bookings?userId=${userId}`, { headers });
                     const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
                     setBookings(bookingsData);
@@ -61,7 +61,7 @@ const StudentHome = () => {
         bookings.filter(b => b.status === 'APPROVED' || b.status === 'CHECKED_IN').length;
 
     // --- Data Processing for Combined Table ---
-    // Tickets සහ Bookings දෙකම එකම ලිස්ට් එකකට දාලා, අලුත්ම එක උඩින් එන්න Sort කරනවා
+    // Tickets and bookings combined into one array
     const combinedActivity = [
         ...tickets.map(t => ({
             id: `TKT-#${t.ticketId}`,
