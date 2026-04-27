@@ -18,13 +18,13 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-    // 1. ලොග් වෙලා ඉන්න කෙනාගේ (Token එකට අදාළ) Notifications ටික යැවීම
+    // 1. send notification who already looged in
     @GetMapping
     public ResponseEntity<?> getMyNotifications(Authentication authentication) {
         String email = authentication.getName();
         List<Notification> rawNotifications = notificationService.getUserNotifications(email);
 
-        // React එකට යවන්න ලේසි වෙන්න Data ටික ලස්සනට Map කරනවා (Infinite Loop errors වළක්වන්න)
+        // mapping data to sent frontend
         List<Map<String, Object>> responseList = rawNotifications.stream().map(notif -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", notif.getId());
@@ -38,7 +38,7 @@ public class NotificationController {
         return ResponseEntity.ok(responseList);
     }
 
-    // 2. Notification එකක් කියෙව්වාම "Read" විදිහට Update කිරීම
+    // 2. After reading notification, update as READ
     @PatchMapping("/{id}/read")
     public ResponseEntity<?> markNotificationAsRead(@PathVariable Long id) {
         try {

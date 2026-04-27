@@ -14,20 +14,20 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // කාටද Notification එක යන්නේ
+    // to who want to send notification
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;
 
-    // පණිවිඩය (උදා: "Your ticket #13 has been resolved")
+    // the message (e.g., "Your ticket #13 has been resolved")
     @Column(nullable = false)
     private String message;
 
-    // මොකක් ගැනද? (උදා: "TICKET", "BOOKING", "SYSTEM")
+    // about what - ticket/ booking...
     @Column(nullable = false)
     private String type;
 
-    // කියවලද නැද්ද කියලා බලාගන්න (මුලින්ම හදද්දි False)
+    // check whether read it or not(default false)
     @Column(nullable = false)
     private boolean isRead = false;
 

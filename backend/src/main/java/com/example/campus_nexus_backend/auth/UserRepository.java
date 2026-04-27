@@ -8,13 +8,13 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     
-    // Email එක දීලා Database එකෙන් User ව හොයාගන්න function එක
+    // find the user by emil in DB
     Optional<User> findByEmail(String email);
 
-    // මෙන්න මේ පේළිය අලුතින් එකතු කරන්න! (Role එක අනුව ගාණ හොයනවා)
+    // count by role
     long countByRole(String role);
 
-    // Assign workflow එකේ technician list එක විතරක් ගන්න.
+    // take only technician in Assign workflow 
     List<User> findByRole(String role);
 
 }
