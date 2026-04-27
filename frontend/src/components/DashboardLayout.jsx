@@ -36,7 +36,8 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             { name: 'Booking Management', path: '/admin/booking', icon: <FaCalendarAlt /> },
             { name: 'Announcements', path: '/admin/announcements', icon: <FaBullhorn /> }, //lakshan
             /**newly added */
-            { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> }];
+            { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> },
+            { name: 'Availability Calendar', path: '/resources/availability', icon: <FaCalendarAlt /> }];
 
 
         } else if (userRole === 'ROLE_STUDENT') {
@@ -46,8 +47,8 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             { name: 'Resources', path: '/student/resources', icon: <FaBoxes /> },
             { name: 'Announcements', path: '/student/announcements', icon: <FaBullhorn /> }, //lakshan
 
+            { name: 'Availability Calendar', path: '/resources/availability', icon: <FaCalendarAlt /> },
             { name: 'Student Notifications', path: '/student/notifications', icon: <FaBell /> }, // අලුත් එක
-
             // මෙන්න අලුතින් දාපු එක:
             //{ name: 'View Grades', path: '/student/grades', icon: <FaGraduationCap /> },
             { name: 'Resource Booking', path: '/student/booking', icon: <FaCalendarAlt /> }];

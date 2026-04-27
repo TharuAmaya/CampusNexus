@@ -49,6 +49,7 @@ import AddResource from './pages/admin/facilities/AddResource/AddResource.jsx';
 import DisplayResource from './pages/admin/facilities/DisplayResource/DisplayResource.jsx';
 import UpdateResource from './pages/admin/facilities/UpdateResource/UpdateResource.jsx';
 import ResourceCatalogue from './pages/student/facilities/ResourceCatalogue.jsx';
+import ResourceAvailabilityCalendar from './pages/shared/facilities/ResourceAvailabilityCalendar.jsx';
 
 
 // Notifications Pages
@@ -161,6 +162,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
                   <ResourceCatalogue />
+                </ProtectedRoute>}
+            />
+
+            <Route
+              path="/resources/availability"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_STUDENT']}>
+                  <ResourceAvailabilityCalendar />
                 </ProtectedRoute>}
             />
 

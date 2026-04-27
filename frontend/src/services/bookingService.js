@@ -174,7 +174,10 @@ export async function fetchAdminBookings(token) {
 
 export async function fetchAdminBookingReview(bookingCode, token) {
     try {
-        const res = await fetch(ENDPOINTS.adminBookingReview(bookingCode), { headers: authHeaders(token) });
+        const res = await fetch(ENDPOINTS.adminBookingReview(bookingCode), { 
+            headers: authHeaders(token),
+            cache: 'no-store'
+        });
         return handleResponse(res);
     } catch (err) {
         return { data: null, error: 'Network error fetching review details.' };
