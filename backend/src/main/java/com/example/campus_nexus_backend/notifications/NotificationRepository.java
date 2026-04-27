@@ -7,9 +7,10 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     
-    // කෙනෙක්ගේ Email එකට අදාළ ඔක්කොම Notifications ටික අලුත්ම එකේ ඉඳන් පරණ එකට ගේනවා
+    
+    // Get all notifications for a user by their email
     List<Notification> findByRecipient_EmailOrderByCreatedAtDesc(String email);
     
-    // තාම කියවලා නැති (Unread) Notifications ගාණ හොයනවා
+    // Count unread notifications for a user by their email
     long countByRecipient_EmailAndIsReadFalse(String email);
 }
