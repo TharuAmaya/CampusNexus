@@ -10,10 +10,10 @@ import java.util.List;
 @Repository
 public interface AnnouncementRepository extends JpaRepository<Announcement, Long> {
     
-    // Admin ට ඔක්කොම ටික බලන්න (අලුත්ම එක උඩින් එන්න)
+    //to see all announcement for admin
     List<Announcement> findAllByOrderByCreatedAtDesc();
 
-    // Student ට හෝ Technician ට අදාළ ඒවා විතරක් බලන්න (උදා: STUDENT කියලා දුන්නම STUDENT සහ ALL කියන දෙකම එනවා)
+    // see student ann/tech ann seperately
     @Query("SELECT a FROM Announcement a WHERE a.targetAudience = :audience OR a.targetAudience = 'ALL' ORDER BY a.createdAt DESC")
     List<Announcement> findForUserRole(@Param("audience") TargetAudience audience);
 }
