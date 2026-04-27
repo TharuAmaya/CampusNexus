@@ -60,7 +60,8 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
 
             { name: 'Announcements', path: '/technician/announcements', icon: <FaBullhorn /> },//lakshan
             
-            { name: 'Maintenance Logs', path: '/technician/logs', icon: <FaTools /> }];
+            //{ name: 'Maintenance Logs', path: '/technician/logs', icon: <FaTools /> }
+        ];
         }
         return commonLinks;
     };
