@@ -7,16 +7,16 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "http://localhost:5173") // React එකෙන් එන Requests වලට ඉඩ දෙනවා
+@CrossOrigin(origins = "http://localhost:5173") //allow react requests
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
 
-    // 1. Profile විස්තර බලාගන්න (GET API)
+    // 1.see profile details (GET API)
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(Authentication authentication) {
-        // Token එකෙන් ලොග් වෙලා ඉන්න කෙනාගේ Email එක ගන්නවා (මේක මාර Secure!)
+        // fetch email from token who logged in
         String email = authentication.getName(); 
         
         User user = userRepository.findByEmail(email).orElse(null);
@@ -25,10 +25,10 @@ public class UserController {
             return ResponseEntity.status(404).body("User not found");
         }
         
-        return ResponseEntity.ok(user); // සම්පූර්ණ විස්තර ටික React එකට යවනවා
+        return ResponseEntity.ok(user); // get all details of the user, send to frontend
     }
 
-    // 2. Profile විස්තර වෙනස් කරන්න (PUT API)
+    // 2.Update profile details
     @PutMapping("/profile")
     public ResponseEntity<?> updateUserProfile(Authentication authentication, @RequestBody User updatedData) {
         String email = authentication.getName();
@@ -38,15 +38,15 @@ public class UserController {
             return ResponseEntity.status(404).body("User not found");
         }
 
-        // ආරක්ෂාව: අපි වෙනස් කරන්න දෙන්නේ මේ අලුත් විස්තර ටික සහ නම විතරයි.
-        // (Email එක, Role එක, Provider වගේ දේවල් වෙනස් කරන්න දෙන්නේ නෑ!)
+        
+        //Update only particular details
         existingUser.setFullName(updatedData.getFullName());
         existingUser.setPhoneNumber(updatedData.getPhoneNumber());
         existingUser.setStudentOrEmpId(updatedData.getStudentOrEmpId());
         existingUser.setDepartment(updatedData.getDepartment());
         existingUser.setBio(updatedData.getBio());
 
-        // Update කරපු විස්තර ටික Database එකේ Save කරනවා
+        // Update the user in the DB
         userRepository.save(existingUser);
 
         return ResponseEntity.ok("Profile updated successfully!");

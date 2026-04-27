@@ -1,12 +1,12 @@
 package com.example.campus_nexus_backend.auth;
 
 import jakarta.persistence.*;
-import lombok.Data; // Lombok ගෙනාවා
+import lombok.Data; 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Data // <-- මේකෙන් Getters, Setters, Constructors ඔක්කොම Auto හැදෙනවා!
+@Data // create all gettes/setters/constructors with Lombok
 public class User {
 
     @Id
@@ -39,7 +39,7 @@ public class User {
     }
 
 
-    // --- Profile සඳහා අලුතින් එකතු කළ කොටස ---
+    // --- for profile part ---
     
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -50,10 +50,10 @@ public class User {
     @Column(name = "department")
     private String department;
 
-    @Column(columnDefinition = "TEXT") // Bio එක ටිකක් දිග වෙන්න පුළුවන් නිසා TEXT දැම්මා
+    @Column(columnDefinition = "TEXT") // add TEXT for bio because it can be long
     private String bio;
 
     
     
-    // මීට පස්සේ මෙතනින් පල්ලෙහාට මුකුත් ලියන්න ඕනේ නෑ! සුපිරි නේද?
+    
 }
