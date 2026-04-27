@@ -10,7 +10,7 @@ public class AnnouncementService {
     @Autowired
     private AnnouncementRepository announcementRepository;
 
-    // 1. අලුත් නිවේදනයක් සෑදීම
+    // 1. create a new announcement
     public Announcement createAnnouncement(AnnouncementRequestDTO dto, String createdBy) {
         Announcement announcement = new Announcement();
         announcement.setTitle(dto.getTitle());
@@ -20,16 +20,16 @@ public class AnnouncementService {
         return announcementRepository.save(announcement);
     }
 
-    // 2. Role එක අනුව නිවේදන බැලීම
+    // 2. see announcements as role wise
     public List<Announcement> getAnnouncementsForRole(String role) {
         if ("ROLE_ADMIN".equals(role)) {
-            // Admin ට ඔක්කොම පේනවා (Edit/Delete කරන්න ලේසි වෙන්න)
+            // admin can see all announcements
             return announcementRepository.findAllByOrderByCreatedAtDesc();
         } else if ("ROLE_STUDENT".equals(role)) {
-            // Student ට STUDENT සහ ALL ඒවා පේනවා
+            // Student can see STUDENT and ALL announcements
             return announcementRepository.findForUserRole(TargetAudience.STUDENT);
         } else if ("ROLE_TECHNICIAN".equals(role)) {
-            // Technician ට TECHNICIAN සහ ALL ඒවා පේනවා
+            // Technician can see TECHNICIAN and ALL announcements
             return announcementRepository.findForUserRole(TargetAudience.TECHNICIAN);
         }
         return List.of();
@@ -37,7 +37,7 @@ public class AnnouncementService {
 
     public Announcement updateAnnouncement(Long id, AnnouncementRequestDTO dto) {//error exceptions
         Announcement announcement = announcementRepository.findById(id)
-                .orElseThrow(() -> new AnnouncementNotFoundException("Announcement with ID " + id + " was not found!")); // මෙතන වෙනස් කළා
+                .orElseThrow(() -> new AnnouncementNotFoundException("Announcement with ID " + id + " was not found!")); // 
         
         announcement.setTitle(dto.getTitle());
         announcement.setContent(dto.getContent());
@@ -46,7 +46,7 @@ public class AnnouncementService {
         return announcementRepository.save(announcement);
     }
 
-    // 4. නිවේදනයක් මැකීම (Delete)
+    // 4. delete an announcement
     public void deleteAnnouncement(Long id) {
         announcementRepository.deleteById(id);
     }
