@@ -25,14 +25,15 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         
-        // React එකෙන් එවන "Authorization" Header එක අල්ලගන්නවා
+        
+        //fetch the "Authorization" header from the incoming request
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String email = null;
 
-        // ඒක ඇතුළේ "Bearer " කියලා තියෙනවද බලනවා
+        //check whether bearer exists or not in the header
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // "Bearer " කෑල්ල අයින් කරලා Token එක ගන්නවා
+            token = authHeader.substring(7); // remove bearer and get the token part
             try {
                 email = jwtUtil.extractUsername(token);
             } catch (Exception e) {
@@ -40,7 +41,8 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // Token එක හරි නම්, Spring Security එකට කියනවා "මෙයාට ඇතුළට යන්න දෙන්න" කියලා
+        
+        //If token is OK tell spring security  to take him in
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.validateToken(token)) {
                 Claims claims = jwtUtil.extractAllClaims(token);
@@ -55,7 +57,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
         
-        // ඊළඟ පියවරට යන්න දෙනවා
+        // send to next step
         filterChain.doFilter(request, response);
     }
 }
