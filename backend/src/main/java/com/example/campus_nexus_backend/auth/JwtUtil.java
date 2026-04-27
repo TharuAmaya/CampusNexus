@@ -13,9 +13,9 @@ import io.jsonwebtoken.Claims;
 @Component
 public class JwtUtil {
 
-    // මේක ගොඩක් දිග රහස් පදයක් වෙන්න ඕනේ (අවම characters 32 ක්). 
+    //security key 
     private final String SECRET_KEY = "CampusNexusSecretKeyForJwtTokenGenerationMustBeLong";
-    // Token එකේ ආයු කාලය (පැය 24 ක් = 86400000 milliseconds)
+    // token expires in 24H
     private final long EXPIRATION_TIME = 86400000; 
 
     private Key getSigningKey() {
@@ -25,7 +25,7 @@ public class JwtUtil {
     public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("role", role) // Token එක ඇතුළේ Role එකත් යවනවා
+                .claim("role", role) // sends a role in token
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -33,7 +33,7 @@ public class JwtUtil {
     }
 
 
-    // Token එකෙන් සම්පූර්ණ විස්තර ටික ගන්නවා
+    // get all data from token
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -42,12 +42,12 @@ public class JwtUtil {
                 .getBody();
     }
 
-    // Token එකෙන් Email එක විතරක් ගන්නවා
+    // Fetch only email from token
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
-    // Token එක තාමත් Valid ද කියලා බලනවා
+    // see token still valid or not
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
