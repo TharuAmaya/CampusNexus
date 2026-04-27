@@ -26,6 +26,7 @@ const prettifyType = (type) =>
 function DisplayResource() {
   const navigate = useNavigate();
   const [resource, setResource] = useState([]);
+  const [bookingCountsByResourceId, setBookingCountsByResourceId] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,6 +41,7 @@ function DisplayResource() {
 
   useEffect(() => {
     loadResources();
+    loadBookingCounts();
   }, []);
 
   const loadResources = async () => {
@@ -73,6 +75,53 @@ function DisplayResource() {
       setError(err.message || "Unable to load resources.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBookingCounts = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/bookings`, {
+        method: "GET",
+        headers: {
+          ...getAuthHeaders(),
+        },
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        setBookingCountsByResourceId({});
+        return;
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      const rawBody = await response.text();
+
+      if (!contentType.includes("application/json")) {
+        setBookingCountsByResourceId({});
+        return;
+      }
+
+      const bookings = JSON.parse(rawBody);
+
+      const countableStatuses = new Set(["PENDING", "APPROVED"]);
+
+      const counts = (Array.isArray(bookings) ? bookings : []).reduce((acc, booking) => {
+        if (!countableStatuses.has(booking?.status)) {
+          return acc;
+        }
+
+        const key = String(booking?.resourceId ?? "").trim();
+        if (!key) {
+          return acc;
+        }
+
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      setBookingCountsByResourceId(counts);
+    } catch (_) {
+      setBookingCountsByResourceId({});
     }
   };
 
@@ -219,10 +268,11 @@ function DisplayResource() {
       item.availableFrom || "-",
       item.availableTo || "-",
       item.status,
+      bookingCountsByResourceId[String(item.resourceId)] ?? 0,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Name", "Type", "Capacity/Qty", "Location", "Available From", "Available To", "Status"]],
+      head: [["ID", "Name", "Type", "Capacity/Qty", "Location", "Available From", "Available To", "Status", "Active bookings"]],
       body: tableData,
       startY: 62,
       theme: "grid",
@@ -362,13 +412,21 @@ function DisplayResource() {
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Location</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Available</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    <div className="leading-tight">
+                      <div>Bookings</div>
+                      <div className="mt-0.5 text-[10px] font-medium normal-case tracking-normal text-slate-500">
+                        Active bookings
+                      </div>
+                    </div>
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
                 {!filteredData.length ? (
                   <tr>
-                    <td colSpan={9} className="px-6 py-12">
+                    <td colSpan={10} className="px-6 py-12">
                       <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
                         <div className="relative mb-3 h-12 w-12 rounded-full bg-cyan-100">
                           <div className="absolute left-3 top-3 h-6 w-6 rounded-md border-2 border-cyan-700" />
@@ -382,6 +440,7 @@ function DisplayResource() {
                 {filteredData.map((item, index) => {
                   const imageUrl = `${API_BASE_URL}/uploads/${item.imageName || item.itemImage || ""}`;
                   const isActive = item.status === "ACTIVE";
+                  const bookingsCount = bookingCountsByResourceId[String(item.resourceId)] ?? 0;
 
                   return (
                     <tr key={item.resourceId ?? index} className="hover:bg-cyan-50/50">
@@ -416,6 +475,7 @@ function DisplayResource() {
                           {item.status}
                         </span>
                       </td>
+                      <td className="px-4 py-3 text-sm text-slate-700">{bookingsCount}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <button
