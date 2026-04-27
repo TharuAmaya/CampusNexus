@@ -525,7 +525,7 @@ const TechnicianTicketDetails = () => {
                                                 type="button"
                                                 onClick={startResolutionEdit}
                                                 disabled={isDeletingResolution}
-                                                className="rounded-lg border border-amber-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="cursor-pointer rounded-lg border border-amber-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 Edit
                                             </button>
@@ -533,7 +533,7 @@ const TechnicianTicketDetails = () => {
                                                 type="button"
                                                 onClick={deleteResolutionNote}
                                                 disabled={isDeletingResolution || isSavingResolutionEdit}
-                                                className="rounded-lg border border-rose-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="cursor-pointer rounded-lg border border-rose-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {isDeletingResolution ? 'Deleting...' : 'Delete'}
                                             </button>
@@ -554,7 +554,7 @@ const TechnicianTicketDetails = () => {
                                                 type="button"
                                                 onClick={cancelResolutionEdit}
                                                 disabled={isSavingResolutionEdit}
-                                                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 Cancel
                                             </button>
@@ -562,7 +562,7 @@ const TechnicianTicketDetails = () => {
                                                 type="button"
                                                 onClick={saveResolutionEdit}
                                                 disabled={isSavingResolutionEdit}
-                                                className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="cursor-pointer rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {isSavingResolutionEdit ? 'Saving...' : 'Save'}
                                             </button>
@@ -580,7 +580,7 @@ const TechnicianTicketDetails = () => {
                                 <button
                                     type="button"
                                     onClick={openCommentModal}
-                                    className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 transition hover:bg-blue-100"
+                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 transition hover:bg-blue-100"
                                 >
                                     <FaComments /> Add Comment
                                 </button>
@@ -624,14 +624,14 @@ const TechnicianTicketDetails = () => {
                                                             <button
                                                                 type="button"
                                                                 onClick={() => openCommentEditModal(comment)}
-                                                                className="rounded-lg border border-amber-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100"
+                                                                className="cursor-pointer rounded-lg border border-amber-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100"
                                                             >
                                                                 Edit
                                                             </button>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleDeleteComment(comment.commentId)}
-                                                                className="rounded-lg border border-rose-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-700 transition hover:bg-rose-100"
+                                                                className="cursor-pointer rounded-lg border border-rose-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-700 transition hover:bg-rose-100"
                                                             >
                                                                 Delete
                                                             </button>
@@ -651,7 +651,7 @@ const TechnicianTicketDetails = () => {
                                 type="button"
                                 onClick={openResolveModal}
                                 disabled={hasResolutionNote}
-                                className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <FaEdit /> Add Resolution Notes
                             </button>
@@ -707,14 +707,14 @@ const TechnicianTicketDetails = () => {
                                     type="button"
                                     onClick={closeResolveModal}
                                     disabled={isResolving}
-                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isResolving}
-                                    className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    className="cursor-pointer rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     {isResolving ? 'Saving...' : 'Save Notes & Resolve'}
                                 </button>
@@ -758,14 +758,14 @@ const TechnicianTicketDetails = () => {
                                     type="button"
                                     onClick={closeCommentModal}
                                     disabled={isCommentSubmitting}
-                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isCommentSubmitting}
-                                    className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     {isCommentSubmitting ? 'Saving...' : (editingCommentId ? 'Save Comment' : 'Add Comment')}
                                 </button>

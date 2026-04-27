@@ -27,6 +27,27 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service implementation for administrator-level booking operations.
+ *
+ * <p>
+ * Handles the full admin lifecycle: listing all bookings with optional
+ * filtering,
+ * reviewing individual booking details (conflict checking, overlap detection),
+ * approving or rejecting pending bookings, and verifying QR-based facility
+ * check-ins.
+ * </p>
+ *
+ * <p>
+ * All write operations are wrapped in {@code @Transactional} to ensure
+ * atomicity.
+ * Read-only operations use {@code @Transactional(readOnly = true)} for query
+ * optimisation.
+ * </p>
+ *
+ * @see com.example.campus_nexus_backend.booking.service.AdminBookingService
+ * @see com.example.campus_nexus_backend.booking.controller.AdminBookingController
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -67,24 +88,28 @@ public class AdminBookingServiceImpl implements AdminBookingService {
     @Transactional(readOnly = true)
     public AdminBookingReviewResponse getBookingReviewDetails(String bookingCode) {
         Booking booking = getBookingEntity(bookingCode);
-        
+
         List<Booking> approvedForDate = bookingRepository.findByResourceIdAndBookingDateAndStatus(
                 booking.getResourceId(), booking.getBookingDate(), BookingStatus.APPROVED);
-                
+
         List<Booking> overlapping = bookingRepository.findConflictingBookings(
-                booking.getResourceId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime(), List.of(BookingStatus.APPROVED), booking.getId());
-                
+                booking.getResourceId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime(),
+                List.of(BookingStatus.APPROVED), booking.getId());
+
         boolean hasOverlap = !overlapping.isEmpty();
         boolean canApprove = booking.getStatus() == BookingStatus.PENDING && !hasOverlap;
-        
-        String message = canApprove ? "Booking is valid and can be approved." : 
-                         (booking.getStatus() != BookingStatus.PENDING ? "Booking is no longer pending." : "Booking has overlap conflicts and cannot be approved.");
+
+        String message = canApprove ? "Booking is valid and can be approved."
+                : (booking.getStatus() != BookingStatus.PENDING ? "Booking is no longer pending."
+                        : "Booking has overlap conflicts and cannot be approved.");
 
         return AdminBookingReviewResponse.builder()
                 .bookingDetails(mapToResponse(booking))
-                .resourceSummary("Resource capacity overview placeholder")
-                .approvedBookingsForDate(approvedForDate.stream().map(b -> mapToSummaryResponse(b, false)).collect(Collectors.toList()))
-                .overlappingBookings(overlapping.stream().map(b -> mapToSummaryResponse(b, false)).collect(Collectors.toList()))
+                .resourceSummary("View all approved bookings for this resource on the selected date below.")
+                .approvedBookingsForDate(
+                        approvedForDate.stream().map(b -> mapToSummaryResponse(b, false)).collect(Collectors.toList()))
+                .overlappingBookings(
+                        overlapping.stream().map(b -> mapToSummaryResponse(b, false)).collect(Collectors.toList()))
                 .canApprove(canApprove)
                 .reviewMessage(message)
                 .build();
@@ -93,24 +118,31 @@ public class AdminBookingServiceImpl implements AdminBookingService {
     @Override
     @Transactional
     public BookingResponse approveBooking(String bookingCode, ApproveBookingRequest request) {
-        log.info("Approving booking {}", bookingCode);
+        log.info("Approving booking {} (override allowed)", bookingCode);
         Booking booking = getBookingEntity(bookingCode);
-        
-        if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new InvalidBookingStateException("Booking must be in PENDING state to be approved.");
+
+        // Allow override from PENDING, REJECTED, or any non-CANCELLED state
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new InvalidBookingStateException("Cancelled bookings cannot be approved.");
         }
-        
-        checkForConflicts(booking.getResourceId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime(), booking.getId());
+
+        // Only check conflicts when moving to APPROVED (skip if already APPROVED)
+        if (booking.getStatus() != BookingStatus.APPROVED) {
+            checkForConflicts(booking.getResourceId(), booking.getBookingDate(), booking.getStartTime(),
+                    booking.getEndTime(), booking.getId());
+        }
 
         BookingStatus oldStatus = booking.getStatus();
         booking.setStatus(BookingStatus.APPROVED);
         booking.setApprovedBy(request.getApprovedBy());
         booking.setApprovedAt(LocalDateTime.now());
         booking.setAdminDecisionReason(request.getAdminDecisionReason());
-        booking.setQrToken(UUID.randomUUID().toString()); 
+        // Generate a new QR token on (re-)approval
+        booking.setQrToken(UUID.randomUUID().toString());
 
         Booking saved = bookingRepository.save(booking);
-        recordHistory(saved.getId(), oldStatus, BookingStatus.APPROVED, request.getApprovedBy(), request.getAdminDecisionReason());
+        recordHistory(saved.getId(), oldStatus, BookingStatus.APPROVED, request.getApprovedBy(),
+                request.getAdminDecisionReason());
 
         return mapToResponse(saved);
     }
@@ -118,11 +150,12 @@ public class AdminBookingServiceImpl implements AdminBookingService {
     @Override
     @Transactional
     public BookingResponse rejectBooking(String bookingCode, RejectBookingRequest request) {
-        log.info("Rejecting booking {}", bookingCode);
+        log.info("Rejecting booking {} (override allowed)", bookingCode);
         Booking booking = getBookingEntity(bookingCode);
-        
-        if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new InvalidBookingStateException("Booking must be in PENDING state to be rejected.");
+
+        // Allow override from PENDING or APPROVED; block CANCELLED
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new InvalidBookingStateException("Cancelled bookings cannot be rejected.");
         }
 
         BookingStatus oldStatus = booking.getStatus();
@@ -130,9 +163,12 @@ public class AdminBookingServiceImpl implements AdminBookingService {
         booking.setRejectedBy(request.getRejectedBy());
         booking.setRejectedAt(LocalDateTime.now());
         booking.setAdminDecisionReason(request.getAdminDecisionReason());
+        // Clear QR token — rejected booking should not be usable for check-in
+        booking.setQrToken(null);
 
         Booking saved = bookingRepository.save(booking);
-        recordHistory(saved.getId(), oldStatus, BookingStatus.REJECTED, request.getRejectedBy(), request.getAdminDecisionReason());
+        recordHistory(saved.getId(), oldStatus, BookingStatus.REJECTED, request.getRejectedBy(),
+                request.getAdminDecisionReason());
 
         return mapToResponse(saved);
     }
@@ -144,21 +180,24 @@ public class AdminBookingServiceImpl implements AdminBookingService {
         LocalDateTime now = LocalDateTime.now();
 
         if (booking == null) {
-            // Log failed checkin even if booking is not found (using 0L as placeholder, or just throwing)
-            // But we need a bookingId for the table. So we throw 404 directly as it's totally invalid.
+            // Log failed checkin even if booking is not found (using 0L as placeholder, or
+            // just throwing)
+            // But we need a bookingId for the table. So we throw 404 directly as it's
+            // totally invalid.
             throw new BookingNotFoundException("Invalid or non-existent QR token");
         }
 
         if (booking.getStatus() != BookingStatus.APPROVED) {
-            recordCheckIn(booking.getId(), request.getQrToken(), CheckInStatus.FAILED, "QR token is only valid for APPROVED bookings.");
+            recordCheckIn(booking.getId(), request.getQrToken(), CheckInStatus.FAILED,
+                    "QR token is only valid for APPROVED bookings.");
             throw new InvalidBookingStateException("QR token is only valid for APPROVED bookings.");
         }
 
         booking.setCheckedInAt(now);
         bookingRepository.save(booking);
-        
+
         BookingCheckIn checkIn = recordCheckIn(booking.getId(), request.getQrToken(), CheckInStatus.SUCCESS, null);
-        
+
         return BookingCheckInResponse.builder()
                 .id(checkIn.getId())
                 .bookingId(checkIn.getBookingId())
@@ -171,7 +210,8 @@ public class AdminBookingServiceImpl implements AdminBookingService {
 
     // --- Private Helper Methods ---
 
-    private void recordHistory(Long bookingId, BookingStatus oldStatus, BookingStatus newStatus, String changedBy, String reason) {
+    private void recordHistory(Long bookingId, BookingStatus oldStatus, BookingStatus newStatus, String changedBy,
+            String reason) {
         historyRepository.save(BookingStatusHistory.builder()
                 .bookingId(bookingId)
                 .previousStatus(oldStatus)
@@ -197,7 +237,8 @@ public class AdminBookingServiceImpl implements AdminBookingService {
                 .orElseThrow(() -> new BookingNotFoundException("Booking specific code not found: " + bookingCode));
     }
 
-    private void checkForConflicts(String resourceId, LocalDate date, java.time.LocalTime start, java.time.LocalTime end, Long excludeId) {
+    private void checkForConflicts(String resourceId, LocalDate date, java.time.LocalTime start,
+            java.time.LocalTime end, Long excludeId) {
         List<Booking> conflicts = bookingRepository.findConflictingBookings(
                 resourceId, date, start, end, List.of(BookingStatus.APPROVED), excludeId);
         if (!conflicts.isEmpty()) {
@@ -226,18 +267,25 @@ public class AdminBookingServiceImpl implements AdminBookingService {
                 .rejectedBy(b.getRejectedBy())
                 .cancelledAt(b.getCancelledAt())
                 .cancelledBy(b.getCancelledBy())
+                .studentName(b.getStudentName())
+                .studentRegNumber(b.getStudentRegNumber())
                 .createdAt(b.getCreatedAt())
                 .updatedAt(b.getUpdatedAt())
                 .build();
     }
-    
+
+    private BookingSummaryResponse mapToSummaryResponse(Booking b) {
+        return mapToSummaryResponse(b, false);
+    }
+
     private BookingSummaryResponse mapToSummaryResponse(Booking b, boolean checkConflict) {
-        Boolean hasConflict = false;
+        boolean hasConflict = false;
         if (checkConflict && b.getStatus() == BookingStatus.PENDING) {
             hasConflict = !bookingRepository.findConflictingBookings(
-                    b.getResourceId(), b.getBookingDate(), b.getStartTime(), b.getEndTime(), List.of(BookingStatus.APPROVED), b.getId()).isEmpty();
+                    b.getResourceId(), b.getBookingDate(), b.getStartTime(), b.getEndTime(),
+                    List.of(BookingStatus.APPROVED), b.getId()).isEmpty();
         }
-        
+
         return BookingSummaryResponse.builder()
                 .id(b.getId())
                 .bookingCode(b.getBookingCode())
@@ -246,7 +294,12 @@ public class AdminBookingServiceImpl implements AdminBookingService {
                 .startTime(b.getStartTime())
                 .endTime(b.getEndTime())
                 .status(b.getStatus())
+                .studentName(b.getStudentName())
+                .studentRegNumber(b.getStudentRegNumber())
                 .hasConflict(hasConflict)
+                // Include qrToken only for APPROVED bookings so the admin QR console can
+                // display it
+                .qrToken(b.getStatus() == BookingStatus.APPROVED ? b.getQrToken() : null)
                 .build();
     }
 }

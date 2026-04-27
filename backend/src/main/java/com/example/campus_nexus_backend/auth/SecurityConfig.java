@@ -37,7 +37,7 @@ public class SecurityConfig {
 //merge conflict resolved here
                         .requestMatchers("/auth/**", "/login/**", "/oauth2/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/resources/recommendations").authenticated()
-                    .requestMatchers(HttpMethod.GET, "/uploads/**", "/resources", "/resources/*").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/uploads/**", "/resources", "/resources/*", "/test-bookings", "/api/bookings/verify/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/resources/*/availability-blocks").authenticated()
                     .requestMatchers(HttpMethod.POST, "/resources/*/availability-blocks").hasAuthority("ROLE_ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/resources/*/availability-blocks/*").hasAuthority("ROLE_ADMIN")
@@ -86,7 +86,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // React Frontend එකට ඉඩ දෙනවා
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://127.0.0.1:5173"));
 
         // GET, POST, PUT, PATCH, DELETE ඔක්කොටම ඉඩ දෙනවා
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

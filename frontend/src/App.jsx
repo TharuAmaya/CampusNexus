@@ -20,6 +20,7 @@ import TechnicianHome from './pages/technician/TechnicianHome.jsx';
 import AssignedTickets from './pages/technician/AssignedTickets.jsx';
 import TechnicianTicketDetails from './pages/technician/TechnicianTicketDetails.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // ආරක්‍ෂක component එක
+import ScrollToTop from './components/ScrollToTop.jsx';
 
 ///View grades page එක
 import ViewGrades from './pages/student/ViewGrades.jsx';
@@ -40,6 +41,7 @@ import StudentTicketDetails from './pages/student/StudentTicketDetails.jsx';
 import MyBookings from './pages/student/booking/MyBookings.jsx';
 import CreateBooking from './pages/student/booking/CreateBooking.jsx';
 import BookingDetails from './pages/student/booking/BookingDetails.jsx';
+import VerifyBooking from './pages/student/booking/VerifyBooking.jsx';
 
 //Resource management pages
 import ResourceHome from './pages/admin/facilities/ResourceHome/ResourceHome.jsx';
@@ -49,9 +51,16 @@ import UpdateResource from './pages/admin/facilities/UpdateResource/UpdateResour
 import ResourceCatalogue from './pages/student/facilities/ResourceCatalogue.jsx';
 import ResourceAvailabilityCalendar from './pages/shared/facilities/ResourceAvailabilityCalendar.jsx';
 
+
+// Notifications Pages
+import AdminNotifications from './pages/admin/AdminNotifications.jsx';
+import StudentNotifications from './pages/student/StudentNotifications.jsx';
+import TechnicianNotifications from './pages/technician/TechnicianNotifications.jsx';
+
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col">
         <Navbar />
 
@@ -66,6 +75,7 @@ function App() {
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/verify-booking/:token" element={<VerifyBooking />} />
 
 
 
@@ -141,7 +151,7 @@ function App() {
                 </ProtectedRoute>}
             />
 
-{/*/* Resource management routes (Student only) */}
+            {/*/* Resource management routes (Student only) */}
             <Route
               path="/student/resources"
               element={
@@ -158,10 +168,17 @@ function App() {
                 </ProtectedRoute>}
             />
 
+            {/*/* Student Notifications */}
+            <Route
+              path="/student/notifications"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_STUDENT']}>
+                  <StudentNotifications />
+                </ProtectedRoute>}
+            />
 
 
 
-            
 
 
             {/* -- ADMIN DASHBOARD -- */}
@@ -230,6 +247,16 @@ function App() {
               }
             />
 
+              {/* Admin Notifications */}
+              <Route
+              path="/admin/notifications"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                  <AdminNotifications />
+                </ProtectedRoute>
+              }
+            />
+
 
 
             {/* -- TECHNICIAN DASHBOARD -- */}
@@ -260,6 +287,17 @@ function App() {
               }
             />
 
+              {/* Technician Notifications */}
+            <Route
+              path="/technician/notifications"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}>
+                  <TechnicianNotifications />
+                </ProtectedRoute>
+              }
+            />
+
+
 
 
             {/* -- COMMON PROTECTED ROUTES (හැමෝටම යන්න පුළුවන්) -- */}
@@ -272,7 +310,7 @@ function App() {
               }
             />
 
-{/*/* Resource management routes (Admin only) */}
+            {/*/* Resource management routes (Admin only) */}
             <Route
               path="/resourcehome"
               element={

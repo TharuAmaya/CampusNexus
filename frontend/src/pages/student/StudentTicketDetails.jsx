@@ -7,6 +7,7 @@ import DashboardLayout from '../../components/DashboardLayout.jsx';
 const API_BASE_URL = 'http://localhost:8081';
 const categoryOptions = ['Maintenance', 'Electrical', 'Plumbing', 'Furniture', 'Cleanliness', 'Security', 'IT Support', 'Other'];
 const priorityOptions = ['Low', 'Medium', 'High', 'Urgent'];
+const allowedImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'svg', 'heic', 'heif', 'avif', 'ico', 'jfif'];
 
 const StudentTicketDetails = () => {
     const { ticketId } = useParams();
@@ -45,6 +46,11 @@ const StudentTicketDetails = () => {
     const [commentText, setCommentText] = useState('');
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        return emailRegex.test(email);
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -349,10 +355,28 @@ const StudentTicketDetails = () => {
 
     const handleUpdateAttachmentChange = (event) => {
         const newFiles = Array.from(event.target.files || []);
+
+        const nonImageFile = newFiles.find((file) => {
+            const mimeType = (file.type || '').toLowerCase();
+            if (mimeType.startsWith('image/')) {
+                return false;
+            }
+
+            const fileName = (file.name || '').toLowerCase();
+            const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+            return !allowedImageExtensions.includes(extension);
+        });
+
+        if (nonImageFile) {
+            setUpdateError('Only image files are allowed. Please select image attachments only.');
+            event.target.value = '';
+            return;
+        }
+
         const allFiles = [...updateFiles, ...newFiles];
 
         if (allFiles.length > 3) {
-            setUpdateError('You can attach a maximum of 3 files.');
+            setUpdateError('You can attach a maximum of 3 images.');
             event.target.value = '';
             return;
         }
@@ -375,8 +399,13 @@ const StudentTicketDetails = () => {
             return;
         }
 
+        if (!validateEmail(updateForm.preferredContact)) {
+            setUpdateError('Please enter a valid email address.');
+            return;
+        }
+
         if (updateFiles.length > 3) {
-            setUpdateError('You can attach a maximum of 3 files.');
+            setUpdateError('You can attach a maximum of 3 images.');
             return;
         }
 
@@ -555,7 +584,7 @@ const StudentTicketDetails = () => {
                         </div>
 
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Preferred Contact</p>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Preferred Email Address</p>
                             <p className="mt-1 font-semibold text-slate-900">{ticket.preferredContact || '-'}</p>
                         </div>
 
@@ -591,7 +620,7 @@ const StudentTicketDetails = () => {
                                 <button
                                     type="button"
                                     onClick={openCommentModal}
-                                    className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 transition hover:bg-blue-100"
+                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 transition hover:bg-blue-100"
                                 >
                                     <FaComments /> Add Comment
                                 </button>
@@ -635,14 +664,14 @@ const StudentTicketDetails = () => {
                                                             <button
                                                                 type="button"
                                                                 onClick={() => openCommentEditModal(comment)}
-                                                                className="rounded-lg border border-amber-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100"
+                                                                className="cursor-pointer rounded-lg border border-amber-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700 transition hover:bg-amber-100"
                                                             >
                                                                 Edit
                                                             </button>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleDeleteComment(comment.commentId)}
-                                                                className="rounded-lg border border-rose-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-700 transition hover:bg-rose-100"
+                                                                className="cursor-pointer rounded-lg border border-rose-300 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-rose-700 transition hover:bg-rose-100"
                                                             >
                                                                 Delete
                                                             </button>
@@ -662,7 +691,7 @@ const StudentTicketDetails = () => {
                                 type="button"
                                 onClick={openUpdateModal}
                                 disabled={ticket.status !== 'OPEN'}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-300 disabled:text-gray-100"
+                                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-300 disabled:text-gray-100"
                             >
                                 <FaEdit /> Update
                             </button>
@@ -670,7 +699,7 @@ const StudentTicketDetails = () => {
                                 type="button"
                                 onClick={openDeleteConfirmation}
                                 disabled={ticket.status !== 'OPEN'}
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-400 bg-rose-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-300 disabled:text-gray-100"
+                                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-rose-400 bg-rose-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-300 disabled:text-gray-100"
                             >
                                 <FaTrash /> Delete
                             </button>
@@ -705,7 +734,7 @@ const StudentTicketDetails = () => {
                             <button
                                 type="button"
                                 onClick={closeUpdateModal}
-                                className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-gray-50 hover:text-slate-700"
+                                className="cursor-pointer rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-gray-50 hover:text-slate-700"
                             >
                                 Close
                             </button>
@@ -792,13 +821,14 @@ const StudentTicketDetails = () => {
                                 </div>
 
                                 <div className="md:col-span-2">
-                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Contact Details</label>
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Email Address</label>
                                     <input
-                                        type="text"
+                                        type="email"
                                         name="preferredContact"
                                         value={updateForm.preferredContact}
                                         onChange={handleUpdateChange}
                                         required
+                                        placeholder="example@email.com"
                                         className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
                                     />
                                 </div>
@@ -823,12 +853,12 @@ const StudentTicketDetails = () => {
                                         <input
                                             type="file"
                                             multiple
-                                            accept="image/*,.pdf,.png,.jpg,.jpeg"
+                                            accept="image/*"
                                             onChange={handleUpdateAttachmentChange}
                                             className="block w-full text-sm text-slate-600 file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#f4511e] file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-[#d84315]"
                                         />
                                         <p className="mt-3 text-xs leading-6 text-slate-500">
-                                            Select up to 3 files. Saving this form replaces previous attachments with the newly selected files.
+                                            Select up to 3 images. Saving this form replaces previous attachments with the newly selected files.
                                         </p>
 
                                         {Array.isArray(ticket?.attachments) && ticket.attachments.length > 0 && (
@@ -848,7 +878,7 @@ const StudentTicketDetails = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => removeUpdateFile(index)}
-                                                        className="text-slate-500 transition-colors hover:text-red-500"
+                                                        className="cursor-pointer text-slate-500 transition-colors hover:text-red-500"
                                                         title="Remove file"
                                                     >
                                                         ✕
@@ -866,14 +896,14 @@ const StudentTicketDetails = () => {
                                 <button
                                     type="button"
                                     onClick={closeUpdateModal}
-                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-500 transition hover:bg-gray-50"
+                                    className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-500 transition hover:bg-gray-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isUpdating}
-                                    className="rounded-lg bg-[#f4511e] px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    className="cursor-pointer rounded-lg bg-[#f4511e] px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     {isUpdating ? 'Updating...' : 'Save Changes'}
                                 </button>
@@ -912,7 +942,7 @@ const StudentTicketDetails = () => {
                                 type="button"
                                 onClick={closeDeleteConfirmation}
                                 disabled={isDeleting}
-                                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Cancel
                             </button>
@@ -920,7 +950,7 @@ const StudentTicketDetails = () => {
                                 type="button"
                                 onClick={handleDelete}
                                 disabled={isDeleting}
-                                className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                className="cursor-pointer rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                             >
                                 {isDeleting ? 'Deleting...' : 'Delete Ticket'}
                             </button>
@@ -963,14 +993,14 @@ const StudentTicketDetails = () => {
                                     type="button"
                                     onClick={closeCommentModal}
                                     disabled={isCommentSubmitting}
-                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isCommentSubmitting}
-                                    className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     {isCommentSubmitting ? 'Saving...' : (editingCommentId ? 'Save Comment' : 'Add Comment')}
                                 </button>
