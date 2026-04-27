@@ -24,7 +24,7 @@ public class Announcement {
     private TargetAudience targetAudience;
 
     @Column(name = "created_by", nullable = false)
-    private String createdBy; // Admin ගේ Email එක සේව් කරන්න
+    private String createdBy; // save the email of the creator
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
