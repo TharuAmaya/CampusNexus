@@ -57,6 +57,11 @@ import AdminNotifications from './pages/admin/AdminNotifications.jsx';
 import StudentNotifications from './pages/student/StudentNotifications.jsx';
 import TechnicianNotifications from './pages/technician/TechnicianNotifications.jsx';
 
+//announcements pages
+import AdminAnnouncements from './pages/admin/AdminAnnouncements.jsx';
+import StudentAnnouncements from './pages/student/StudentAnnouncements.jsx';
+import TechnicianAnnouncements from './pages/technician/TechnicianAnnouncements.jsx';
+
 function App() {
   return (
     <Router>
@@ -178,6 +183,10 @@ function App() {
             />
 
 
+              {/* Student Announcements */} 
+            <Route path="/student/announcements" element={
+              <ProtectedRoute allowedRoles={['ROLE_STUDENT']}><StudentAnnouncements /></ProtectedRoute>
+            } />
 
 
 
@@ -247,8 +256,8 @@ function App() {
               }
             />
 
-              {/* Admin Notifications */}
-              <Route
+            {/* Admin Notifications */}
+            <Route
               path="/admin/notifications"
               element={
                 <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
@@ -256,6 +265,11 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Admin Announcements */}
+            <Route path="/admin/announcements" element={
+              <ProtectedRoute allowedRoles={['ROLE_ADMIN']}><AdminAnnouncements /></ProtectedRoute>
+            } />
 
 
 
@@ -287,7 +301,7 @@ function App() {
               }
             />
 
-              {/* Technician Notifications */}
+            {/* Technician Notifications */}
             <Route
               path="/technician/notifications"
               element={
@@ -296,6 +310,15 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+
+            {/* Technician Announcements */}
+            <Route path="/technician/announcements" element={
+              <ProtectedRoute allowedRoles={['ROLE_TECHNICIAN']}><TechnicianAnnouncements /></ProtectedRoute>
+            } />
+
+
+
 
 
 

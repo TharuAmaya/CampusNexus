@@ -25,7 +25,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         
-        // 1. Token එකෙන් provider එක (google ද github ද) හොයාගන්නවා
+        // 1. get the providet(google,github) from token)
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
         String provider = oauthToken.getAuthorizedClientRegistrationId(); 
         
@@ -36,10 +36,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String picture = "";
         String providerId = "";
 
-        // 2. ලොග් වුණේ කොහෙන්ද කියලා බලලා අදාළ විස්තර ගන්නවා
+        // 2. take details from provider according to provider type (google, github)
         if (provider.equals("github")) {
             email = oAuth2User.getAttribute("email");
-            // GitHub එකේ Email එක Private කරලා නම්, username එකෙන් email එකක් හදාගන්නවා
+            
+            //if github email is private, create a fake email using username
             if (email == null) { 
                 email = oAuth2User.getAttribute("login") + "@github.com"; 
             }
@@ -51,51 +52,51 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             
             picture = oAuth2User.getAttribute("avatar_url");
             
-            // GitHub id එක integer එකක් නිසා string එකට හරවනවා
+            // turn github id into string because our User entity expects a string for providerId
             Object idObj = oAuth2User.getAttribute("id");
             if (idObj != null) {
                 providerId = idObj.toString();
             }
             
         } else {
-            // මේ තියෙන්නේ පරණ Google කෑල්ල
+            // old google code
             email = oAuth2User.getAttribute("email");
             name = oAuth2User.getAttribute("name");
             picture = oAuth2User.getAttribute("picture");
             providerId = oAuth2User.getAttribute("sub");
         }
 
-        // lambda (->) expression එක ඇතුළට යවන්න නම් variables "final" වෙන්න ඕනේ
+        // variables should be final if want to go in lambda (->) expression 
         final String finalEmail = email;
         final String finalName = name;
         final String finalPicture = picture;
         final String finalProviderId = providerId;
 
-        // Database එකේ මේ email එක තියෙනවද බලනවා. නැත්නම් අලුතින් හදනවා.
+        // check email exist in DB or not, if not exist create new user
         User user = userRepository.findByEmail(finalEmail).orElseGet(() -> {
             User newUser = new User();
             newUser.setEmail(finalEmail);
             newUser.setFullName(finalName);
             newUser.setAvatarUrl(finalPicture);
-            newUser.setProvider(provider.toUpperCase()); // GOOGLE හෝ GITHUB කියලා සේව් වෙනවා
+            newUser.setProvider(provider.toUpperCase()); // save provider in uppercase (GOOGLE, GITHUB)
             newUser.setProviderId(finalProviderId);
 
-            // Email එක අනුව Role එක තීරණය කරනවා
+            // set the role according to email
             if (finalEmail.equals("mwsahirubro75@gmail.com")) { 
                 newUser.setRole("ROLE_ADMIN");
             } else if (finalEmail.equals("mewanyamagedaragama@gmail.com")) { 
                 newUser.setRole("ROLE_TECHNICIAN");
             } else {
-                newUser.setRole("ROLE_STUDENT"); // ඔයාගේ GitHub එකෙන් එන එකත් වැටෙන්නේ මෙතනටයි!
+                newUser.setRole("ROLE_STUDENT"); // github student part
             }
 
             return userRepository.save(newUser);
         });
 
-        // Token එක හදනවා
+        // create the token using email and role
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
-        // React Frontend එකට Redirect කරනවා Token එකත් අරගෙන!
+        //redirect to the frontend with token
         String frontendUrl = "http://localhost:5173/login/success?token=" + token;
         getRedirectStrategy().sendRedirect(request, response, frontendUrl);
     }

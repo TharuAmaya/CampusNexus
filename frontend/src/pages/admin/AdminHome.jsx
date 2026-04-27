@@ -91,7 +91,7 @@ const AdminHome = () => {
                 </div>
             )}
 
-            {/* ඉස්සරහට අපිට මෙතන "Recent Activities" හරි "Pending Tickets" Table එකක් හරි දාන්න පුළුවන් */}
+            {/* ** */}
             <div className="mt-10 bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center text-gray-500 border-dashed">
                 <p>System activities and charts will appear here as the system grows.</p>
             </div>

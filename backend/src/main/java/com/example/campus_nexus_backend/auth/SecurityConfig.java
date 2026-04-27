@@ -26,7 +26,7 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-    // 1. Security Filter Chain එක (CSRF අක්‍රිය කරලා, OPTIONS වලට ඉඩ දීලා තියෙන්නේ)
+    // 1. Security Filter Chain 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -45,8 +45,9 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.PUT, "/resources/**").hasAuthority("ROLE_ADMIN")
 
 
-                        // මෙන්න අලුත් පේළිය: Admin ගේ API වලට යන්න පුළුවන් ROLE_ADMIN අයට විතරයි!
+                        // admin parts only for ADMIN_ROLE
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                        
                     .requestMatchers("/api/technician/**").hasAuthority("ROLE_TECHNICIAN")
 
                         .requestMatchers("/api/user/**").authenticated()
@@ -72,26 +73,25 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler))
 
-                // මෙන්න අලුත් පේළිය: Spring Security එකේ සාමාන්‍ය මුරකරුවට කලින් අපේ JWT
-                // මුරකරුවා දානවා
+                //set jwt security filter before the default username password authentication filter
                 .addFilterBefore(jwtFilter,
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // 2. එකම එක CORS Configuration එක (මෙතන තමයි PUT සහ Token වලට අවසර දෙන්නේ)
+    // 2. allow PUT and tokens
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // React Frontend එකට ඉඩ දෙනවා
+        // allow react frontend
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://127.0.0.1:5173"));
 
-        // GET, POST, PUT, PATCH, DELETE ඔක්කොටම ඉඩ දෙනවා
+        // GET, POST, PUT, PATCH, DELETE allowed all
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Tokens ගේන්න ඉඩ දෙනවා
+        // allow to take tokens
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "*"));
         configuration.setAllowCredentials(true);
 

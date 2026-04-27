@@ -36,7 +36,7 @@ const ManageUsers = () => {
         fetchUsers();
     }, []);
 
-    // 2. CREATE: අලුත් User කෙනෙක් Add කිරීම
+    //  CREATE: Add a new user
     const handleAddSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -54,7 +54,7 @@ const ManageUsers = () => {
                 setMessage({ text: 'User added successfully!', type: 'success' });
                 setShowAddModal(false);
                 setFormData({ email: '', role: 'ROLE_STUDENT', department: '', studentOrEmpId: '' });
-                fetchUsers(); // Table එක අලුත් කරනවා
+                fetchUsers(); // updade the table
             } else {
                 setMessage({ text: 'Failed to add user. Email might exist.', type: 'error' });
             }
@@ -64,7 +64,7 @@ const ManageUsers = () => {
         setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     };
 
-    // 3. UPDATE: User ව Edit කරන්න Modal එක Open කිරීම
+    // 3. UPDATE: open model to edit user details
     const openEditModal = (user) => {
         setEditingUserId(user.id);
         setFormData({ 
@@ -76,7 +76,7 @@ const ManageUsers = () => {
         setShowEditModal(true);
     };
 
-    // UPDATE: වෙනස් කරපු විස්තර Save කිරීම
+    // UPDATE: save updated details
     const handleEditSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -103,7 +103,7 @@ const ManageUsers = () => {
         setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     };
 
-    // 4. DELETE: User ව මකා දැමීම
+    // 4. DELETE: delete the user
     const handleDelete = async (id, email) => {
         if (window.confirm(`Are you sure you want to delete user: ${email}?`)) {
             try {
