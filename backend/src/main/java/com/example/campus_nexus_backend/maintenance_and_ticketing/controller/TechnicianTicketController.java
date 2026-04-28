@@ -26,7 +26,7 @@ public class TechnicianTicketController {
     private TechnicianTicketService technicianTicketService;
 
 
-    // --- අපේ අලුත් Services --- notification related Lakshan edits
+    // ---Services--- notification related Lakshan edits
     @Autowired
     private NotificationService notificationService;
 
@@ -77,11 +77,11 @@ public class TechnicianTicketController {
         // යාළුවාගේ කෝඩ් එක
         technicianTicketService.resolveTicket(id, dto.getResolutionNotes(), authentication.getName());
         
-        // --- Notification යවන කෑල්ල ---
+        // --- Notification sending part ---
         try {
             Ticket ticket = ticketRepository.findById(id).orElseThrow();
             
-            // Ticket එක දාපු Student ට Notification එක යවනවා
+            // sending an notification who created the ticket (student)
             notificationService.sendNotification(
                 ticket.getCreatedBy().getEmail(), 
                 "Great news! Your Ticket #" + id + " has been RESOLVED by the technician. Notes: " + dto.getResolutionNotes(), 

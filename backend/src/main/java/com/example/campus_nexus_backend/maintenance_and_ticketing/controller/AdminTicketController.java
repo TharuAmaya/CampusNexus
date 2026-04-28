@@ -33,7 +33,7 @@ public class AdminTicketController {
     private TicketService ticketService; 
 
 
-    // --- අපේ අලුත් Services සහ Repositories  Lakshan edits---
+    // ---  Lakshan edits---
     @Autowired
     private NotificationService notificationService;
 
@@ -65,22 +65,22 @@ public class AdminTicketController {
             @PathVariable Long id, 
             @RequestBody AssignTechnicianDTO dto) {
             
-        // යාළුවාගේ කෝඩ් එක (Assign වෙනවා)
+        // assign sahiru code part
         adminTicketService.assignTechnician(id, dto.getAssignedTechnicianId());
         
-        // --- Notification යවන කෑල්ල ---
+        // --- Notification sending part ---
         try {
             Ticket ticket = ticketRepository.findById(id).orElseThrow();
             User technician = userRepository.findById(dto.getAssignedTechnicianId()).orElseThrow();
 
-            // 1. Technician ට Notification එකක් යවනවා
+            // 1. sending notification to technician
             notificationService.sendNotification(
                 technician.getEmail(), 
                 "You have been assigned to a new Ticket #" + id, 
                 "TICKET"
             );
             
-            // 2. Ticket එක දාපු Student ට Notification එකක් යවනවා
+            // 2. sending notification to student
             notificationService.sendNotification(
                 ticket.getCreatedBy().getEmail(), 
                 "Your Ticket #" + id + " has been assigned to a technician.", 
