@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "../../../../components/DashboardLayout.jsx";
+import { FaArrowLeft, FaPlusCircle, FaInfoCircle, FaImage } from "react-icons/fa";
 
 const RESOURCE_TYPES = [
   "LECTURE_HALL",
@@ -69,7 +70,7 @@ function AddResource() {
     imageForm.append("file", imageFile);
     setUploading(true);
 
-    const response = await fetch(`${API_BASE_URL}/resources/resourceImg`, {
+    const response = await fetch(`${API_BASE_URL}/resources/image`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: imageForm,
@@ -174,23 +175,33 @@ function AddResource() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50 px-4 py-10 sm:px-6 lg:px-8">
+        <style>{`@keyframes facilitiesFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
         <div className="mx-auto w-full max-w-3xl">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-slate-800 sm:text-4xl">
-              Add New Resource
-            </h1>
-            <Link
-              to="/resourcehome"
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-            >
-              Back
-            </Link>
+          <div className="relative mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm" style={{ animation: 'facilitiesFadeUp 420ms ease-out both' }}>
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-200/45 blur-2xl" />
+            <div className="absolute -bottom-10 left-10 h-28 w-28 rounded-full bg-cyan-200/40 blur-2xl" />
+            <div className="relative flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Facilities Admin</p>
+                <h1 className="flex items-center gap-2 text-3xl font-bold text-slate-800 sm:text-4xl"><FaPlusCircle className="text-cyan-700" /> Add New Resource</h1>
+                <p className="mt-1 text-sm text-slate-600">Create high-quality, bookable campus resources with complete details.</p>
+              </div>
+              <Link
+                to="/resourcehome"
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 active:translate-y-px active:scale-[0.99]"
+              >
+                <span className="inline-flex items-center gap-2"><FaArrowLeft /> Back</span>
+              </Link>
+            </div>
           </div>
           <form
             onSubmit={handleSubmit}
             className="space-y-6 rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-xl backdrop-blur sm:p-8"
+            style={{ animation: 'facilitiesFadeUp 520ms ease-out both' }}
           >
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <h2 className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-600"><FaInfoCircle /> Resource Details</h2>
+              <div className="mt-4 grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label
                   className="mb-2 block text-sm font-semibold text-slate-700"
@@ -326,6 +337,12 @@ function AddResource() {
                   required
                 />
               </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <h2 className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-600"><FaImage /> Media</h2>
+              <div className="mt-4">
               <div className="sm:col-span-2">
                 <label
                   className="mb-2 block text-sm font-semibold text-slate-700"
@@ -347,6 +364,15 @@ function AddResource() {
                     className="mt-4 h-44 w-full rounded-xl object-cover sm:w-80"
                   />
                 )}
+                {!imagePreviewUrl ? (
+                  <div className="mt-4 flex h-44 w-full items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white text-center sm:w-80">
+                    <div>
+                      <div className="mx-auto mb-2 h-8 w-8 rounded-lg border-2 border-cyan-600" />
+                      <p className="text-xs font-medium text-slate-500">Image preview appears here</p>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
               </div>
             </div>
             <div className="rounded-xl bg-slate-100 p-4 text-sm text-slate-600">
@@ -365,7 +391,7 @@ function AddResource() {
             <button
               type="submit"
               disabled={loading || uploading}
-              className="w-full rounded-xl bg-slate-900 px-5 py-3 text-base font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-xl bg-gradient-to-r from-slate-900 to-cyan-800 px-5 py-3 text-base font-semibold text-white transition hover:from-slate-800 hover:to-cyan-700 active:translate-y-px active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading || uploading ? "Saving Resource..." : "Create Resource"}
             </button>

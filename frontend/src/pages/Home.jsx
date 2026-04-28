@@ -19,11 +19,11 @@ const staggerContainer = {
 const Home = () => {
   const showcaseRef = useRef(null);
 
-  // --- අලුතින් එකතු කරපු කෑල්ල ---
+  // --- newly added part ---
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Token එක තියෙනවද කියලා බලනවා
+    // Check if token exists in localStorage
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);
@@ -199,7 +199,7 @@ const Home = () => {
             <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-1 bg-gradient-to-r from-blue-100 via-secondary to-green-100 -z-10 transform -translate-y-1/2 rounded-full"></div>
 
             {[
-              { step: "01", icon: <FaSearch />, title: "Search & Request", desc: "Find available rooms or equipment and submit a PENDING request.", color: "text-blue-500", bg: "bg-blue-50" },
+              { step: "01", icon: <FaSearch />, title: "Login & Request", desc: "Find available rooms or equipment and submit a PENDING request.", color: "text-blue-500", bg: "bg-blue-50" },
               { step: "02", icon: <FaUserCheck />, title: "Admin Review", desc: "Administrators review the request based on purpose and availability.", color: "text-accent", bg: "bg-yellow-50" },
               { step: "03", icon: <FaCalendarCheck />, title: "Approval", desc: "Status changes to APPROVED and you receive an instant notification.", color: "text-green-500", bg: "bg-green-50" }
             ].map((item, index) => (

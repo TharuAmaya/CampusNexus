@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+
+// --- Lakshan Notification Imports ---
+import com.example.campus_nexus_backend.notifications.NotificationService;
+import com.example.campus_nexus_backend.auth.UserRepository;
+import com.example.campus_nexus_backend.auth.User;
+
 /**
  * REST controller exposing the student Booking resource
  * ({@code /api/bookings}).
@@ -57,6 +63,10 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    // --- අපේ අලුත් Services දෙක ---
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
+
     // ─────────────────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
@@ -66,10 +76,10 @@ public class BookingController {
         Map<String, String> links = new LinkedHashMap<>();
         links.put("self", "/api/bookings/" + bookingId);
         links.put("update", "/api/bookings/" + bookingId);
-        links.put("cancel", "/api/bookings/" + bookingId + "/cancel");
+        links.put("delete", "/api/bookings/" + bookingId);
         links.put("qr-token", "/api/bookings/" + bookingId + "/qr");
         if (resourceId != null) {
-            links.put("resource", "/resources/" + resourceId);
+            links.put("resource", "/api/resources/" + resourceId);
         }
         links.put("collection", "/api/bookings");
         return links;
@@ -79,10 +89,10 @@ public class BookingController {
     private String linkHeader(String bookingId, String resourceId) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("</api/bookings/%s>; rel=\"self\"", bookingId)).append(", ");
-        sb.append(String.format("</api/bookings/%s/cancel>; rel=\"cancel\"", bookingId)).append(", ");
+        sb.append(String.format("</api/bookings/%s>; rel=\"delete\"", bookingId)).append(", ");
         sb.append(String.format("</api/bookings/%s/qr>; rel=\"qr-token\"", bookingId)).append(", ");
         if (resourceId != null) {
-            sb.append(String.format("</resources/%s>; rel=\"resource\"", resourceId)).append(", ");
+            sb.append(String.format("</api/resources/%s>; rel=\"resource\"", resourceId)).append(", ");
         }
         sb.append("</api/bookings>; rel=\"collection\"");
         return sb.toString();
@@ -108,12 +118,30 @@ public class BookingController {
      * @param request The booking creation payload
      * @return 201 Created with Location header and the new booking representation
      */
-    @PostMapping
+   @PostMapping
     public ResponseEntity<BookingResponse> createBooking(
             @Valid @RequestBody CreateBookingRequest request) {
 
         BookingResponse response = bookingService.createBooking(request);
         response.setLinks(bookingLinks(response.getBookingCode(), response.getResourceId()));
+
+        // --- Notification part start ---
+        try {
+            // find all admins in system
+            List<User> admins = userRepository.findByRole("ROLE_ADMIN");
+            
+            // dending to all admins Notification as Booking
+            for (User admin : admins) {
+                notificationService.sendNotification(
+                    admin.getEmail(), 
+                    "A new resource booking request (" + response.getBookingCode() + ") has been submitted by student ID: " + request.getUserId(), 
+                    "BOOKING" // send this part for BOOKING sidebar tab because of this name
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send booking notification: " + e.getMessage());
+        }
+        // --- Notification part over ---
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -161,7 +189,7 @@ public class BookingController {
             Map<String, String> links = new LinkedHashMap<>();
             links.put("self", "/api/bookings/" + b.getBookingCode());
             links.put("resource", "/api/resources/" + b.getResourceId());
-            links.put("cancel", "/api/bookings/" + b.getBookingCode() + "/cancel");
+            links.put("delete", "/api/bookings/" + b.getBookingCode());
             b.setLinks(links);
         });
 
@@ -246,7 +274,7 @@ public class BookingController {
      * @param cancelledBy The ID of the user requesting cancellation
      * @return 200 OK with updated booking representation (status = CANCELLED)
      */
-    @PatchMapping("/{bookingId}/cancel")
+    @DeleteMapping("/{bookingId}")
     public ResponseEntity<BookingResponse> cancelBooking(
             @PathVariable("bookingId") String bookingId,
             @RequestParam("cancelledBy") String cancelledBy) {

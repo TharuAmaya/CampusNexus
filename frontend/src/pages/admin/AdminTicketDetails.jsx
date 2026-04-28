@@ -650,7 +650,7 @@ const AdminTicketDetails = () => {
                                         type="button"
                                         onClick={handleAssignTechnician}
                                         disabled={!selectedTechnicianId || isAssigning}
-                                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-blue-400 bg-blue-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-blue-800 transition hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-blue-400 bg-blue-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-blue-800 transition hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <FaUserCog /> {isAssigning ? 'Assigning...' : 'Assign'}
                                     </button>
@@ -678,7 +678,7 @@ const AdminTicketDetails = () => {
                                         type="button"
                                         onClick={handleStatusUpdate}
                                         disabled={!selectedStatus || isUpdatingStatus}
-                                        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-400 bg-emerald-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-emerald-800 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-emerald-400 bg-emerald-100 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-emerald-800 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <FaTasks /> {isUpdatingStatus ? 'Updating...' : 'Update'}
                                     </button>
@@ -689,7 +689,7 @@ const AdminTicketDetails = () => {
                                     type="button"
                                     onClick={openRejectModal}
                                     disabled={ticket?.status !== 'OPEN' || isRejecting}
-                                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <FaBan /> Reject Ticket
                                 </button>
@@ -697,7 +697,7 @@ const AdminTicketDetails = () => {
                                     type="button"
                                     onClick={handleCancelRejection}
                                     disabled={ticket?.status !== 'REJECTED'}
-                                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-blue-400 bg-blue-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-blue-400 bg-blue-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <FaTrashAlt /> Cancel Rejection
                                 </button>
@@ -705,7 +705,7 @@ const AdminTicketDetails = () => {
                                     type="button"
                                     onClick={openDeleteModal}
                                     disabled={ticket.status !== 'CLOSED' || isDeleting}
-                                    className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-rose-400 bg-rose-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-rose-400 bg-rose-400 px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <FaTrashAlt /> Delete
                                 </button>
@@ -762,14 +762,14 @@ const AdminTicketDetails = () => {
                                     type="button"
                                     onClick={closeRejectModal}
                                     disabled={isRejecting}
-                                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isRejecting}
-                                    className="rounded-lg bg-amber-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    className="cursor-pointer rounded-lg bg-amber-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     {isRejecting ? 'Submitting...' : 'Submit Rejection'}
                                 </button>
@@ -803,7 +803,7 @@ const AdminTicketDetails = () => {
                                 type="button"
                                 onClick={closeDeleteModal}
                                 disabled={isDeleting}
-                                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Cancel
                             </button>
@@ -811,7 +811,7 @@ const AdminTicketDetails = () => {
                                 type="button"
                                 onClick={handleDeleteTicket}
                                 disabled={isDeleting}
-                                className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                className="cursor-pointer rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                             >
                                 {isDeleting ? 'Deleting...' : 'Delete'}
                             </button>

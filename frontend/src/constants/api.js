@@ -18,7 +18,7 @@ export const ENDPOINTS = {
     bookingsByUser: (userId) => `${BASE_URL}/api/bookings?userId=${userId}`,
     bookingById: (id) => `${BASE_URL}/api/bookings/${id}`,
     createBooking: () => `${BASE_URL}/api/bookings`,
-    cancelBooking: (id, userId) => `${BASE_URL}/api/bookings/${id}/cancel?cancelledBy=${userId}`,
+    cancelBooking: (id, userId) => `${BASE_URL}/api/bookings/${id}?cancelledBy=${userId}`,
     updateBooking: (id) => `${BASE_URL}/api/bookings/${id}`,
     bookingQrToken: (id) => `${BASE_URL}/api/bookings/${id}/qr`,
 

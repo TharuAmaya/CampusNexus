@@ -1,6 +1,7 @@
 package com.example.campus_nexus_backend.facilities.controller;
 
 import com.example.campus_nexus_backend.facilities.dto.ResourceDropdownDTO;
+import com.example.campus_nexus_backend.facilities.dto.ResourceRecommendationDTO;
 import com.example.campus_nexus_backend.facilities.exception.BadRequestException;
 import com.example.campus_nexus_backend.facilities.exception.ResourceNotFoundException;
 import com.example.campus_nexus_backend.facilities.model.ResourcesModel;
@@ -28,6 +29,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @RestController
@@ -41,12 +43,13 @@ public class ResourceController {
             .build();
 
     @PostMapping("/resources")
-    public ResourcesModel newResourceModel(@RequestBody ResourcesModel newResourceModel) {
+    public ResponseEntity<ResourcesModel> newResourceModel(@RequestBody ResourcesModel newResourceModel) {
         validateResourceMetadata(newResourceModel);
-        return resourceRepository.save(newResourceModel);
+        ResourcesModel savedResource = resourceRepository.save(newResourceModel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedResource);
     }
 
-    @PostMapping("/resources/resourceImg")
+    @PostMapping("/resources/image")
     public ResponseEntity<String> resourceImg(@RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File is required.");
@@ -73,11 +76,19 @@ public class ResourceController {
     }
 
     private Path resolveUploadDirectory() {
+        // Try original path for team members
         Path backendRelative = Paths.get("backend", "src", "main", "uploads");
         if (backendRelative.toFile().exists() || Paths.get("backend", "src", "main").toFile().exists()) {
             return backendRelative;
         }
 
+        // Try CampusNexus/backend path structure
+        Path campusNexusPath = Paths.get("CampusNexus", "backend", "src", "main", "uploads");
+        if (campusNexusPath.toFile().exists()) {
+            return campusNexusPath;
+        }
+
+        // Fallback to original default
         return Paths.get("src", "main", "uploads");
     }
 
@@ -94,23 +105,121 @@ public class ResourceController {
         String normalizedKeyword = keyword == null ? "" : keyword.toLowerCase(Locale.ROOT);
 
         return resourceRepository.findAll().stream()
-            .filter(r -> type == null || r.getType() == type)
-            .filter(r -> status == null || r.getStatus() == status)
-            .filter(r -> minCapacity == null || r.getCapacity() >= minCapacity)
-            .filter(r -> maxCapacity == null || r.getCapacity() <= maxCapacity)
-            .filter(r -> normalizedLocation.isBlank() || (r.getLocation() != null && r.getLocation().toLowerCase(Locale.ROOT).contains(normalizedLocation)))
-            .filter(r -> normalizedKeyword.isBlank() ||
-                String.valueOf(r.getResourceId()).contains(normalizedKeyword) ||
-                (r.getName() != null && r.getName().toLowerCase(Locale.ROOT).contains(normalizedKeyword)) ||
-                (r.getType() != null && r.getType().name().toLowerCase(Locale.ROOT).contains(normalizedKeyword)) ||
-                (r.getLocation() != null && r.getLocation().toLowerCase(Locale.ROOT).contains(normalizedKeyword)))
-            .collect(Collectors.toList());
+                .filter(r -> type == null || r.getType() == type)
+                .filter(r -> status == null || r.getStatus() == status)
+                .filter(r -> minCapacity == null || r.getCapacity() >= minCapacity)
+                .filter(r -> maxCapacity == null || r.getCapacity() <= maxCapacity)
+                .filter(r -> normalizedLocation.isBlank() || (r.getLocation() != null
+                        && r.getLocation().toLowerCase(Locale.ROOT).contains(normalizedLocation)))
+                .filter(r -> normalizedKeyword.isBlank() ||
+                        String.valueOf(r.getResourceId()).contains(normalizedKeyword) ||
+                        (r.getName() != null && r.getName().toLowerCase(Locale.ROOT).contains(normalizedKeyword)) ||
+                        (r.getType() != null && r.getType().name().toLowerCase(Locale.ROOT).contains(normalizedKeyword))
+                        ||
+                        (r.getLocation() != null
+                                && r.getLocation().toLowerCase(Locale.ROOT).contains(normalizedKeyword)))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/resources/{id}")
     public ResourcesModel getResourceById(@PathVariable("id") Long id) {
         return resourceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
+    }
+
+    @GetMapping("/resources/recommendations")
+    public List<ResourceRecommendationDTO> getRecommendations(
+            @RequestParam(value = "requiredCapacity", required = false) Integer requiredCapacity,
+            @RequestParam(value = "preferredLocation", required = false) String preferredLocation,
+            @RequestParam(value = "preferredType", required = false) String preferredType,
+            @RequestParam(value = "limit", defaultValue = "3") Integer limit
+    ) {
+        if (limit == null || limit < 1 || limit > 10) {
+            throw new BadRequestException("limit must be between 1 and 10.");
+        }
+
+        if (requiredCapacity != null && requiredCapacity < 0) {
+            throw new BadRequestException("requiredCapacity cannot be negative.");
+        }
+
+        ResourceType parsedType = null;
+        if (preferredType != null && !preferredType.isBlank()) {
+            try {
+                parsedType = ResourceType.valueOf(preferredType.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException ex) {
+                throw new BadRequestException("Invalid preferredType. Use values like LECTURE_HALL, LAB, MEETING_ROOM, EQUIPMENT, SPORTS_FACILITY.");
+            }
+        }
+        final ResourceType preferredResourceType = parsedType;
+
+        String normalizedLocation = preferredLocation == null ? "" : preferredLocation.trim().toLowerCase(Locale.ROOT);
+
+        class ScoredRecommendation {
+            private final ResourcesModel resource;
+            private final int score;
+            private final String reason;
+
+            private ScoredRecommendation(ResourcesModel resource, int score, String reason) {
+                this.resource = resource;
+                this.score = score;
+                this.reason = reason;
+            }
+        }
+
+        List<ScoredRecommendation> scored = resourceRepository.findAll().stream()
+                .filter(resource -> resource.getStatus() == Status.ACTIVE)
+                .map(resource -> {
+                    int score = 10;
+                    List<String> reasons = new ArrayList<>();
+
+                    if (requiredCapacity != null) {
+                        int capacityGap = resource.getCapacity() - requiredCapacity;
+                        if (capacityGap < 0) {
+                            return null;
+                        }
+                        score += 40;
+                        score += Math.max(0, 20 - Math.min(capacityGap, 20));
+                        reasons.add("Meets required capacity");
+                    }
+
+                    if (preferredResourceType != null) {
+                        if (resource.getType() == preferredResourceType) {
+                            score += 30;
+                            reasons.add("Matches preferred type");
+                        }
+                    }
+
+                    if (!normalizedLocation.isBlank()) {
+                        String location = resource.getLocation() == null ? "" : resource.getLocation().toLowerCase(Locale.ROOT);
+                        if (location.equals(normalizedLocation)) {
+                            score += 20;
+                            reasons.add("Exact location match");
+                        } else if (location.contains(normalizedLocation)) {
+                            score += 12;
+                            reasons.add("Location partially matches");
+                        }
+                    }
+
+                    if (reasons.isEmpty()) {
+                        reasons.add("Best available match based on active resource data");
+                    }
+
+                    String reasonText = String.join("; ", reasons);
+                    return new ScoredRecommendation(resource, score, reasonText);
+                })
+                .filter(item -> item != null)
+                .sorted(Comparator
+                        .comparingInt((ScoredRecommendation item) -> item.score)
+                        .reversed()
+                        .thenComparingInt(item -> item.resource.getCapacity())
+                        .thenComparing(item -> item.resource.getName() == null ? "" : item.resource.getName(), String.CASE_INSENSITIVE_ORDER)
+                )
+                .limit(limit)
+                .collect(Collectors.toList());
+
+        return scored.stream()
+                .map(item -> ResourceRecommendationDTO.from(item.resource, item.score, item.reason))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/uploads/{filename}")
@@ -278,8 +387,7 @@ public class ResourceController {
                     .map(resource -> new ResourceDropdownDTO(
                             resource.getResourceId(),
                             resource.getName(),
-                            resource.getType() != null ? resource.getType().name() : null
-                    ))
+                            resource.getType() != null ? resource.getType().name() : null))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(dropdownItems);
@@ -294,8 +402,7 @@ public class ResourceController {
                 .map(resource -> ResponseEntity.ok(new ResourceDropdownDTO(
                         resource.getResourceId(),
                         resource.getName(),
-                        resource.getType() != null ? resource.getType().name() : null
-                )))
+                        resource.getType() != null ? resource.getType().name() : null)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

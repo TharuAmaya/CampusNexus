@@ -24,6 +24,7 @@ const initialFormState = {
 
 const categoryOptions = ['Maintenance', 'Electrical', 'Plumbing', 'Furniture', 'Cleanliness', 'Security', 'IT Support', 'Other'];
 const priorityOptions = ['Low', 'Medium', 'High', 'Urgent'];
+const allowedImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'svg', 'heic', 'heif', 'avif', 'ico', 'jfif'];
 
 const CreateTicketmsn = () => {
     const [formData, setFormData] = useState(initialFormState);
@@ -93,6 +94,11 @@ const CreateTicketmsn = () => {
         fetchResources();
     }, [formData.resourceType]);
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        return emailRegex.test(email);
+    };
+
     const handleChange = (event) => {
         const { name, value } = event.target;
         setFormData((previous) => ({
@@ -106,6 +112,23 @@ const CreateTicketmsn = () => {
 
     const handleAttachmentChange = (event) => {
         const newFiles = Array.from(event.target.files || []);
+
+        const nonImageFile = newFiles.find((file) => {
+            const mimeType = (file.type || '').toLowerCase();
+            if (mimeType.startsWith('image/')) {
+                return false;
+            }
+
+            const fileName = (file.name || '').toLowerCase();
+            const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+            return !allowedImageExtensions.includes(extension);
+        });
+
+        if (nonImageFile) {
+            setErrorMessage('Only image files are allowed. Please select image attachments only.');
+            event.target.value = '';
+            return;
+        }
         
         // Combine already selected files with newly selected files
         const allFiles = [...selectedFiles, ...newFiles];
@@ -146,6 +169,11 @@ const CreateTicketmsn = () => {
 
         if (!formData.resourceType || !formData.resourceId || !formData.category || !formData.description || !formData.priority || !formData.preferredContact) {
             setErrorMessage('Please complete all required fields before submitting.');
+            return;
+        }
+
+        if (!validateEmail(formData.preferredContact)) {
+            setErrorMessage('Please enter a valid email address.');
             return;
         }
 
@@ -346,12 +374,12 @@ const CreateTicketmsn = () => {
                                             ref={fileInputRef}
                                             type="file"
                                             multiple
-                                            accept="image/*,.pdf,.png,.jpg,.jpeg"
+                                            accept="image/*"
                                             onChange={handleAttachmentChange}
                                             className="block w-full text-sm text-slate-600 file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#f4511e] file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-[#d84315]"
                                         />
                                         <p className="mt-3 text-xs leading-6 text-slate-500">
-                                            Select up to 3 files. Images are recommended when you need to show damage, errors, or a maintenance issue.
+                                            Select up to 3 images. Only image formats are supported.
                                         </p>
 
                                         <div className="mt-4 space-y-2">
@@ -365,7 +393,7 @@ const CreateTicketmsn = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => removeFile(file.name)}
-                                                        className="text-slate-500 hover:text-red-500 transition-colors"
+                                                        className="cursor-pointer text-slate-500 hover:text-red-500 transition-colors"
                                                         title="Remove file"
                                                     >
                                                         ✕
@@ -379,14 +407,14 @@ const CreateTicketmsn = () => {
                                 </div>
 
                                 <div className="md:col-span-2">
-                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Contact Details</label>
+                                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#f4511e]">Preferred Email Address</label>
                                     <input
-                                        type="text"
+                                        type="email"
                                         name="preferredContact"
                                         value={formData.preferredContact}
                                         onChange={handleChange}
                                         required
-                                        placeholder="Phone number, email address, or WhatsApp"
+                                        placeholder="example@email.com"
                                         className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#f4511e]/40 focus:bg-white"
                                     />
                                 </div>
@@ -419,7 +447,7 @@ const CreateTicketmsn = () => {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full rounded-lg bg-[#f4511e] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-lg transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    className="w-full cursor-pointer rounded-lg bg-[#f4511e] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-lg transition hover:bg-[#d84315] disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     {isSubmitting ? 'Submitting...' : <><FaPaperPlane className="inline-block align-middle" /> Submit Ticket</>}
                                 </button>

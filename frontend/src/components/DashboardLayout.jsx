@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 // අලුතින් Hamburger සහ Close icons ගමු
-import { FaUser, FaTicketAlt, FaUsers, FaUserPlus, FaBoxes, FaBell, FaTools, FaHome, FaBars, FaTimes, FaGraduationCap, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaTicketAlt, FaUsers, FaUserPlus, FaBoxes, FaBell, FaTools, FaHome, FaBars, FaTimes, FaGraduationCap, FaCalendarAlt, FaBullhorn } from 'react-icons/fa';
 
 const DashboardLayout = ({ children, title, noPadding = false, hideBranding = false, hideHeader = false, hideSidebar = false, hideTitle = false }) => {
     const location = useLocation();
@@ -24,17 +24,20 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
     const getSidebarLinks = () => {
         const commonLinks = [
             { name: 'Dashboard Home', path: userRole === 'ROLE_ADMIN' ? '/admin-dashboard' : userRole === 'ROLE_TECHNICIAN' ? '/technician-dashboard' : '/student-dashboard', icon: <FaHome /> },
-            { name: 'Profile', path: '/profile', icon: <FaUser /> },
-            { name: 'Notifications', path: '/notifications', icon: <FaBell /> }
+            { name: 'Profile', path: '/profile', icon: <FaUser /> }
         ];
 
         if (userRole === 'ROLE_ADMIN') {
             return [...commonLinks,
             { name: 'Ticket Management', path: '/admin/tickets', icon: <FaTicketAlt /> },
             { name: 'User List', path: '/admin/users', icon: <FaUsers /> },
+            //notification admin
+            { name: 'Admin Notifications', path: '/admin/notifications', icon: <FaBell /> }, // අලුත් එක
             { name: 'Booking Management', path: '/admin/booking', icon: <FaCalendarAlt /> },
+            { name: 'Announcements', path: '/admin/announcements', icon: <FaBullhorn /> }, //lakshan
             /**newly added */
-            { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> }];
+            { name: 'Resource Management', path: '/resourcehome', icon: <FaBoxes /> },
+            { name: 'Availability Calendar', path: '/resources/availability', icon: <FaCalendarAlt /> }];
 
 
         } else if (userRole === 'ROLE_STUDENT') {
@@ -42,14 +45,24 @@ const DashboardLayout = ({ children, title, noPadding = false, hideBranding = fa
             { name: 'Publish Ticket', path: '/student/publish-ticket', icon: <FaTicketAlt /> },
             { name: 'All Tickets', path: '/student/all-tickets', icon: <FaTicketAlt /> },
             { name: 'Resources', path: '/student/resources', icon: <FaBoxes /> },
+            { name: 'Announcements', path: '/student/announcements', icon: <FaBullhorn /> }, //lakshan
+
+            { name: 'Availability Calendar', path: '/resources/availability', icon: <FaCalendarAlt /> },
+            { name: 'Student Notifications', path: '/student/notifications', icon: <FaBell /> }, // අලුත් එක
             // මෙන්න අලුතින් දාපු එක:
-            { name: 'View Grades', path: '/student/grades', icon: <FaGraduationCap /> },
+            //{ name: 'View Grades', path: '/student/grades', icon: <FaGraduationCap /> },
             { name: 'Resource Booking', path: '/student/booking', icon: <FaCalendarAlt /> }];
 
         } else if (userRole === 'ROLE_TECHNICIAN') {
             return [...commonLinks,
             { name: 'Assigned Tickets', path: '/technician/tickets', icon: <FaTicketAlt /> },
-            { name: 'Maintenance Logs', path: '/technician/logs', icon: <FaTools /> }];
+
+            { name: 'Technician Notifications', path: '/technician/notifications', icon: <FaBell /> }, // අලුත් එක
+
+            { name: 'Announcements', path: '/technician/announcements', icon: <FaBullhorn /> },//lakshan
+            
+            //{ name: 'Maintenance Logs', path: '/technician/logs', icon: <FaTools /> }
+        ];
         }
         return commonLinks;
     };

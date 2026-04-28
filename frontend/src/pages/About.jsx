@@ -1,116 +1,156 @@
 import { motion } from 'framer-motion';
-import { FaServer, FaReact, FaShieldAlt, FaMobileAlt, FaDatabase, FaGithub } from 'react-icons/fa';
+import { FaEye, FaRocket, FaHandshake, FaCalendarCheck, FaTicketAlt, FaUserShield } from 'react-icons/fa';
+import { HiOutlineLightBulb } from 'react-icons/hi';
 
 const About = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-10 pb-20">
-      {/* Hero Image Section (Achievements Style) */}
-<div className="relative h-[40vh] min-h-[400px] flex items-center justify-center">
-  <div className="absolute inset-0 z-0">
-    <img 
-      src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop" 
-      alt="About SmartCampus" 
-      className="w-full h-full object-cover"
-    />
-    <div className="absolute inset-0 bg-primary/90 mix-blend-multiply" /> 
-  </div>
-  
-  <motion.div 
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.8 }}
-    className="relative z-10 text-center text-white px-6"
-  >
-    <div className="text-accent font-bold uppercase tracking-widest text-sm mb-4">Our Story</div>
-    <h1 className="text-5xl md:text-6xl font-bold mb-4">About SmartCampus Hub</h1>
-    <p className="text-xl text-gray-300 max-w-3xl mx-auto font-light leading-relaxed">
-      A production-inspired, enterprise-grade web system designed to modernize and streamline university facility management.
-    </p>
-  </motion.div>
-</div>
-
-      <div className="container mx-auto px-6 -mt-16 relative z-20">
+      
+      {/* --- HERO SECTION --- */}
+      <div className="relative h-[45vh] min-h-[450px] flex items-center justify-center">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop" 
+            alt="About CampusNexus" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-primary/85 mix-blend-multiply" /> 
+        </div>
         
-        {/* Core Mission & Tech Stack Grid */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="relative z-10 text-center text-white px-6"
+        >
+          <div className="text-accent font-bold uppercase tracking-widest text-sm mb-4">Empowering Campus Life</div>
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight">About CampusNexus Hub</h1>
+          <p className="text-xl text-gray-200 max-w-3xl mx-auto font-light leading-relaxed">
+            Redefining university operations through a centralized, intelligent management ecosystem.
+          </p>
+        </motion.div>
+      </div>
+
+      <div className="container mx-auto px-6 -mt-20 relative z-20">
+        
+        {/* --- VISION & MISSION SECTION --- */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white rounded-3xl shadow-xl p-8 md:p-12 max-w-6xl mx-auto mb-16"
+          className="bg-white rounded-[40px] shadow-2xl p-8 md:p-16 max-w-6xl mx-auto mb-20"
         >
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-6 border-l-4 border-accent pl-4">Our Mission</h2>
-              <p className="text-gray-600 leading-relaxed mb-6 text-lg">
-                Modern universities are complex ecosystems. Managing resources effectively—from high-tech data science labs to everyday meeting rooms—requires seamless coordination. 
-              </p>
-              <p className="text-gray-600 leading-relaxed text-lg">
-                SmartCampus Hub eliminates paper trails and redundant email threads by providing a centralized platform. It empowers students to book resources easily, allows technicians to track maintenance tickets efficiently, and gives administrators complete oversight.
-              </p>
-            </div>
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
             
-            {/* Tech Stack Visuals */}
-            <div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-8 text-center">Powered By Modern Tech Stack</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 hover:bg-blue-50 transition-colors p-6 rounded-2xl text-center border border-gray-100">
-                   <FaReact className="text-5xl text-[#61DAFB] mx-auto mb-4" />
-                   <h4 className="font-bold text-gray-800">React.js</h4>
-                   <p className="text-sm text-gray-500 mt-2">Dynamic Client UI</p>
+            {/* Vision Column */}
+            <div className="relative">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+                  <FaEye />
                 </div>
-                <div className="bg-gray-50 hover:bg-green-50 transition-colors p-6 rounded-2xl text-center border border-gray-100">
-                   <FaServer className="text-5xl text-[#6DB33F] mx-auto mb-4" />
-                   <h4 className="font-bold text-gray-800">Spring Boot</h4>
-                   <p className="text-sm text-gray-500 mt-2">RESTful Backend API</p>
-                </div>
-                <div className="bg-gray-50 hover:bg-yellow-50 transition-colors p-6 rounded-2xl text-center border border-gray-100">
-                   <FaDatabase className="text-5xl text-[#336791] mx-auto mb-4" />
-                   <h4 className="font-bold text-gray-800">MySQL Database</h4>
-                   <p className="text-sm text-gray-500 mt-2">Persistent Storage</p>
-                </div>
-                <div className="bg-gray-50 hover:bg-gray-100 transition-colors p-6 rounded-2xl text-center border border-gray-100">
-                   <FaGithub className="text-5xl text-gray-800 mx-auto mb-4" />
-                   <h4 className="font-bold text-gray-800">GitHub Actions</h4>
-                   <p className="text-sm text-gray-500 mt-2">CI/CD Pipeline</p>
-                </div>
+                <h2 className="text-3xl font-bold text-gray-800 tracking-tight">Our Vision</h2>
               </div>
+              <p className="text-gray-600 text-lg leading-relaxed italic">
+                "To be the digital heartbeat of modern education, where technology and human collaboration coexist to create an optimized, frictionless campus environment."
+              </p>
+              <div className="mt-8 border-t border-gray-100 pt-6">
+                <p className="text-gray-500">We aim to set the global standard for smart facility management in higher education.</p>
+              </div>
+            </div>
+
+            {/* Mission Column */}
+            <div className="relative">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+                  <FaRocket />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-800 tracking-tight">Our Mission</h2>
+              </div>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                "To empower university stakeholders with intuitive digital tools that eliminate administrative bottlenecks, optimize resource utilization, and foster transparency across all departments."
+              </p>
+              <ul className="mt-6 space-y-3">
+                <li className="flex items-center gap-3 text-gray-600 font-medium">
+                  <div className="w-2 h-2 bg-accent rounded-full" /> Streamlining resource access.
+                </li>
+                <li className="flex items-center gap-3 text-gray-600 font-medium">
+                  <div className="w-2 h-2 bg-accent rounded-full" /> Enhancing maintenance speed.
+                </li>
+                <li className="flex items-center gap-3 text-gray-600 font-medium">
+                  <div className="w-2 h-2 bg-accent rounded-full" /> Promoting data-driven decisions.
+                </li>
+              </ul>
             </div>
           </div>
         </motion.div>
 
-        {/* System Modules Highlights */}
+        {/* --- SYSTEM HIGHLIGHTS --- */}
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-primary mb-4">Core System Modules</h2>
-            <p className="text-gray-600">Built to handle real-world campus operations efficiently.</p>
+          <div className="flex flex-col items-center text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+              <HiOutlineLightBulb className="text-lg"/> The CampusNexus Edge
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why SmartCampus Hub?</h2>
+            <div className="w-20 h-1.5 bg-accent rounded-full"></div>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-blue-100 text-secondary rounded-lg flex items-center justify-center text-xl mb-6">
-                <FaMobileAlt />
+            {/* Value 1 */}
+            <div className="bg-white p-10 rounded-[30px] shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+              <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl mb-8">
+                <FaCalendarCheck />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">Booking Workflow</h3>
-              <p className="text-gray-600">Smart conflict checking prevents overlapping schedules. Fully integrated approval workflows (PENDING → APPROVED) for administrators.</p>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Centralized Booking</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Eliminate booking conflicts with our intelligent scheduling engine. From labs to event halls, management is now at your fingertips.
+              </p>
             </div>
             
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-red-100 text-red-500 rounded-lg flex items-center justify-center text-xl mb-6">
-                <FaShieldAlt />
+            {/* Value 2 */}
+            <div className="bg-white p-10 rounded-[30px] shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+              <div className="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-2xl mb-8">
+                <FaTicketAlt />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">Incident Ticketing</h3>
-              <p className="text-gray-600">Users can create tickets with image attachments. Technicians can update statuses (OPEN → IN PROGRESS → RESOLVED) and add resolution notes.</p>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Rapid Response</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Our incident ticketing system ensures that maintenance issues are resolved in record time, keeping the campus running smoothly.
+              </p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-yellow-100 text-accent rounded-lg flex items-center justify-center text-xl mb-6">
-                <FaShieldAlt />
+            {/* Value 3 */}
+            <div className="bg-white p-10 rounded-[30px] shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-8">
+                <FaUserShield />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">Role-Based Security</h3>
-              <p className="text-gray-600">Integrated with Google OAuth 2.0. Secure endpoints and protected routes ensuring Students, Technicians, and Admins only access what they need.</p>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Security First</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Enterprise-grade security ensuring user privacy and data integrity through robust authentication and role-based access.
+              </p>
             </div>
           </div>
         </div>
+
+        {/* --- BOTTOM TEAM CTA --- */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          className="mt-24 bg-gray-900 rounded-[40px] p-12 text-center text-white relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 blur-[100px] rounded-full"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full"></div>
+          
+          <h2 className="text-3xl font-bold mb-6 flex items-center justify-center gap-3">
+             Collaborative Innovation <FaHandshake className="text-accent" />
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
+            SmartCampus Hub is more than just software—it's a commitment to improving the academic experience for students, staff, and administrators alike.
+          </p>
+          <div className="flex justify-center gap-12 text-sm uppercase tracking-widest font-bold text-gray-500">
+            <span>Production Ready</span>
+            <span>Scalable</span>
+            <span>Secure</span>
+          </div>
+        </motion.div>
 
       </div>
     </div>

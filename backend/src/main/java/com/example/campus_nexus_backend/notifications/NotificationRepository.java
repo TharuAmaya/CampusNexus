@@ -1,0 +1,16 @@
+package com.example.campus_nexus_backend.notifications;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface NotificationRepository extends JpaRepository<Notification, Long> {
+    
+    
+    // Get all notifications for a user by their email
+    List<Notification> findByRecipient_EmailOrderByCreatedAtDesc(String email);
+    
+    // Count unread notifications for a user by their email
+    long countByRecipient_EmailAndIsReadFalse(String email);
+}
