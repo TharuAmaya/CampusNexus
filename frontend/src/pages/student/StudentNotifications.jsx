@@ -69,7 +69,7 @@ const StudentNotifications = () => {
                             <FaBell /> All Updates
                         </div>
                     </button>
-                    <button 
+                    {/*<button 
                         onClick={() => setActiveTab('TICKET')}
                         className={`flex-1 py-4 text-center font-medium transition-colors ${activeTab === 'TICKET' ? 'text-orange-600 border-b-2 border-orange-600 bg-white' : 'text-gray-500 hover:bg-gray-100'}`}
                     >
@@ -77,6 +77,7 @@ const StudentNotifications = () => {
                             <FaTicketAlt /> Tickets
                         </div>
                     </button>
+                     --- NOTIFICATIONS LIST SECTION --- 
                     <button 
                         onClick={() => setActiveTab('BOOKING')}
                         className={`flex-1 py-4 text-center font-medium transition-colors ${activeTab === 'BOOKING' ? 'text-green-600 border-b-2 border-green-600 bg-white' : 'text-gray-500 hover:bg-gray-100'}`}
@@ -84,7 +85,7 @@ const StudentNotifications = () => {
                         <div className="flex items-center justify-center gap-2">
                             <FaCalendarCheck /> Bookings
                         </div>
-                    </button>
+                    </button>*/}
                 </div>
 
                 {/* --- NOTIFICATIONS LIST SECTION --- */}
