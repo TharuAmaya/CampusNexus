@@ -189,7 +189,7 @@ export default function BookingDetails() {
     }, [id, currentEditForm, booking, resourceDetails, refetch]);
 
     const handleCancel = useCallback(async () => {
-        if (!window.confirm('Cancel this booking? This action cannot be undone.')) return;
+        if (!window.confirm('Cancel this reservation? This action cannot be undone.')) return;
         setIsCancelling(true);
         setActionError('');
         const token = localStorage.getItem('token');

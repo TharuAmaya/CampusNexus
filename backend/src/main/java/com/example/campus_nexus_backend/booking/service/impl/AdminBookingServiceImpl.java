@@ -137,6 +137,7 @@ public class AdminBookingServiceImpl implements AdminBookingService {
         booking.setApprovedBy(request.getApprovedBy());
         booking.setApprovedAt(LocalDateTime.now());
         booking.setAdminDecisionReason(request.getAdminDecisionReason());
+
         // Generate a new QR token on (re-)approval
         booking.setQrToken(UUID.randomUUID().toString());
 
