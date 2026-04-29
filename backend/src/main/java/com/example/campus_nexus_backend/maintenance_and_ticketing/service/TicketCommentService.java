@@ -28,14 +28,17 @@ public class TicketCommentService {
 
     // Helper: Enforces that ONLY involved Students/Technicians can ADD comments
     private void validateUserAccessToTicket(Ticket ticket, User user) {
+        // --- VALIDATION: Admins are strictly prohibited from commenting on tickets ---
         if ("ROLE_ADMIN".equals(user.getRole())) {
             throw new RuntimeException("Action denied: Admins are not allowed to add comments.");
         }
         
+        // --- VALIDATION: Self-ownership check for students and their tickets ---
         if ("ROLE_STUDENT".equals(user.getRole()) && !ticket.getCreatedBy().getEmail().equals(user.getEmail())) {
             throw new RuntimeException("Unauthorized: You can only comment on your own tickets.");
         }
         
+        // --- VALIDATION: Strict assignment check for technicians on active tickets ---
         if ("ROLE_TECHNICIAN".equals(user.getRole())) {
             if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(user.getEmail())) {
                 throw new RuntimeException("Unauthorized: You can only comment on tickets assigned to you.");
@@ -48,6 +51,7 @@ public class TicketCommentService {
         Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));
         User user = userRepository.findByEmail(userEmail).orElseThrow();
 
+        // --- VALIDATION: Comment content check ---
         if (dto == null || dto.getCommentText() == null || dto.getCommentText().trim().isEmpty()) {
             throw new RuntimeException("Comment text cannot be empty.");
         }
@@ -90,11 +94,12 @@ public class TicketCommentService {
     public void updateComment(Long commentId, TicketCommentRequestDTO dto, String userEmail) {
         TicketComment comment = commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("Comment not found"));
 
+        // --- VALIDATION: Comment content check ---
         if (dto == null || dto.getCommentText() == null || dto.getCommentText().trim().isEmpty()) {
             throw new RuntimeException("Comment text cannot be empty.");
         }
         
-        // Strict ownership check (Tech cannot edit Student comment, Student cannot edit Tech comment)
+        // --- VALIDATION: Strict ownership check (Tech cannot edit Student comment, Student cannot edit Tech comment) ---
         if (!comment.getUser().getEmail().equals(userEmail)) {
             throw new RuntimeException("Unauthorized: You can only edit your own comments.");
         }
@@ -107,7 +112,7 @@ public class TicketCommentService {
     public void deleteComment(Long commentId, String userEmail) {
         TicketComment comment = commentRepository.findById(commentId).orElseThrow(() -> new RuntimeException("Comment not found"));
 
-        // Strict ownership check
+        // --- VALIDATION: Strict ownership check for deleting comments ---
         if (!comment.getUser().getEmail().equals(userEmail)) {
             throw new RuntimeException("Unauthorized: You can only delete your own comments.");
         }

@@ -17,6 +17,8 @@ const AllTickets = () => {
                 setErrorMessage('');
 
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/tickets/my-tickets ---
+                // Fetches a detailed list of all tickets logged by the student
                 const response = await fetch(`${API_BASE_URL}/api/tickets/my-tickets`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });

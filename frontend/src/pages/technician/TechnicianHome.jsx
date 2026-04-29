@@ -29,6 +29,8 @@ const TechnicianHome = () => {
                 const token = localStorage.getItem('token');
                 
                 // Fetch tickets for stats cards
+                // --- API CALL: GET /api/technician/tickets ---
+                // Fetches assigned tickets to calculate counts and display recent items
                 const ticketsResponse = await fetch(`${API_BASE_URL}/api/technician/tickets`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -70,6 +72,8 @@ const TechnicianHome = () => {
                 setRecentTickets(recent);
 
                 // Fetch dashboard stats for pie charts
+                // --- API CALL: GET /api/technician/tickets/dashboard/stats ---
+                // Gets aggregated statistics (by status, priority) for the dashboard charts
                 const statsResponse = await fetch(`${API_BASE_URL}/api/technician/tickets/dashboard/stats`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });

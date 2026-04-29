@@ -17,6 +17,8 @@ const AssignedTickets = () => {
                 setErrorMessage('');
 
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/technician/tickets ---
+                // Retrieves all tickets assigned to the logged-in technician
                 const response = await fetch(`${API_BASE_URL}/api/technician/tickets`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });

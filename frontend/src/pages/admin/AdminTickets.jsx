@@ -20,6 +20,8 @@ const AdminTickets = () => {
                 setErrorMessage('');
 
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/admin/tickets ---
+                // Retrieves a summary list of all tickets in the system
                 const response = await fetch(`${API_BASE_URL}/api/admin/tickets`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -114,6 +116,9 @@ const AdminTickets = () => {
         }
     };
 
+    // =========================================================================
+    // FEATURE: PDF GENERATION (START)
+    // =========================================================================
     const handleGeneratePdf = () => {
         const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
         const generatedAt = new Date().toLocaleString();
@@ -206,6 +211,9 @@ const AdminTickets = () => {
         const dateTag = new Date().toISOString().slice(0, 10);
         doc.save(`admin-ticket-analysis-${dateTag}.pdf`);
     };
+    // =========================================================================
+    // FEATURE: PDF GENERATION (END)
+    // =========================================================================
 
     return (
         <DashboardLayout title="Ticket Management">
@@ -234,7 +242,7 @@ const AdminTickets = () => {
                             ))}
                         </select>
                     </div>
-
+                    
                     <button
                         type="button"
                         onClick={handleGeneratePdf}

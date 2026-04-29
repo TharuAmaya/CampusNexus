@@ -57,10 +57,12 @@ public class TicketService {
         User student = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // --- VALIDATION: Ensure only users with STUDENT role can submit tickets ---
         if (!student.getRole().equals("ROLE_STUDENT")) {
             throw new RuntimeException("Only students can create tickets.");
         }
 
+        // --- VALIDATION: Check image constraint rules (max count, file type, extensions) ---
         validateImageAttachments(files);
 
         Ticket ticket = new Ticket();
@@ -70,6 +72,7 @@ public class TicketService {
         ticket.setDescription(dto.getDescription());
         ticket.setPriority(dto.getPriority());
         ticket.setPreferredContact(dto.getPreferredContact());
+        // [IDENTIFIER]: Student creates ticket -> status is automatically OPEN
         ticket.setStatus("OPEN"); // Enforcing OPEN status
 
         Ticket savedTicket = ticketRepository.save(ticket);
@@ -116,7 +119,7 @@ public class TicketService {
         User requestingUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Rule 1: Students can ONLY view their own tickets
+        // --- VALIDATION: Rule 1: Students can ONLY view their own tickets ---
         if ("ROLE_STUDENT".equals(requestingUser.getRole())) {
             if (!ticket.getCreatedBy().getEmail().equals(userEmail)) {
                 throw new RuntimeException("Unauthorized: You can only view your own tickets.");
@@ -127,7 +130,7 @@ public class TicketService {
             }
         }
 
-        // Rule 2: Technicians can ONLY view tickets explicitly assigned to them
+        // --- VALIDATION: Rule 2: Technicians can ONLY view tickets explicitly assigned to them ---
         if ("ROLE_TECHNICIAN".equals(requestingUser.getRole())) {
             if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(userEmail)) {
                 throw new RuntimeException("Unauthorized: You can only view tickets assigned to you.");
@@ -148,10 +151,12 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        // --- VALIDATION: Ensure user owns the ticket before allowing edits ---
         if (!ticket.getCreatedBy().getEmail().equals(userEmail)) {
             throw new RuntimeException("Unauthorized: You can only edit your own tickets");
         }
 
+        // --- VALIDATION: Only allow edits to tickets in OPEN status ---
         if (!"OPEN".equals(ticket.getStatus())) {
             throw new RuntimeException("Action denied: You can only edit tickets that are currently OPEN.");
         }
@@ -213,6 +218,7 @@ public class TicketService {
             return;
         }
 
+        // --- VALIDATION: Restrict max number of attachments to 3 backend-side ---
         if (files.size() > 3) {
             throw new RuntimeException("Maximum of 3 image attachments allowed.");
         }
@@ -222,6 +228,7 @@ public class TicketService {
                 continue;
             }
 
+            // --- VALIDATION: Check if the file's MIME type strictly starts with image/ ---
             String contentType = file.getContentType();
             if (contentType != null && !contentType.isBlank()) {
                 if (contentType.toLowerCase(Locale.ROOT).startsWith("image/")) {
@@ -230,6 +237,7 @@ public class TicketService {
                 throw new RuntimeException("Only image attachments are allowed.");
             }
 
+            // --- VALIDATION: Verify against allowed explicit image file extensions ---
             String originalName = file.getOriginalFilename();
             String normalizedName = originalName == null ? "" : originalName.toLowerCase(Locale.ROOT);
             int dotIndex = normalizedName.lastIndexOf('.');
@@ -246,12 +254,12 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        // 1. Check if the user owns the ticket
+        // --- VALIDATION: Check if the user owns the ticket ---
         if (!ticket.getCreatedBy().getEmail().equals(userEmail)) {
             throw new RuntimeException("Unauthorized: You can only delete your own tickets");
         }
 
-        // 2. NEW RULE: Check if the status is OPEN
+        // --- VALIDATION: NEW RULE: Check if the status is OPEN ---
         if (!"OPEN".equals(ticket.getStatus())) {
             throw new RuntimeException("Action denied: You can only delete tickets that are currently OPEN.");
         }
@@ -287,6 +295,7 @@ public class TicketService {
         }
         dto.setAttachments(attachmentDTOs);
 
+        // [STS_HISTORY] - Fetches and constructs the status history list for the ticket view
         List<TicketStatusHistory> statusHistoryRows = statusHistoryRepository
                 .findByTicket_TicketIdOrderByChangedAtAsc(ticket.getTicketId());
         List<TicketStatusHistoryDTO> statusHistory = new ArrayList<>();

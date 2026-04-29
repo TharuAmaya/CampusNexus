@@ -43,6 +43,8 @@ const AdminTicketDetails = () => {
                 setErrorMessage('');
 
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/admin/tickets/{id} ---
+                // Fetches the full details of a specific ticket
                 const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -76,6 +78,8 @@ const AdminTicketDetails = () => {
             try {
                 setIsResourceLoading(true);
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/resources/{id} ---
+                // Fetches specific resource details (name, type) using the ticket's resourceId to display it on the ticket details view.
                 const response = await fetch(`${API_BASE_URL}/api/resources/${ticket.resourceId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -101,6 +105,8 @@ const AdminTicketDetails = () => {
                 setIsTechniciansLoading(true);
                 setAssignError('');
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/admin/technicians ---
+                // Retrieves a list of all technicians to populate the assignment dropdown
                 const response = await fetch(`${API_BASE_URL}/api/admin/technicians`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -128,6 +134,8 @@ const AdminTicketDetails = () => {
                 setCommentsError('');
 
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/tickets/{ticketId}/comments ---
+                // Fetches all the discussion comments related to this specific ticket
                 const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}/comments`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -152,6 +160,7 @@ const AdminTicketDetails = () => {
     }, [ticketId]);
 
     const handleAssignTechnician = async () => {
+        // --- VALIDATION: Ensure a technician is actually selected to assign ---
         if (!selectedTechnicianId) {
             setAssignError('Please select a technician.');
             return;
@@ -163,6 +172,8 @@ const AdminTicketDetails = () => {
             setAssignSuccess(false);
 
             const token = localStorage.getItem('token');
+            // --- API CALL: PATCH /api/admin/tickets/{id} ---
+            // Assigns a specific technician to this ticket
             const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
                 method: 'PATCH',
                 headers: {
@@ -204,26 +215,31 @@ const AdminTicketDetails = () => {
     };
 
     const handleStatusUpdate = async () => {
+        // --- VALIDATION: Ensure a status is selected ---
         if (!selectedStatus) {
             setStatusError('Please select a status.');
             return;
         }
 
+        // --- VALIDATION: Prevent setting OPEN status once ticket is CLOSED ---
         if (selectedStatus === 'OPEN' && ticket?.status === 'CLOSED') {
             setStatusError('OPEN is not available when the current ticket status is CLOSED.');
             return;
         }
 
+        // --- VALIDATION: Check INPROGRESS preconditions ---
         if (selectedStatus === 'INPROGRESS' && ticket?.status !== 'OPEN') {
             setStatusError('INPROGRESS can be selected only when the current status is OPEN.');
             return;
         }
 
+        // --- VALIDATION: Prevent setting INPROGRESS if no technician is assigned ---
         if (selectedStatus === 'INPROGRESS' && !ticket?.assignedToEmail) {
             setStatusError('Assign a technician before setting status to INPROGRESS.');
             return;
         }
 
+        // --- VALIDATION: Ensure ticket state allows CLOSING ---
         if (selectedStatus === 'CLOSED' && !['REJECTED', 'RESOLVED'].includes(ticket?.status)) {
             setStatusError('Ticket must be REJECTED or RESOLVED before setting status to CLOSED.');
             return;
@@ -235,6 +251,8 @@ const AdminTicketDetails = () => {
             setStatusSuccess(false);
 
             const token = localStorage.getItem('token');
+            // --- API CALL: PATCH /api/admin/tickets/{id}/status ---
+            // Manually updates the status of the ticket
             const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/status`, {
                 method: 'PATCH',
                 headers: {
@@ -303,6 +321,8 @@ const AdminTicketDetails = () => {
             setCancelRejectionSuccess(false);
 
             const token = localStorage.getItem('token');
+            // --- API CALL: PATCH /api/admin/tickets/{id}/cancel-rejection ---
+            // Reverts a rejected ticket back to an OPEN status
             const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/cancel-rejection`, {
                 method: 'PATCH',
                 headers: {
@@ -336,11 +356,13 @@ const AdminTicketDetails = () => {
     const handleRejectTicket = async (event) => {
         event.preventDefault();
 
+        // --- VALIDATION: Ensure rejection reason is provided before rejecting ticket ---
         if (!rejectReason.trim()) {
             setRejectError('Please enter a reject reason.');
             return;
         }
 
+        // --- VALIDATION: Prevent rejection if ticket is not OPEN ---
         if (ticket?.status !== 'OPEN') {
             setRejectError('Reject is available only when the current ticket status is OPEN.');
             return;
@@ -352,6 +374,8 @@ const AdminTicketDetails = () => {
             setRejectSuccess(false);
 
             const token = localStorage.getItem('token');
+            // --- API CALL: PATCH /api/admin/tickets/{id}/reject ---
+            // Rejects a ticket and records the rejection reason
             const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}/reject`, {
                 method: 'PATCH',
                 headers: {
@@ -393,6 +417,8 @@ const AdminTicketDetails = () => {
             setDeleteError('');
 
             const token = localStorage.getItem('token');
+            // --- API CALL: DELETE /api/admin/tickets/{id} ---
+            // Permanently deletes a CLOSED ticket from the database
             const response = await fetch(`${API_BASE_URL}/api/admin/tickets/${ticketId}`, {
                 method: 'DELETE',
                 headers: {
@@ -685,6 +711,7 @@ const AdminTicketDetails = () => {
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2 md:self-start">
+                                {/* [IDENTIFIER]: Reject ticket button is enabled only when the ticket status is OPEN */}
                                 <button
                                     type="button"
                                     onClick={openRejectModal}
@@ -693,6 +720,7 @@ const AdminTicketDetails = () => {
                                 >
                                     <FaBan /> Reject Ticket
                                 </button>
+                                {/* [IDENTIFIER]: Cancel rejection button is enabled only when the ticket status is REJECTED */}
                                 <button
                                     type="button"
                                     onClick={handleCancelRejection}
@@ -701,6 +729,7 @@ const AdminTicketDetails = () => {
                                 >
                                     <FaTrashAlt /> Cancel Rejection
                                 </button>
+                                {/* [IDENTIFIER]: Delete ticket button is enabled only when the ticket status is CLOSED */}
                                 <button
                                     type="button"
                                     onClick={openDeleteModal}
@@ -712,6 +741,7 @@ const AdminTicketDetails = () => {
                             </div>
                         </div>
 
+                        {/* [STS_HISTORY] - Status history viewing page last section */}
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
                             <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status History</p>
                             {Array.isArray(ticket.statusHistory) && ticket.statusHistory.length > 0 ? (

@@ -59,6 +59,7 @@ public class AdminTicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        // --- VALIDATION: Prevent technician assignment to inactive tickets ---
         if ("CLOSED".equals(ticket.getStatus()) || "REJECTED".equals(ticket.getStatus())) {
             throw new RuntimeException("Cannot assign technicians to CLOSED or REJECTED tickets.");
         }
@@ -66,6 +67,7 @@ public class AdminTicketService {
         User technician = userRepository.findById(technicianId)
                 .orElseThrow(() -> new RuntimeException("Technician not found"));
 
+        // --- VALIDATION: Ensure user being assigned actually holds TECHNICIAN role ---
         if (!"ROLE_TECHNICIAN".equals(technician.getRole())) {
             throw new RuntimeException("User is not a technician!");
         }
@@ -82,6 +84,8 @@ public class AdminTicketService {
         User changedBy = userRepository.findByEmail(changedByEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // [IDENTIFIER]: Reject ticket button related implementation
+        // --- VALIDATION: Restriction so Admin can only reject OPEN tickets ---
         if (!"OPEN".equals(ticket.getStatus())) {
             throw new RuntimeException("Action denied: Admin can only reject tickets with an 'OPEN' status.");
         }
@@ -94,9 +98,12 @@ public class AdminTicketService {
         ticket.setStatus("REJECTED");
         ticket.setRejectionReason(reason);
         ticketRepository.save(ticket);
+        
+        // [STS_HISTORY] - Records the rejection in the ticket's history
         saveStatusHistory(ticket, oldStatus, "REJECTED", changedBy);
     }
 
+    // [IDENTIFIER]: Cancel rejection related implementation
     // 4b. Cancel Rejection
     public void cancelRejection(Long ticketId, String changedByEmail) {
         Ticket ticket = ticketRepository.findById(ticketId)
@@ -113,6 +120,8 @@ public class AdminTicketService {
         ticket.setStatus("OPEN");
         ticket.setRejectionReason(null);
         ticketRepository.save(ticket);
+
+        // [STS_HISTORY] - Records the cancellation of rejection in the ticket's history
         saveStatusHistory(ticket, oldStatus, "OPEN", changedBy);
     }
 
@@ -126,7 +135,7 @@ public class AdminTicketService {
 
         String normalizedStatus = normalizeStatus(newStatus);
 
-        // Validate that the status is one of the allowed values
+        // --- VALIDATION: Ensure the status is one of the allowed values ---
         List<String> allowedStatuses = List.of("OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED");
         if (!allowedStatuses.contains(normalizedStatus)) {
             throw new RuntimeException("Invalid status value. Allowed: OPEN, IN_PROGRESS, RESOLVED, CLOSED, REJECTED");
@@ -134,14 +143,19 @@ public class AdminTicketService {
 
         String oldStatus = ticket.getStatus();
 
+        // [IDENTIFIER]: After assigning a technician only IN_PROGRESS is available / prevents shifting to IN_PROGRESS if unassigned
+        // --- VALIDATION: Prevent transitioning to IN_PROGRESS if unassigned ---
         if ("IN_PROGRESS".equals(normalizedStatus) && ticket.getAssignedTo() == null) {
             throw new RuntimeException("Assign a technician before setting status to IN_PROGRESS.");
         }
 
+        // [IDENTIFIER]: Selecting INPROGRESS changes status from OPEN to INPROGRESS
+        // --- VALIDATION: Enforce lifecycle for IN_PROGRESS status from OPEN ---
         if ("IN_PROGRESS".equals(normalizedStatus) && !"OPEN".equals(oldStatus)) {
             throw new RuntimeException("Action denied: Ticket status can move to IN_PROGRESS only from OPEN.");
         }
 
+        // --- VALIDATION: Prevent reverting CLOSED tickets to OPEN ---
         if ("OPEN".equals(normalizedStatus) && "CLOSED".equals(oldStatus)) {
             throw new RuntimeException("Action denied: CLOSED tickets cannot be moved back to OPEN.");
         }
@@ -150,16 +164,20 @@ public class AdminTicketService {
             return;
         }
 
+        // --- VALIDATION: Pre-requisite for CLOSED status is REJECTED or RESOLVED ---
         if ("CLOSED".equals(normalizedStatus) && !List.of("REJECTED", "RESOLVED").contains(oldStatus)) {
             throw new RuntimeException("Action denied: Ticket must be REJECTED or RESOLVED before setting status to CLOSED.");
         }
 
         ticket.setStatus(normalizedStatus);
         ticketRepository.save(ticket);
+
+        // [STS_HISTORY] - Records the general status update in the ticket's history
         saveStatusHistory(ticket, oldStatus, normalizedStatus, changedBy);
     }
 
     private String normalizeStatus(String status) {
+        // --- VALIDATION: Prevent empty status string inputs ---
         if (status == null) {
             throw new RuntimeException("Status is required.");
         }
@@ -177,6 +195,7 @@ public class AdminTicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        // [IDENTIFIER]: Delete ticket feature allows deleting ONLY when the ticket status is CLOSED
         if (!"CLOSED".equals(ticket.getStatus())) {
             throw new RuntimeException("Action denied: Admins can only delete tickets with a 'CLOSED' status.");
         }
@@ -184,6 +203,7 @@ public class AdminTicketService {
         ticketRepository.delete(ticket);
     }
 
+    // [STS_HISTORY] - Utility method to save a new record in TicketStatusHistory table
     private void saveStatusHistory(Ticket ticket, String oldStatus, String newStatus, User changedBy) {
         TicketStatusHistory history = new TicketStatusHistory();
         history.setTicket(ticket);

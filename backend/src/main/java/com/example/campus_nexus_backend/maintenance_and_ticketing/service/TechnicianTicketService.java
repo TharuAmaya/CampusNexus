@@ -52,16 +52,17 @@ public class TechnicianTicketService {
         User technician = userRepository.findByEmail(technicianEmail)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // --- VALIDATION: Ensure resolution notes exist ---
         if (resolutionNotes == null || resolutionNotes.trim().isEmpty()) {
             throw new RuntimeException("Resolution note is required to mark ticket as RESOLVED.");
         }
 
-        // Verify this technician is assigned to this ticket
+        // --- VALIDATION: Verify this technician is actually assigned to this ticket before resolving ---
         if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(technicianEmail)) {
             throw new RuntimeException("Unauthorized: You can only resolve tickets assigned to you.");
         }
 
-        // Verify status is IN_PROGRESS
+        // --- VALIDATION: Verify status is strictly IN_PROGRESS before allowing resolution ---
         if (!"IN_PROGRESS".equals(ticket.getStatus())) {
             throw new RuntimeException("Action denied: Ticket must be IN_PROGRESS to resolve.");
         }
@@ -71,6 +72,7 @@ public class TechnicianTicketService {
         ticket.setStatus("RESOLVED");
         ticketRepository.save(ticket);
 
+        // [STS_HISTORY] - Creates a status history record for the ticket resolution
         TicketStatusHistory history = new TicketStatusHistory();
         history.setTicket(ticket);
         history.setOldStatus(oldStatus);
@@ -84,14 +86,17 @@ public class TechnicianTicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        // --- VALIDATION: Prevent empty note updates ---
         if (resolutionNotes == null || resolutionNotes.trim().isEmpty()) {
             throw new RuntimeException("Resolution note cannot be empty.");
         }
 
+        // --- VALIDATION: Only assigned technician can edit notes ---
         if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(technicianEmail)) {
             throw new RuntimeException("Unauthorized: You can only edit resolution notes of tickets assigned to you.");
         }
 
+        // --- VALIDATION: Notes can only be updated if ticket already resolved ---
         if (!"RESOLVED".equals(ticket.getStatus())) {
             throw new RuntimeException("Action denied: Resolution notes can only be edited for RESOLVED tickets.");
         }
@@ -108,10 +113,12 @@ public class TechnicianTicketService {
         User technician = userRepository.findByEmail(technicianEmail)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // --- VALIDATION: Only assigned technician can delete notes ---
         if (ticket.getAssignedTo() == null || !ticket.getAssignedTo().getEmail().equals(technicianEmail)) {
             throw new RuntimeException("Unauthorized: You can only delete resolution notes of tickets assigned to you.");
         }
 
+        // --- VALIDATION: Deleting resolution note is strictly for RESOLVED state ---
         if (!"RESOLVED".equals(ticket.getStatus())) {
             throw new RuntimeException("Action denied: Resolution notes can only be deleted for RESOLVED tickets.");
         }
@@ -121,6 +128,7 @@ public class TechnicianTicketService {
         ticket.setStatus("IN_PROGRESS");
         ticketRepository.save(ticket);
 
+        // [STS_HISTORY] - Creates a status history record returning from resolved to in progress
         TicketStatusHistory history = new TicketStatusHistory();
         history.setTicket(ticket);
         history.setOldStatus(oldStatus);

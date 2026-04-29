@@ -42,6 +42,10 @@ const CreateTicketmsn = () => {
         const fetchTypes = async () => {
             try {
                 const token = localStorage.getItem('token');
+                
+                // --- API CALL: GET /api/resources/types ---
+                // Mapped in ResourceController.
+                // Fetches the distinct resource types (e.g. ROOM, EQUIPMENT) to populate the first dropdown.
                 const response = await fetch(`${API_BASE_URL}/api/resources/types`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -72,6 +76,10 @@ const CreateTicketmsn = () => {
             try {
                 setIsLoadingResources(true);
                 const token = localStorage.getItem('token');
+                
+                // --- API CALL: GET /api/resources/names?type={type} ---
+                // Mapped in ResourceController.
+                // Fetches the specific resources for the selected type (cascading dropdown).
                 const response = await fetch(
                     `${API_BASE_URL}/api/resources/names?type=${encodeURIComponent(formData.resourceType)}`,
                     { headers: { Authorization: `Bearer ${token}` } }
@@ -94,6 +102,7 @@ const CreateTicketmsn = () => {
         fetchResources();
     }, [formData.resourceType]);
 
+    // --- VALIDATION: Email format checking ---
     const validateEmail = (email) => {
         const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
         return emailRegex.test(email);
@@ -113,6 +122,7 @@ const CreateTicketmsn = () => {
     const handleAttachmentChange = (event) => {
         const newFiles = Array.from(event.target.files || []);
 
+        // --- VALIDATION: Check if selected files are actually images ---
         const nonImageFile = newFiles.find((file) => {
             const mimeType = (file.type || '').toLowerCase();
             if (mimeType.startsWith('image/')) {
@@ -133,6 +143,7 @@ const CreateTicketmsn = () => {
         // Combine already selected files with newly selected files
         const allFiles = [...selectedFiles, ...newFiles];
 
+        // --- VALIDATION: Restrict max number of attachments to 3 ---
         if (allFiles.length > 3) {
             setErrorMessage('You can attach a maximum of 3 files. Please select fewer files.');
             event.target.value = '';
@@ -167,16 +178,19 @@ const CreateTicketmsn = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        // --- VALIDATION: Ensure all required fields are filled ---
         if (!formData.resourceType || !formData.resourceId || !formData.category || !formData.description || !formData.priority || !formData.preferredContact) {
             setErrorMessage('Please complete all required fields before submitting.');
             return;
         }
 
+        // --- VALIDATION: Verify email format before submitting ---
         if (!validateEmail(formData.preferredContact)) {
             setErrorMessage('Please enter a valid email address.');
             return;
         }
 
+        // --- VALIDATION: Final check to ensure max 3 files before submitting ---
         if (selectedFiles.length > 3) {
             setErrorMessage('You can attach a maximum of 3 files.');
             return;
@@ -207,6 +221,8 @@ const CreateTicketmsn = () => {
                 payload.append('images', file);
             });
 
+            // --- API CALL: POST /api/tickets ---
+            // Creates a new ticket. Includes file uploads (multipart/form-data)
             const response = await fetch(`${API_BASE_URL}/api/tickets`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },

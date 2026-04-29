@@ -71,6 +71,8 @@ const StudentTicketDetails = () => {
                 setErrorMessage('');
 
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/tickets/{id} ---
+                // Fetches the full details of a specific ticket to display on the details page
                 const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -104,6 +106,8 @@ const StudentTicketDetails = () => {
             try {
                 setIsResourceLoading(true);
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/resources/{id} ---
+                // Fetches specific resource details (name, type) using the ticket's resourceId to display it on the ticket details view.
                 const response = await fetch(`${API_BASE_URL}/api/resources/${ticket.resourceId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -183,6 +187,8 @@ const StudentTicketDetails = () => {
 
     const refreshTicketDetails = async () => {
         const token = localStorage.getItem('token');
+        // --- API CALL: GET /api/tickets/{id} ---
+        // Refreshes the full details of a specific ticket
         const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -198,6 +204,8 @@ const StudentTicketDetails = () => {
 
     const refreshComments = async () => {
         const token = localStorage.getItem('token');
+        // --- API CALL: GET /api/tickets/{ticketId}/comments ---
+        // Fetches all the discussion comments related to this specific ticket
         const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}/comments`, {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -267,6 +275,10 @@ const StudentTicketDetails = () => {
 
             const token = localStorage.getItem('token');
             const isEditing = Boolean(editingCommentId);
+            
+            // --- API CALL: POST or PUT /api/tickets/{ticketId}/comments ---
+            // If editingCommentId exists, uses PUT to update an existing comment.
+            // Otherwise, uses POST to add a new comment to the ticket.
             const endpoint = isEditing
                 ? `${API_BASE_URL}/api/tickets/${ticketId}/comments/${editingCommentId}`
                 : `${API_BASE_URL}/api/tickets/${ticketId}/comments`;
@@ -303,6 +315,8 @@ const StudentTicketDetails = () => {
             setCommentSuccess('');
 
             const token = localStorage.getItem('token');
+            // --- API CALL: DELETE /api/tickets/{ticketId}/comments/{commentId} ---
+            // Deletes a specific comment from the ticket
             const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: {
@@ -356,6 +370,7 @@ const StudentTicketDetails = () => {
     const handleUpdateAttachmentChange = (event) => {
         const newFiles = Array.from(event.target.files || []);
 
+        // --- VALIDATION: Check if selected files for update are actually images ---
         const nonImageFile = newFiles.find((file) => {
             const mimeType = (file.type || '').toLowerCase();
             if (mimeType.startsWith('image/')) {
@@ -375,6 +390,7 @@ const StudentTicketDetails = () => {
 
         const allFiles = [...updateFiles, ...newFiles];
 
+        // --- VALIDATION: Restrict max number of attachments to 3 on update ---
         if (allFiles.length > 3) {
             setUpdateError('You can attach a maximum of 3 images.');
             event.target.value = '';
@@ -394,16 +410,19 @@ const StudentTicketDetails = () => {
     const handleUpdateSubmit = async (event) => {
         event.preventDefault();
 
+        // --- VALIDATION: Ensure all required fields are filled on ticket update ---
         if (!updateForm.resourceType || !updateForm.resourceId || !updateForm.category || !updateForm.description || !updateForm.priority || !updateForm.preferredContact) {
             setUpdateError('Please complete all required fields.');
             return;
         }
 
+        // --- VALIDATION: Verify email format on ticket update ---
         if (!validateEmail(updateForm.preferredContact)) {
             setUpdateError('Please enter a valid email address.');
             return;
         }
 
+        // --- VALIDATION: Final check to ensure max 3 files before updating ---
         if (updateFiles.length > 3) {
             setUpdateError('You can attach a maximum of 3 images.');
             return;
@@ -433,6 +452,8 @@ const StudentTicketDetails = () => {
                 payload.append('images', file);
             });
 
+            // --- API CALL: PUT /api/tickets/{id} ---
+            // Updates an existing ticket. Form-data used to support editing file attachments.
             const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
                 method: 'PUT',
                 headers: {
@@ -493,6 +514,8 @@ const StudentTicketDetails = () => {
             setDeleteError('');
 
             const token = localStorage.getItem('token');
+            // --- API CALL: DELETE /api/tickets/{id} ---
+            // Deletes the student's ticket completely from the system
             const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
                 method: 'DELETE',
                 headers: {
@@ -705,6 +728,7 @@ const StudentTicketDetails = () => {
                             </button>
                         </div>
 
+                        {/* [STS_HISTORY] - Status history viewing page last section */}
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
                             <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status History</p>
                             {Array.isArray(ticket.statusHistory) && ticket.statusHistory.length > 0 ? (

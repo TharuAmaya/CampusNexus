@@ -51,6 +51,8 @@ const TechnicianTicketDetails = () => {
                 setErrorMessage('');
 
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/tickets/{id} ---
+                // Fetches the full details of a specific ticket to display on the details page
                 const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -84,6 +86,8 @@ const TechnicianTicketDetails = () => {
             try {
                 setIsResourceLoading(true);
                 const token = localStorage.getItem('token');
+                // --- API CALL: GET /api/resources/{id} ---
+                // Fetches specific resource details (name, type) using the ticket's resourceId to display it on the ticket details view.
                 const response = await fetch(`${API_BASE_URL}/api/resources/${ticket.resourceId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -117,6 +121,8 @@ const TechnicianTicketDetails = () => {
 
     const refreshTicketDetails = async () => {
         const token = localStorage.getItem('token');
+        // --- API CALL: GET /api/tickets/{id} ---
+        // Refreshes the full details of a specific ticket
         const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -132,6 +138,8 @@ const TechnicianTicketDetails = () => {
 
     const refreshComments = async () => {
         const token = localStorage.getItem('token');
+        // --- API CALL: GET /api/tickets/{ticketId}/comments ---
+        // Fetches all the discussion comments related to this specific ticket
         const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}/comments`, {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -201,6 +209,10 @@ const TechnicianTicketDetails = () => {
 
             const token = localStorage.getItem('token');
             const isEditing = Boolean(editingCommentId);
+            
+            // --- API CALL: POST or PUT /api/tickets/{ticketId}/comments ---
+            // If editingCommentId exists, uses PUT to update an existing comment.
+            // Otherwise, uses POST to add a new comment to the ticket.
             const endpoint = isEditing
                 ? `${API_BASE_URL}/api/tickets/${ticketId}/comments/${editingCommentId}`
                 : `${API_BASE_URL}/api/tickets/${ticketId}/comments`;
@@ -237,6 +249,8 @@ const TechnicianTicketDetails = () => {
             setCommentSuccess('');
 
             const token = localStorage.getItem('token');
+            // --- API CALL: DELETE /api/tickets/{ticketId}/comments/{commentId} ---
+            // Deletes a specific comment from the ticket
             const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}/comments/${commentId}`, {
                 method: 'DELETE',
                 headers: {
@@ -260,6 +274,7 @@ const TechnicianTicketDetails = () => {
     const handleResolveSubmit = async (event) => {
         event.preventDefault();
 
+        // --- VALIDATION: Ensure resolution notes are provided before resolving ticket ---
         if (!resolutionNotes.trim()) {
             setResolveError('Please add resolution notes.');
             return;
@@ -271,6 +286,8 @@ const TechnicianTicketDetails = () => {
             setResolveSuccess(false);
 
             const token = localStorage.getItem('token');
+            // --- API CALL: PATCH /api/technician/tickets/{id}/resolve ---
+            // Resolves the ticket, saves the resolution note, and sends a notification to the student
             const response = await fetch(`${API_BASE_URL}/api/technician/tickets/${ticketId}/resolve`, {
                 method: 'PATCH',
                 headers: {
@@ -321,6 +338,8 @@ const TechnicianTicketDetails = () => {
             setResolveSuccess(false);
 
             const token = localStorage.getItem('token');
+            // --- API CALL: PATCH /api/technician/tickets/{id}/resolution-note ---
+            // Edits the resolution note of an already resolved ticket
             const response = await fetch(`${API_BASE_URL}/api/technician/tickets/${ticketId}/resolution-note`, {
                 method: 'PATCH',
                 headers: {
@@ -353,6 +372,8 @@ const TechnicianTicketDetails = () => {
             setResolveSuccess(false);
 
             const token = localStorage.getItem('token');
+            // --- API CALL: DELETE /api/technician/tickets/{id}/resolution-note ---
+            // Deletes the resolution note
             const response = await fetch(`${API_BASE_URL}/api/technician/tickets/${ticketId}/resolution-note`, {
                 method: 'DELETE',
                 headers: {
@@ -657,6 +678,7 @@ const TechnicianTicketDetails = () => {
                             </button>
                         </div>
 
+                        {/* [STS_HISTORY] - Status history viewing page last section */}
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
                             <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status History</p>
                             {Array.isArray(ticket.statusHistory) && ticket.statusHistory.length > 0 ? (
